@@ -126,7 +126,103 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .dchip{padding:5px 12px;border-radius:18px;border:1px solid var(--border);background:var(--paper2);
   font-size:12px;color:var(--ink2);transition:.16s}
 .dchip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.dchip.locked{cursor:default;opacity:.92}
+.dchip.locked:hover{filter:none}
 .dchip .sw{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+/* 诗人长廊 */
+.poet-picker{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 12px;margin-bottom:20px;
+  border-bottom:1px solid var(--border);scrollbar-width:thin}
+.poet-chip{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;width:74px;
+  padding:8px 4px;border-radius:var(--r);border:1px solid transparent;background:none;
+  cursor:pointer;transition:.16s}
+.poet-chip:hover{background:var(--paper2)}
+.poet-chip.on{background:var(--paper2);border-color:var(--teal)}
+.poet-chip .pav{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:24px;font-weight:700;color:#fff;background:var(--ink2);transition:.16s}
+.poet-chip.on .pav{background:var(--teal);box-shadow:0 2px 10px rgba(45,90,107,.35)}
+.poet-chip .pnm{font-family:var(--serif);font-size:15px;color:var(--ink);line-height:1}
+.poet-chip .pdy{font-size:11px;color:var(--ink3)}
+.poet-hero{display:flex;gap:22px;align-items:flex-start;background:var(--paper2);
+  border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.poet-seal{flex:0 0 auto;width:88px;height:88px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:46px;font-weight:700;color:var(--paper);background:var(--teal);
+  border:3px solid var(--silk-line);box-shadow:inset 0 0 0 2px rgba(247,245,240,.35)}
+.poet-info{flex:1;min-width:0}
+.poet-info h3{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:.04em;margin-bottom:4px}
+.poet-info .pmeta{font-size:13px;color:var(--ink2);margin-bottom:12px}
+.poet-info .pmeta b{color:var(--teal)}
+.poet-info .pintro{font-size:14px;color:var(--ink);line-height:1.7}
+.poet-stats{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
+.poet-stats .pst{font-size:12px;color:var(--ink2)}
+.poet-stats .pst b{font-family:var(--serif);font-size:22px;color:var(--ink);margin-right:4px}
+.poet-sec{margin-bottom:22px}
+.poet-sec h4{font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.poet-sec h4 .bar{width:4px;height:18px;background:var(--teal);border-radius:2px}
+@media(max-width:560px){.poet-hero{flex-direction:column;align-items:center;text-align:center}
+  .poet-stats{justify-content:center}}
+/* 时间轴游标（D 时空联动） */
+#time-scrubber{margin-top:16px;background:var(--paper2);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px 18px 18px;box-shadow:var(--shadow)}
+.ts-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.ts-play{width:38px;height:38px;border-radius:50%;background:var(--teal);color:#fff;font-size:15px;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:.16s}
+.ts-play:hover{filter:brightness(1.1)}
+.ts-year{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--ink);line-height:1;min-width:84px}
+.ts-year small{font-size:14px;color:var(--ink2);font-weight:400;margin-left:2px}
+.ts-count{font-size:13px;color:var(--ink2)}
+.ts-count b{color:var(--teal);font-family:var(--serif);font-size:16px}
+.ts-spd{margin-left:auto;display:flex;gap:5px;align-items:center}
+.ts-spd .lab{font-size:12px;color:var(--ink3)}
+.ts-spd button{font-size:12px;padding:3px 9px;border-radius:14px;border:1px solid var(--border);
+  background:var(--paper);color:var(--ink2)}
+.ts-spd button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ts-track{position:relative;height:46px;margin-top:4px;cursor:pointer;user-select:none}
+.ts-grad{position:absolute;left:0;right:0;top:18px;height:10px;border-radius:5px;
+  border:1px solid var(--silk-line);opacity:.92}
+.ts-fill{position:absolute;left:0;top:18px;height:10px;border-radius:5px 0 0 5px;
+  background:rgba(28,28,30,.16);pointer-events:none}
+.ts-era{position:absolute;top:32px;transform:translateX(-50%);font-size:11px;color:var(--ink2);
+  white-space:nowrap;pointer-events:none}
+.ts-era i{display:block;width:1px;height:7px;background:var(--silk-line);margin:0 auto 2px;opacity:.6}
+.ts-life{position:absolute;top:8px;transform:translateX(-50%);pointer-events:none;text-align:center}
+.ts-life i{display:block;width:2px;height:30px;background:var(--ochre);margin:0 auto}
+.ts-life span{font-size:10px;color:var(--ochre);font-weight:700;background:var(--paper2);padding:0 2px}
+.ts-handle{position:absolute;top:13px;width:18px;height:18px;border-radius:50%;background:var(--teal);
+  border:2px solid var(--paper);box-shadow:0 1px 5px rgba(28,28,30,.3);transform:translateX(-50%);
+  cursor:grab;z-index:3}
+.ts-handle:active{cursor:grabbing}
+#mapsvg .tl-mark{transition:opacity .45s ease}
+/* 诗作列表联动（E） */
+.map-layout{display:flex;gap:16px;align-items:flex-start}
+.map-main{flex:1;min-width:0}
+#map-list{flex:0 0 270px;background:var(--paper2);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;display:flex;flex-direction:column;max-height:640px}
+.ml-head{padding:12px 14px;border-bottom:1px solid var(--border)}
+.ml-tabs{display:flex;gap:4px;margin-bottom:10px}
+.ml-tabs button{flex:1;font-size:12px;padding:5px 6px;border-radius:8px;border:1px solid var(--border);
+  background:var(--paper);color:var(--ink2)}
+.ml-tabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ml-fame{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink3)}
+.ml-fame input[type=range]{flex:1;accent-color:var(--teal);height:3px}
+.ml-count{margin-top:9px;font-size:12px;color:var(--ink2)}
+.ml-count b{color:var(--teal);font-family:var(--serif);font-size:15px}
+.ml-body{overflow-y:auto;padding:6px}
+.ml-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:9px;cursor:pointer;transition:.14s}
+.ml-item:hover{background:var(--paper3)}
+.ml-item.on{background:var(--teal-l);box-shadow:inset 0 0 0 1px var(--teal)}
+.ml-item.ev{cursor:default}
+.ml-yr{flex:0 0 auto;width:38px;text-align:center;font-family:var(--serif);font-size:13px;color:#7a6030;
+  background:var(--silk);border:1px solid var(--silk-line);border-radius:6px;padding:3px 0}
+.ml-item.ev .ml-yr{color:var(--ink2);background:var(--paper3);border-color:var(--border)}
+.ml-main{flex:1;min-width:0}
+.ml-main b{font-family:var(--serif);font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-meta{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-fame-n{font-size:10px;color:var(--teal);background:var(--teal-l);border-radius:8px;padding:1px 6px}
+.ml-go{flex:0 0 auto;font-size:12px;color:var(--teal);padding:3px 6px;border-radius:7px;border:1px solid var(--border)}
+.ml-go:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+.ml-empty{padding:20px 12px;text-align:center;color:var(--ink3);font-size:12px}
+@media(max-width:900px){.map-layout{flex-direction:column}
+  #map-list{flex:none;width:100%;max-height:300px}}
 #gtooltip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);
   font-size:12px;padding:4px 9px;border-radius:6px;opacity:0;transition:.1s;white-space:nowrap;z-index:5}
 .gpop{position:absolute;background:var(--paper);border:1px solid var(--border2);border-radius:var(--r);
@@ -156,6 +252,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   font-size:18px;color:var(--ink);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;line-height:1}
 .map-zoom-ctrl button:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
 .map-zoom-ctrl button.rz{font-size:13px}
+.map-zoom-hint{position:absolute;left:14px;bottom:14px;z-index:6;font-size:11px;color:var(--ink2);
+  background:rgba(247,245,240,.88);border:1px solid var(--border);border-radius:8px;padding:3px 9px;pointer-events:none}
 
 /* ══════════ 时间轴 ══════════ */
 #tlwrap{overflow-x:auto;padding:30px 0;background:var(--paper2);border:1px solid var(--border);
@@ -193,7 +291,25 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .d-hero h1{font-family:var(--serif);font-size:clamp(30px,6vw,46px);font-weight:700;letter-spacing:.1em;margin-bottom:18px}
 .d-verse{font-family:var(--serif);font-size:clamp(18px,3.4vw,24px);line-height:2.5}
 .d-verse ruby rt{font-size:.42em;color:var(--ink3);font-family:var(--sans);letter-spacing:0}
-.d-verse .ln{display:block}
+.d-verse .ln{display:block;transition:.25s;border-radius:6px;padding:0 6px;margin:0 -6px}
+.d-verse .ln.reciting{background:var(--teal-l);color:var(--teal)}
+.d-recite{margin-top:18px;padding:8px 18px;border-radius:20px;background:var(--teal);color:#fff;
+  font-size:14px;transition:.16s}
+.d-recite:hover{filter:brightness(1.1)}
+.d-recite.on{background:var(--ochre)}
+/* 古琴背景音控件 */
+.amb-wrap{position:relative}
+.amb-pop{position:absolute;right:0;top:calc(100% + 8px);width:236px;background:var(--paper);
+  border:1px solid var(--border2);border-radius:var(--r);box-shadow:var(--shadow2);padding:14px;z-index:30;display:none}
+.amb-pop.on{display:block}
+.amb-row{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.amb-play{width:100%;padding:8px;border-radius:9px;background:var(--teal);color:#fff;font-size:13px}
+.amb-play.on{background:var(--ochre)}
+.amb-lab{font-size:12px;color:var(--ink2);flex:0 0 auto}
+.amb-pop input[type=range]{flex:1;accent-color:var(--teal)}
+.amb-hifi{font-size:12px;color:var(--ink);cursor:pointer;margin-bottom:6px}
+.amb-hifi input{accent-color:var(--teal)}
+.amb-note{font-size:11px;color:var(--ink3);line-height:1.5}
 .dtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:2px}
 .dtab{padding:9px 15px;font-size:14px;color:var(--ink2);border-radius:10px 10px 0 0;transition:.16s;white-space:nowrap}
 .dtab:hover{background:var(--paper2)}
@@ -385,6 +501,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
     <button class="vtab" id="t-graph" onclick="showView('graph')">🕸 知识图谱</button>
     <button class="vtab" id="t-map" onclick="showView('map')">🗺 诗词地图</button>
     <button class="vtab" id="t-timeline" onclick="showView('timeline')">⏳ 时间轴</button>
+    <button class="vtab" id="t-poets" onclick="showView('poets')">✍ 诗人</button>
     <button class="vtab" id="t-path" onclick="showView('path')">🚩 闯关</button>
   </div>
   <div class="nav-right">
@@ -395,6 +512,15 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
     <button class="chip" id="role-chip" onclick="openRolePick()"><span class="ic">🧒</span><span>学生</span></button>
     <button class="chip" id="grade-chip" onclick="openGradePick()">年级 ▼</button>
     <button class="chip" onclick="openSearch()"><span class="ic">🔍</span>搜索</button>
+    <div class="amb-wrap">
+      <button class="chip" id="amb-chip" onclick="toggleAmbPanel()"><span class="ic">🎵</span><span>古琴</span></button>
+      <div class="amb-pop" id="amb-pop">
+        <div class="amb-row"><button class="amb-play" id="amb-play" onclick="ambToggle()">▶ 播放古琴背景</button></div>
+        <div class="amb-row"><span class="amb-lab">音量</span><input type="range" id="amb-vol" min="0" max="100" value="50" oninput="ambSetVol(this.value/100)"></div>
+        <label class="amb-row amb-hifi"><input type="checkbox" id="amb-hifi" onchange="ambSetHifi(this.checked)"><span>高音质（内嵌真实古琴）</span></label>
+        <div class="amb-note" id="amb-note">默认零字节·程序合成五声音阶</div>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -432,21 +558,45 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   <section class="view" id="v-map">
     <div class="page-head"><h2 class="serif">诗词地图</h2><span class="hint">手绘古风·循着诗人的足迹漫游山河</span></div>
     <div class="controls" id="map-controls"></div>
-    <div id="mapwrap" class="no-print">
-      <div id="mapsvg-holder"></div>
-      <div class="map-pop" id="map-pop"></div>
+    <div class="map-layout">
+      <aside id="map-list" class="no-print">
+        <div class="ml-head">
+          <div class="ml-tabs" id="ml-tabs">
+            <button class="on" data-tab="all" onclick="setMapTab('all')">全部</button>
+            <button data-tab="poem" onclick="setMapTab('poem')">只看诗作</button>
+            <button data-tab="event" onclick="setMapTab('event')">只看大事</button>
+          </div>
+          <div class="ml-fame"><span>仅代表作</span><input type="range" id="ml-slider" min="0" max="100" value="100" oninput="setMapFame(+this.value)"><span>全部</span></div>
+          <div class="ml-count" id="ml-count"></div>
+        </div>
+        <div class="ml-body" id="ml-body"></div>
+      </aside>
+      <div class="map-main">
+        <div id="mapwrap" class="no-print">
+          <div id="mapsvg-holder"></div>
+          <div class="map-pop" id="map-pop"></div>
+        </div>
+        <div class="map-legend">
+          <span><i style="background:#2d3a4a"></i>诗词创作地</span>
+          <span><i style="background:#5a4a6a"></i>诗人故里</span>
+          <span><svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#5a4a8a" stroke-width="2" stroke-dasharray="4,3"/></svg>诗人足迹</span>
+        </div>
+      </div>
     </div>
-    <div class="map-legend">
-      <span><i style="background:#2d3a4a"></i>诗词创作地</span>
-      <span><i style="background:#5a4a6a"></i>诗人故里</span>
-      <span><svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#5a4a8a" stroke-width="2" stroke-dasharray="4,3"/></svg>诗人足迹</span>
-    </div>
+    <div id="time-scrubber" class="no-print"></div>
   </section>
 
   <!-- 时间轴 -->
   <section class="view" id="v-timeline">
     <div class="page-head"><h2 class="serif">历史时间轴</h2><span class="hint">诗词与历史大事·横向拖动浏览</span></div>
     <div id="tlwrap"><div class="tl-inner" id="tl-inner"></div></div>
+  </section>
+
+  <!-- 诗人 -->
+  <section class="view" id="v-poets">
+    <div class="page-head"><h2 class="serif">诗人长廊</h2><span class="hint">点选诗人，览其生平、足迹与诗作</span></div>
+    <div class="poet-picker" id="poet-picker"></div>
+    <div id="poet-panel"></div>
   </section>
 
   <!-- 闯关路径 -->
@@ -462,6 +612,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       <div class="d-meta" id="d-meta"></div>
       <h1 class="serif" id="d-title"></h1>
       <div class="d-verse serif" id="d-verse"></div>
+      <button class="d-recite" id="d-recite" onclick="reciteToggle()">🔊 朗读</button>
     </div>
     <div class="dtabs" id="dtabs"></div>
     <div id="dpanels"></div>
@@ -941,12 +1092,13 @@ function showView(v){
   const vt=document.getElementById('v-'+v); if(vt)vt.classList.add('on');
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   const tb=document.getElementById('t-'+v); if(tb)tb.classList.add('on');
-  stopGraph();
+  stopGraph(); tlPause(); if(v!=='detail')reciteStop();
   if(v==='grade')renderGradeList();
   else if(v==='cards')renderCards();
   else if(v==='graph')renderGraph();
   else if(v==='map')renderMap();
   else if(v==='timeline')renderTimeline();
+  else if(v==='poets')renderPoets();
   else if(v==='path')renderPath();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1025,7 +1177,8 @@ function openDetail(id){
   // hero
   document.getElementById('d-meta').innerHTML='<span class="dyn">'+p.dyn+'代</span> · '+POETS[p.poet].name+' · '+p.volume;
   document.getElementById('d-title').textContent=p.title;
-  document.getElementById('d-verse').innerHTML=p.lines.map(l=>'<span class="ln">'+rubyLine(l)+'</span>').join('');
+  document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'">'+rubyLine(l)+'</span>').join('');
+  reciteStop();
   // tabs
   document.getElementById('dtabs').innerHTML=D_TABS.map((t,i)=>
     '<button class="dtab'+(i===0?' on':'')+'" onclick="dTab('+i+')">'+t[0]+'</button>').join('');
@@ -1200,9 +1353,12 @@ function submitQuiz(){
 let gNodes=[],gEdges=[],gAnim=null,gCanvas,gCtx,gDrag=null,gAngle=0;
 function renderGControls(){
   const order=['poem','poet','dynasty','place','mood','imagery','style','event'];
-  document.getElementById('gcontrols').innerHTML=order.map(k=>
-    '<button class="dchip'+(ST.dims[k]?' on':'')+'" onclick="togDim(\''+k+'\')">'+
-    '<span class="sw" style="background:'+GCOL[k]+'"></span>'+GLABEL[k]+'</button>').join('');
+  document.getElementById('gcontrols').innerHTML=order.map(k=>{
+    const lock=(k==='poem');
+    return '<button class="dchip'+(ST.dims[k]?' on':'')+(lock?' locked':'')+'"'+
+      (lock?' title="诗词是图谱核心节点，始终显示"':'')+' onclick="togDim(\''+k+'\')">'+
+      '<span class="sw" style="background:'+GCOL[k]+'"></span>'+GLABEL[k]+(lock?' 🔒':'')+'</button>';
+  }).join('');
 }
 function togDim(k){if(k==='poem')return;ST.dims[k]=ST.dims[k]?0:1;lsSave();renderGControls();renderGraph();}
 function buildGraph(){
@@ -1431,7 +1587,12 @@ function miniMapSVG(p){
     '<text x="'+(x+15)+'" y="'+(y-2)+'" font-size="22" fill="#2d3a4a" font-weight="700" font-family="serif">'+anc+'</text>'+
     '<text x="'+(x+15)+'" y="'+(y+20)+'" font-size="14" fill="#7a6030">'+p.placeModern+'</text></svg>';
 }
-let mapPoet=null,mapDyn='all',mapTerrain=true,mapName='ancient',mapLandmark=true;
+let mapPoet=null,mapDyn='all',mapTerrain=true,mapName='ancient',mapLandmark=true,mapTab='all',mapFame=100;
+/* 传播度（人工标注，越大越脍炙人口）——驱动 E3 代表作⇄全部 滑块 */
+const FAME={yonge:102,jingye:105,chunxiao:104,zeniwang:98,denggue:103,minnong:105,wanglu:100,
+  huixiang:96,jueju:95,shanxing:99,jiuyue:97,yeshu:88,yuanri:94,qingming:103,tixilin:98,
+  huanglou:96,youziyin:101,chunwang:100,shanju:92,jihai:90};
+function poemFame(p){return FAME[p.id]||85;}
 /* 名胜古迹分类标记（B1）：山/水/楼/关/岳 */
 const LANDMARKS=[
  {t:'岳',n:'东岳泰山',c:[117.10,36.25]},{t:'岳',n:'西岳华山',c:[110.08,34.48]},
@@ -1450,7 +1611,128 @@ function landmarksSVG(){ if(!mapLandmark)return '';
       '<text x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="#f7f5f0" font-family="serif" style="pointer-events:none">'+L.t+'</text>'+
       '<text x="'+(p[0]+11).toFixed(1)+'" y="'+(p[1]+3.5).toFixed(1)+'" font-size="11" fill="'+col+'" font-family="serif" opacity=".82" style="pointer-events:none">'+L.n+'</text>';
   }).join('');}
-function renderMap(){renderMapControls();buildMapSVG();}
+function renderMap(){renderMapControls();rebuildMapTime();}
+function rebuildMapTime(){refreshMapTime();renderMapList();buildMapSVG();renderTimeScrubber();}
+
+/* ══════ D：时间轴驱动·时空联动 ══════ */
+let tlYear=null,tlMin=618,tlMax=1840,tlPlaying=false,tlSpeed=1,tlNodes=[],tlRAF=0,tlLast=0,tlDrag=false,tlBoundWin=false;
+const TL_YPS=42; /* 1× 每秒推进年数 */
+const TL_ERAS=[['初唐',618],['盛唐',712],['中唐',766],['晚唐',836],['宋',960],['元',1271],['明',1368],['清',1644]];
+const TL_ERA_COL={'初唐':'#c8a060','盛唐':'#b07840','中唐':'#94795a','晚唐':'#6f6a60','宋':'#4a6b72','元':'#5a6b6e','明':'#46505a','清':'#3a3a42'};
+function mapVisiblePoems(){let ps=visiblePoems(); if(mapDyn!=='all')ps=ps.filter(p=>p.dyn===mapDyn); return ps;}
+function refreshMapTime(){
+  const ys=mapVisiblePoems().map(poemYear); if(!ys.length){tlMin=618;tlMax=1840;}
+  else{tlMin=Math.min.apply(null,ys);tlMax=Math.max.apply(null,ys);}
+  if(tlMax-tlMin<10)tlMax=tlMin+10;
+  if(tlYear==null||tlYear<tlMin||tlYear>tlMax)tlYear=tlMax;
+}
+function applyMapYear(y){
+  if(y==null)y=tlMax;
+  for(let i=0;i<tlNodes.length;i++){const n=tlNodes[i]; n.el.style.opacity=(n.yr<=y)?'':'0.07';}
+  const ps=mapVisiblePoems(), lit=ps.filter(p=>poemYear(p)<=y).length, span=tlMax-tlMin||1, r=(y-tlMin)/span*100;
+  const yEl=document.getElementById('ts-year'); if(yEl)yEl.innerHTML=Math.round(y)+'<small>年</small>';
+  const cEl=document.getElementById('ts-count'); if(cEl)cEl.innerHTML='已问世 <b>'+lit+'</b> / '+ps.length+' 首';
+  const fEl=document.getElementById('ts-fill'); if(fEl)fEl.style.width=r+'%';
+  const hEl=document.getElementById('ts-handle'); if(hEl)hEl.style.left=r+'%';
+  applyListYear(y);
+}
+function renderTimeScrubber(){
+  const box=document.getElementById('time-scrubber'); if(!box)return;
+  const span=tlMax-tlMin||1, ratio=y=>Math.max(0,Math.min(100,(y-tlMin)/span*100));
+  const stops=TL_ERAS.filter(e=>e[1]>=tlMin-40&&e[1]<=tlMax+40);
+  const grad=stops.length>=2?'linear-gradient(90deg,'+stops.map(e=>TL_ERA_COL[e[0]]+' '+ratio(e[1]).toFixed(1)+'%').join(',')+')':'linear-gradient(90deg,#b07840,#4a6b72)';
+  const eras=stops.map(e=>'<div class="ts-era" style="left:'+ratio(e[1])+'%"><i></i>'+e[0]+'·'+e[1]+'</div>').join('');
+  let life='';
+  if(mapPoet&&POETS[mapPoet]){const ym=(''+POETS[mapPoet].years).match(/\d{3,4}/g);
+    if(ym&&ym.length>=2){const b=+ym[0],d=+ym[ym.length-1];
+      if(b>=tlMin-2&&b<=tlMax+2)life+='<div class="ts-life" style="left:'+ratio(b)+'%"><span>生'+b+'</span><i></i></div>';
+      if(d>=tlMin-2&&d<=tlMax+2)life+='<div class="ts-life" style="left:'+ratio(d)+'%"><span>卒'+d+'</span><i></i></div>';}}
+  const spd=[1,2,4].map(s=>'<button class="'+(tlSpeed===s?'on':'')+'" onclick="tlSetSpeed('+s+')">'+s+'×</button>').join('');
+  box.innerHTML=
+    '<div class="ts-head">'+
+      '<button class="ts-play" id="ts-play" onclick="tlTogglePlay()">'+(tlPlaying?'⏸':'▶')+'</button>'+
+      '<div class="ts-year" id="ts-year"></div><div class="ts-count" id="ts-count"></div>'+
+      '<div class="ts-spd"><span class="lab">速度</span>'+spd+'</div></div>'+
+    '<div class="ts-track" id="ts-track"><div class="ts-grad" style="background:'+grad+'"></div>'+
+      '<div class="ts-fill" id="ts-fill"></div>'+eras+life+'<div class="ts-handle" id="ts-handle"></div></div>';
+  bindTlTrack(); applyMapYear(tlYear);
+}
+function tlYearFromX(cx){const t=document.getElementById('ts-track');if(!t)return tlYear;const r=t.getBoundingClientRect();
+  let rt=(cx-r.left)/r.width; rt=Math.max(0,Math.min(1,rt)); return tlMin+rt*(tlMax-tlMin);}
+function tlSetYear(y){tlYear=Math.max(tlMin,Math.min(tlMax,y));applyMapYear(tlYear);}
+function bindTlTrack(){const t=document.getElementById('ts-track');if(!t)return;
+  t.onmousedown=e=>{tlPause();tlDrag=true;tlSetYear(tlYearFromX(e.clientX));};
+  t.ontouchstart=e=>{tlPause();tlDrag=true;tlSetYear(tlYearFromX(e.touches[0].clientX));e.preventDefault();};
+  if(tlBoundWin)return; tlBoundWin=true;
+  window.addEventListener('mousemove',e=>{if(tlDrag)tlSetYear(tlYearFromX(e.clientX));});
+  window.addEventListener('touchmove',e=>{if(tlDrag){tlSetYear(tlYearFromX(e.touches[0].clientX));e.preventDefault();}},{passive:false});
+  window.addEventListener('mouseup',()=>{tlDrag=false;}); window.addEventListener('touchend',()=>{tlDrag=false;});
+}
+function tlTogglePlay(){tlPlaying?tlPause():tlPlay();}
+function tlPlay(){
+  if(tlYear>=tlMax)tlYear=tlMin;
+  tlPlaying=true;tlLast=performance.now();const pb=document.getElementById('ts-play');if(pb)pb.textContent='⏸';
+  clearInterval(tlRAF);
+  tlRAF=setInterval(()=>{
+    if(!tlPlaying){clearInterval(tlRAF);return;}
+    const now=performance.now(),dt=Math.min(0.25,(now-tlLast)/1000);tlLast=now;
+    const ny=tlYear+dt*TL_YPS*tlSpeed;
+    if(ny>=tlMax){tlSetYear(tlMax);tlPause();return;}
+    tlSetYear(ny);
+  },55);
+}
+function tlPause(){tlPlaying=false;clearInterval(tlRAF);const pb=document.getElementById('ts-play');if(pb)pb.textContent='▶';}
+function tlSetSpeed(s){tlSpeed=s;document.querySelectorAll('.ts-spd button').forEach(b=>b.classList.toggle('on',b.textContent===s+'×'));}
+
+/* ══════ E：诗作列表联动 ══════ */
+function curMapPoems(){const fmin=100-mapFame;return mapVisiblePoems().filter(p=>poemFame(p)>=fmin);}
+function setMapTab(t){mapTab=t;document.querySelectorAll('#ml-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));renderMapList();}
+function setMapFame(v){mapFame=v;renderMapList();}
+function renderMapList(){
+  const body=document.getElementById('ml-body'); if(!body)return;
+  let items=[];
+  if(mapTab!=='event')curMapPoems().forEach(p=>items.push({k:'p',yr:poemYear(p),p:p}));
+  if(mapTab!=='poem')EVENTS.forEach(e=>items.push({k:'e',yr:parseInt(e.year),e:e}));
+  items.sort((a,b)=>a.yr-b.yr);
+  if(!items.length){body.innerHTML='<div class="ml-empty">暂无符合条件的内容</div>';applyListYear(tlYear);return;}
+  body.innerHTML=items.map(it=>{
+    if(it.k==='p'){const p=it.p;
+      return '<div class="ml-item" data-yr="'+it.yr+'" data-id="'+p.id+'" onclick="locatePoem(\''+p.id+'\')">'+
+        '<div class="ml-yr">'+it.yr+'</div>'+
+        '<div class="ml-main"><b>'+p.title+'</b>'+
+        '<div class="ml-meta">'+p.dyn+'·'+POETS[p.poet].name+' · 传播度 '+poemFame(p)+'</div></div>'+
+        '<button class="ml-go" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">读›</button></div>';
+    }
+    const e=it.e;
+    return '<div class="ml-item ev" data-yr="'+it.yr+'"><div class="ml-yr">'+it.yr+'</div>'+
+      '<div class="ml-main"><b>'+e.t+'</b><div class="ml-meta">历史大事</div></div></div>';
+  }).join('');
+  applyListYear(tlYear);
+}
+function applyListYear(y){
+  if(y==null)y=tlMax;
+  const items=document.querySelectorAll('#ml-body .ml-item'); let np=0;
+  items.forEach(it=>{const yr=+it.dataset.yr;
+    if(yr<=y){it.style.display='';if(!it.classList.contains('ev'))np++;}else{it.style.display='none';}});
+  const c=document.getElementById('ml-count');
+  if(c)c.innerHTML='截至 '+Math.round(y)+' 年 · 已问世 <b>'+np+'</b> 首';
+}
+function locatePoem(id){
+  const p=POEMS.find(x=>x.id===id); if(!p)return;
+  if(poemYear(p)>tlYear){tlPause();tlSetYear(poemYear(p));}
+  const xy=GEOXY[p.placeModern];
+  if(xy){const K=2.8;mapK=K;mapTX=VW/2-xy[0]*K;mapTY=VH/2-xy[1]*K;clampZoom();applyZoom();pulseAt(xy);}
+  document.querySelectorAll('#ml-body .ml-item').forEach(el=>el.classList.toggle('on',el.dataset.id===id));
+}
+function pulseAt(xy){
+  const g=document.getElementById('mapZoomG'); if(!g)return;
+  const NS='http://www.w3.org/2000/svg', c=document.createElementNS(NS,'circle');
+  c.setAttribute('cx',xy[0]);c.setAttribute('cy',xy[1]);c.setAttribute('r','6');
+  c.setAttribute('fill','none');c.setAttribute('stroke','#2d5a6b');c.setAttribute('stroke-width','2.6');
+  const a1=document.createElementNS(NS,'animate');a1.setAttribute('attributeName','r');a1.setAttribute('values','6;36');a1.setAttribute('dur','1.1s');a1.setAttribute('repeatCount','2');
+  const a2=document.createElementNS(NS,'animate');a2.setAttribute('attributeName','opacity');a2.setAttribute('values','0.9;0');a2.setAttribute('dur','1.1s');a2.setAttribute('repeatCount','2');
+  c.appendChild(a1);c.appendChild(a2);g.appendChild(c);setTimeout(()=>{if(c.parentNode)c.parentNode.removeChild(c);},2300);
+}
 function renderMapControls(){
   const dyns=['all',...new Set(visiblePoems().map(p=>p.dyn))];
   let h='<span style="font-size:12px;color:var(--ink3)">朝代：</span>';
@@ -1468,27 +1750,28 @@ function renderMapControls(){
   h+='<button class="dchip'+(mapLandmark?' on':'')+'" style="margin-left:10px" onclick="setMapLandmark(!mapLandmark)">⛰ 名胜</button>';
   document.getElementById('map-controls').innerHTML=h;
 }
-function setMapDyn(d){mapDyn=d;renderMapControls();buildMapSVG();}
-function setMapPoet(k){mapPoet=k;renderMapControls();buildMapSVG();}
-function setMapTerrain(v){mapTerrain=v;renderMapControls();buildMapSVG();}
-function setMapName(v){mapName=v;renderMapControls();buildMapSVG();}
-function setMapLandmark(v){mapLandmark=v;renderMapControls();buildMapSVG();}
+function setMapDyn(d){mapDyn=d;renderMapControls();rebuildMapTime();}
+function setMapPoet(k){mapPoet=k;renderMapControls();rebuildMapTime();}
+function setMapTerrain(v){mapTerrain=v;renderMapControls();rebuildMapTime();}
+function setMapName(v){mapName=v;renderMapControls();rebuildMapTime();}
+function setMapLandmark(v){mapLandmark=v;renderMapControls();rebuildMapTime();}
 function buildMapSVG(){
   let ps=visiblePoems(); if(mapDyn!=='all')ps=ps.filter(p=>p.dyn===mapDyn);
   const places={};
   ps.forEach(p=>{const k=p.placeModern; if(!places[k])places[k]={modern:p.placeModern,ancient:p.place.split('（')[0],xy:GEOXY[k],poems:[]}; places[k].poems.push(p);});
   const arr=Object.values(places).filter(pl=>pl.xy);
+  arr.forEach(pl=>{pl.year=Math.min.apply(null,pl.poems.map(poemYear));});
   function nb(pl){return arr.filter(o=>o!==pl && Math.hypot(o.xy[0]-pl.xy[0],o.xy[1]-pl.xy[1])<78).length;}
   let dots='',labels='';
-  arr.forEach(pl=>{const x=pl.xy[0],y=pl.xy[1];
-    dots+='<circle cx="'+x+'" cy="'+y+'" r="10" fill="none" stroke="#2d3a4a" stroke-width="1" opacity=".14"/>'+
-          '<circle class="map-marker" cx="'+x+'" cy="'+y+'" r="6" fill="#2d3a4a" style="cursor:pointer" data-place="'+pl.modern+'"/>';});
+  arr.forEach(pl=>{const x=pl.xy[0],y=pl.xy[1];const yr=pl.year;
+    dots+='<circle class="tl-mark" data-yr="'+yr+'" cx="'+x+'" cy="'+y+'" r="10" fill="none" stroke="#2d3a4a" stroke-width="1" opacity=".14"/>'+
+          '<circle class="map-marker tl-mark" data-yr="'+yr+'" cx="'+x+'" cy="'+y+'" r="6" fill="#2d3a4a" style="cursor:pointer" data-place="'+pl.modern+'"/>';});
   function emit(pl,lx,ly,leader){
     var big=(mapName==='modern')?pl.modern.replace(/^今/,''):placeName(pl);
-    var small=(mapName==='modern')?placeName(pl):pl.modern;
-    if(leader)labels+='<line x1="'+pl.xy[0].toFixed(1)+'" y1="'+pl.xy[1].toFixed(1)+'" x2="'+(lx-3).toFixed(1)+'" y2="'+(ly-4).toFixed(1)+'" stroke="#8a7040" stroke-width=".8" opacity=".5"/>';
-    labels+='<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="15" fill="#2d3a4a" font-weight="700" font-family="serif" style="pointer-events:none">'+big+'</text>'+
-            '<text x="'+lx.toFixed(1)+'" y="'+(ly+14).toFixed(1)+'" font-size="11" fill="#7a6030" style="pointer-events:none">'+small+'</text>';}
+    var small=(mapName==='modern')?placeName(pl):pl.modern;var yr=pl.year;
+    if(leader)labels+='<line class="tl-mark" data-yr="'+yr+'" x1="'+pl.xy[0].toFixed(1)+'" y1="'+pl.xy[1].toFixed(1)+'" x2="'+(lx-3).toFixed(1)+'" y2="'+(ly-4).toFixed(1)+'" stroke="#8a7040" stroke-width=".8" opacity=".5"/>';
+    labels+='<text class="tl-mark" data-yr="'+yr+'" x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="15" fill="#2d3a4a" font-weight="700" font-family="serif" style="pointer-events:none">'+big+'</text>'+
+            '<text class="tl-mark" data-yr="'+yr+'" x="'+lx.toFixed(1)+'" y="'+(ly+14).toFixed(1)+'" font-size="11" fill="#7a6030" style="pointer-events:none">'+small+'</text>';}
   const crowded=arr.filter(pl=>nb(pl)>=2 && pl.xy[0]>600).sort((a,b)=>a.xy[1]-b.xy[1]);
   const inline=arr.filter(pl=>crowded.indexOf(pl)<0).sort((a,b)=>a.xy[1]-b.xy[1]);
   const placed=[];
@@ -1529,6 +1812,8 @@ function buildMapSVG(){
   document.getElementById('map-pop').style.display='none';
   document.querySelectorAll('.map-marker').forEach(mk=>mk.addEventListener('click',function(e){showMapPop(places[mk.dataset.place],e);}));
   applyZoom(); bindMapZoom(); ensureZoomCtrl();
+  tlNodes=[].slice.call(document.querySelectorAll('#mapsvg .tl-mark')).map(el=>({el:el,yr:+el.dataset.yr}));
+  applyMapYear(tlYear);
 }
 /* ── 地图缩放/平移 ── */
 let mapK=1,mapTX=0,mapTY=0;
@@ -1544,7 +1829,9 @@ function zoomCenter(factor){const sv=document.getElementById('mapsvg');const r=s
   zoomAt(r.width/2*ratio, r.height/2*ratio, factor);}
 function resetZoom(){mapK=1;mapTX=0;mapTY=0;applyZoom();}
 function bindMapZoom(){const sv=document.getElementById('mapsvg');if(!sv||sv._zbound)return;sv._zbound=true;
-  sv.addEventListener('wheel',function(e){e.preventDefault();const p=svgPt(e);zoomAt(p.x,p.y,e.deltaY<0?1.18:1/1.18);},{passive:false});
+  sv.addEventListener('wheel',function(e){
+    if(!(e.ctrlKey||e.metaKey))return; /* 无修饰键时让页面正常滚动；⌘/Ctrl+滚轮（或触控板捏合）才缩放 */
+    e.preventDefault();const p=svgPt(e);zoomAt(p.x,p.y,e.deltaY<0?1.18:1/1.18);},{passive:false});
   sv.addEventListener('dblclick',function(e){const p=svgPt(e);zoomAt(p.x,p.y,1.6);});
   let drag=false,lx=0,ly=0,moved=0,ratio=1;
   sv.addEventListener('pointerdown',function(e){if(e.target.classList&&e.target.classList.contains('map-marker'))return;
@@ -1565,7 +1852,10 @@ function ensureZoomCtrl(){const wrap=document.getElementById('mapwrap');
   d.innerHTML='<button title="放大" onclick="zoomCenter(1.4)">＋</button>'+
               '<button title="缩小" onclick="zoomCenter(1/1.4)">－</button>'+
               '<button class="rz" title="复位" onclick="resetZoom()">复位</button>';
-  wrap.appendChild(d);}
+  wrap.appendChild(d);
+  if(!document.getElementById('map-zoom-hint')){const hint=document.createElement('div');
+    hint.id='map-zoom-hint';hint.className='map-zoom-hint';hint.textContent='⌘/Ctrl + 滚轮缩放 · 拖动平移';
+    wrap.appendChild(hint);}}
 
 function showMapPop(pl,e){
   const pop=document.getElementById('map-pop');
@@ -1582,11 +1872,22 @@ function showMapPop(pl,e){
 /* ══════════════════════════════════════════
    历史时间轴
    ══════════════════════════════════════════ */
+/* 把模糊的 createdYear（约626年 / 约8世纪初 / 晚唐 / 南宋 / 唐贞元年间 / 盛唐 / 1839年）解析为数字年份 */
+const ERA_YEAR=[['初唐',640],['盛唐',740],['中唐',800],['晚唐',850],['北宋',1050],['南宋',1175],
+  ['贞观',635],['永徽',652],['开元',730],['天宝',750],['贞元',795],['元和',810],['会昌',843]];
+function poemYear(p){
+  const s=''+(p.createdYear||'');
+  const cen=s.match(/(\d+)\s*世纪\s*(初|前期)?/);
+  if(cen)return (+cen[1]-1)*100+(cen[2]?15:50);
+  const m=s.match(/(\d{3,4})/); if(m)return +m[0];
+  for(const e of ERA_YEAR)if(s.indexOf(e[0])>=0)return e[1];
+  return ({'唐':750,'宋':1100,'元':1300,'明':1500,'清':1750})[p.dyn]||800;
+}
 function renderTimeline(){
   const inner=document.getElementById('tl-inner');
   const ERAS=[['唐','618–907',0.0],['宋','960–1279',0.46],['元','1271–1368',0.74],['明','1368–1644',0.80],['清','1644–1911',0.90]];
   const Y0=618,Y1=1911,span=Y1-Y0,Wpx=2600,axisY=220,GAP=120;
-  const xOf=year=>{const y=parseInt((''+year).replace(/[^0-9]/g,''))||Y0;return 50+(y-Y0)/span*(Wpx-100);};
+  const xOf=year=>{const y=(typeof year==='number')?year:(parseInt((''+year).replace(/[^0-9]/g,''))||Y0);return 50+(y-Y0)/span*(Wpx-100);};
   inner.style.width=Wpx+'px';
   let h='<div class="tl-axis" style="top:'+axisY+'px"></div>';
   ERAS.forEach(e=>{const x=50+e[2]*(Wpx-100);
@@ -1602,7 +1903,7 @@ function renderTimeline(){
        '<div class="tl-dot ev" style="left:'+x+'px;top:'+axisY+'px"></div>';});
   // 诗词：轴下方，按 x 邻近向下分层避让
   const pllanes=[]; let maxLn=0;
-  visiblePoems().map(p=>({p,x:xOf((''+p.createdYear).replace(/[^0-9]/g,'')||Y0)}))
+  visiblePoems().map(p=>({p,x:xOf(poemYear(p))}))
     .sort((a,b)=>a.x-b.x).forEach(o=>{const x=o.x,p=o.p;
     let ln=0; while(pllanes[ln]!==undefined && x-pllanes[ln]<GAP)ln++; pllanes[ln]=x; if(ln>maxLn)maxLn=ln;
     const lblTop=axisY+22+ln*44;
@@ -1612,6 +1913,95 @@ function renderTimeline(){
        '<div class="tl-lbl" title="'+p.title+'" onclick="openDetail(\''+p.id+'\')" style="left:'+x+'px;top:'+lblTop+'px"><div class="t">'+t+'</div><div class="y">'+p.dyn+'·'+p.createdYear+'</div></div>';});
   inner.style.height=(axisY+22+(maxLn+1)*44+24)+'px';
   inner.innerHTML=h;
+}
+
+/* ══════════════════════════════════════════
+   诗人长廊（C1 选择器 / C2 面板 / C3 足迹）
+   ══════════════════════════════════════════ */
+const DYN_ORDER={'唐':1,'宋':2,'元':3,'明':4,'清':5};
+let poetSel=null;
+function poetBirth(key){const m=(POETS[key].years||'').match(/\d{3,4}/);return m?+m[0]:9999;}
+function poetKeysSorted(){
+  return Object.keys(POETS).filter(k=>POEMS.some(p=>p.poet===k))
+    .sort((a,b)=>(DYN_ORDER[POETS[a].dyn]-DYN_ORDER[POETS[b].dyn])||(poetBirth(a)-poetBirth(b)));
+}
+function renderPoets(){
+  const keys=poetKeysSorted();
+  if(!poetSel||!keys.includes(poetSel))poetSel=keys[0];
+  renderPoetPicker(keys);
+  renderPoetPanel(poetSel);
+}
+function renderPoetPicker(keys){
+  document.getElementById('poet-picker').innerHTML=keys.map(k=>{const po=POETS[k];
+    return '<button class="poet-chip'+(k===poetSel?' on':'')+'" onclick="selectPoet(\''+k+'\')">'+
+      '<span class="pav">'+po.av+'</span><span class="pnm">'+po.name+'</span>'+
+      '<span class="pdy">'+po.dyn+'·'+poetBirth(k)+'</span></button>';}).join('');
+  const picker=document.getElementById('poet-picker');
+  const on=picker.querySelector('.poet-chip.on');
+  if(on)picker.scrollLeft=on.offsetLeft-picker.clientWidth/2+on.clientWidth/2;
+}
+function selectPoet(k){poetSel=k;
+  renderPoetPicker(poetKeysSorted());
+  renderPoetPanel(k);
+  document.getElementById('poet-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function renderPoetPanel(key){
+  const po=POETS[key];
+  const works=POEMS.filter(p=>p.poet===key);
+  const places=[...new Set(works.map(p=>p.place.split('（')[0]))];
+  const hasRoute=!!ROUTES[key];
+  let h='<div class="poet-hero">'+
+    '<div class="poet-seal">'+po.av+'</div>'+
+    '<div class="poet-info"><h3 class="serif">'+po.name+'</h3>'+
+    '<div class="pmeta"><b>'+po.dyn+'代</b> · 生卒 '+po.years+'</div>'+
+    '<p class="pintro">'+po.intro+'</p>'+
+    '<div class="poet-stats">'+
+      '<span class="pst"><b>'+works.length+'</b>首入选诗作</span>'+
+      '<span class="pst"><b>'+places.length+'</b>处足迹地</span>'+
+      (hasRoute?'<button class="dchip" onclick="gotoMapPoet(\''+key+'\')">🗺 在大地图看足迹 →</button>':'')+
+    '</div></div></div>';
+  // 代表作
+  h+='<div class="poet-sec"><h4><span class="bar"></span>代表诗作</h4><div class="rel-grid">'+
+    works.map(p=>{const st=starsOf(p.id);
+      return '<div class="rel-card" onclick="openDetail(\''+p.id+'\')"><b>'+p.title+'</b>'+
+        '<span>'+p.dyn+'代 · '+p.volume+(st?' · '+'★'.repeat(st):'')+'</span></div>';}).join('')+
+    '</div></div>';
+  // 足迹/地点 mini-map
+  h+='<div class="poet-sec"><h4><span class="bar"></span>'+(hasRoute?'游历足迹':'诗作地点')+'</h4>'+
+    poetMapSVG(key)+'</div>';
+  document.getElementById('poet-panel').innerHTML=h;
+}
+function gotoMapPoet(key){setMapPoet(key);showView('map');}
+function poetMapSVG(key){
+  const po=POETS[key];
+  const works=POEMS.filter(p=>p.poet===key);
+  // 诗作地点（去重）
+  const placeMap={};
+  works.forEach(p=>{const xy=GEOXY[p.placeModern];if(xy&&!placeMap[p.placeModern])placeMap[p.placeModern]={xy:xy,anc:p.place.split('（')[0]};});
+  const route=ROUTES[key];
+  let marks='';
+  Object.values(placeMap).forEach(pl=>{const x=pl.xy[0],y=pl.xy[1];
+    marks+='<circle cx="'+x+'" cy="'+y+'" r="16" fill="none" stroke="#2d3a4a" stroke-width="1.4" opacity=".4"/>'+
+           '<circle cx="'+x+'" cy="'+y+'" r="7" fill="#2d3a4a"/>'+
+           '<text x="'+(x+13)+'" y="'+(y+1)+'" font-size="18" fill="#2d3a4a" font-weight="700" font-family="serif">'+pl.anc+'</text>';});
+  // 故里
+  let bornMark='';
+  if(po.born){const bx=po.born[0],by=po.born[1];
+    bornMark='<circle cx="'+bx+'" cy="'+by+'" r="8" fill="#5a4a6a"/>'+
+      '<text x="'+(bx+13)+'" y="'+(by+20)+'" font-size="13" fill="#5a4a6a" font-family="serif">故里</text>';}
+  // 足迹线（C3）
+  let routeSvg='';
+  if(route){
+    routeSvg='<polyline points="'+route.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+
+      '" fill="none" stroke="#5a4a8a" stroke-width="2.4" stroke-dasharray="8,6" opacity=".82" stroke-linejoin="round"/>';
+    route.forEach((p,i)=>{routeSvg+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="9.5" fill="#5a4a8a" stroke="#f7f5f0" stroke-width="1.6"/>'+
+      '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#f7f5f0" style="pointer-events:none">'+(i+1)+'</text>';});
+  }
+  return '<svg viewBox="0 0 '+VW+' '+VH+'" style="width:100%;max-width:640px;height:auto;background:var(--silk);border-radius:10px;border:1px solid var(--silk-line)" xmlns="http://www.w3.org/2000/svg">'+
+    '<defs><clipPath id="landclipp"><path d="'+PROVPATH+'"/></clipPath></defs>'+
+    '<path d="'+PROVPATH+'" fill="#ddd0a6"/>'+reliefImg('landclipp')+
+    '<path d="'+PROVPATH+'" fill="none" stroke="#9a8050" stroke-width=".6" stroke-linejoin="round"/>'+
+    riversSVG(1.6,1.4,.5)+routeSvg+marks+bornMark+'</svg>';
 }
 
 /* ══════════════════════════════════════════
@@ -1702,6 +2092,110 @@ function printSheet(){if(ST.poem){buildPrintSheet(ST.poem);window.print();}}
 initSearch();
 boot();
 window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(gCanvas);}});
+
+/* ══════════════════════════════════════════
+   F · 朗读（Web Speech API，零字节离线）+ 逐句高亮
+   ══════════════════════════════════════════ */
+var recVoice=null,recReciting=false,recQueue=[],recIdx=0; /* var：避免 boot 期 showView→reciteStop 的 TDZ */
+function pickZhVoice(){
+  if(!('speechSynthesis' in window))return null;
+  const vs=speechSynthesis.getVoices();
+  if(!vs.length)return null;
+  const zh=vs.filter(v=>/^zh/i.test(v.lang));
+  if(!zh.length)return null;
+  /* 优先高质量标准普通话语音（避开 Eddy/Rocko 等趣味音色） */
+  const prefer=['婷婷','Tingting','Ting-Ting','美嘉','Meijia','善怡','语舒','Yu-shu','Sinji','普通话','Mandarin','Google'];
+  for(const nm of prefer){const m=zh.find(v=>(v.name||'').includes(nm));if(m)return m;}
+  return zh.find(v=>v.localService&&/zh[-_]?CN|Hans/i.test(v.lang))||zh.find(v=>v.localService)||zh[0];
+}
+if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=()=>{recVoice=pickZhVoice();};}
+function reciteToggle(){ recReciting?reciteStop():reciteStart(); }
+function reciteStart(){
+  if(!('speechSynthesis' in window)){alert('当前浏览器不支持语音朗读');return;}
+  const p=ST.poem; if(!p)return;
+  recVoice=recVoice||pickZhVoice();
+  speechSynthesis.cancel();
+  recReciting=true; recIdx=0;
+  recQueue=p.lines.map(l=>l.t);
+  setReciteBtn(true);
+  reciteLine();
+}
+function reciteLine(){
+  if(!recReciting||recIdx>=recQueue.length){reciteStop();return;}
+  document.querySelectorAll('#d-verse .ln').forEach(el=>el.classList.toggle('reciting',+el.dataset.li===recIdx));
+  const u=new SpeechSynthesisUtterance(recQueue[recIdx].replace(/[，。？！、；：]/g,'，'));
+  u.lang='zh-CN'; if(recVoice)u.voice=recVoice;
+  u.rate=0.82; u.pitch=1.0;
+  u.onend=()=>{ if(!recReciting)return; recIdx++; setTimeout(reciteLine,360); };
+  u.onerror=()=>{ if(recReciting){recIdx++;setTimeout(reciteLine,360);} };
+  speechSynthesis.speak(u);
+}
+function reciteStop(){
+  recReciting=false;
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  document.querySelectorAll('#d-verse .ln.reciting').forEach(el=>el.classList.remove('reciting'));
+  setReciteBtn(false);
+}
+function setReciteBtn(on){const b=document.getElementById('d-recite');if(b){b.textContent=on?'⏸ 停止':'🔊 朗读';b.classList.toggle('on',on);}}
+
+/* ══════════════════════════════════════════
+   F · 古琴背景音：默认零字节程序合成（Karplus-Strong 五声音阶）；
+   高音质开关播放内嵌真实古琴片段 GUQIN_CLIP（留空则回退程序合成）
+   ══════════════════════════════════════════ */
+const GUQIN_CLIP=''; /* 可填 data:audio/mp3;base64,... 真实古琴循环；留空=仅程序合成 */
+const PENTA=[146.83,164.81,196.00,220.00,261.63,293.66,329.63,392.00]; /* 宫商角徵羽（低音域，古琴清越） */
+var AC=null,ambGain=null,ambOn=false,ambVol=0.5,ambHifi=false,ambTimer=0,ambSrc=null,ambBuf={};
+function ambInit(){
+  if(AC)return;
+  AC=new (window.AudioContext||window.webkitAudioContext)();
+  ambGain=AC.createGain(); ambGain.gain.value=ambVol;
+  const rev=AC.createConvolver(); rev.buffer=ambImpulse(2.6,2.4);
+  const wet=AC.createGain(); wet.gain.value=0.55; const dry=AC.createGain(); dry.gain.value=0.7;
+  ambGain.connect(dry).connect(AC.destination);
+  ambGain.connect(rev).connect(wet).connect(AC.destination);
+}
+function ambImpulse(dur,decay){const sr=AC.sampleRate,len=Math.floor(sr*dur),b=AC.createBuffer(2,len,sr);
+  for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);}return b;}
+function ksBuffer(freq){ if(ambBuf[freq])return ambBuf[freq];
+  const sr=AC.sampleRate,N=Math.max(2,Math.round(sr/freq)),dur=3.4,len=Math.floor(sr*dur);
+  const b=AC.createBuffer(1,len,sr),d=b.getChannelData(0),ring=new Float32Array(N);
+  for(let i=0;i<N;i++)ring[i]=Math.random()*2-1;
+  let idx=0;const damp=0.996;
+  for(let i=0;i<len;i++){const cur=ring[idx],nx=ring[(idx+1)%N];ring[idx]=(cur+nx)*0.5*damp;d[i]=cur*Math.pow(1-i/len,0.6);idx=(idx+1)%N;}
+  return ambBuf[freq]=b;}
+function ambPluck(freq,vol){const s=AC.createBufferSource();s.buffer=ksBuffer(freq);
+  const g=AC.createGain();g.gain.value=vol;const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;
+  s.connect(lp).connect(g).connect(ambGain);s.start();}
+function ambTick(){ if(!ambOn||ambHifi)return;
+  ambPluck(PENTA[Math.floor(Math.random()*PENTA.length)],0.16+Math.random()*0.12);
+  if(Math.random()<0.32)setTimeout(()=>{if(ambOn&&!ambHifi)ambPluck(PENTA[Math.floor(Math.random()*PENTA.length)],0.11);},170+Math.random()*230);
+  ambTimer=setTimeout(ambTick,1500+Math.random()*1900);
+}
+function ambPlayClip(){
+  if(!GUQIN_CLIP)return false;
+  fetch(GUQIN_CLIP).then(r=>r.arrayBuffer()).then(b=>AC.decodeAudioData(b)).then(buf=>{
+    if(!ambOn)return; ambSrc=AC.createBufferSource();ambSrc.buffer=buf;ambSrc.loop=true;ambSrc.connect(ambGain);ambSrc.start();
+  }).catch(()=>{});
+  return true;
+}
+function ambStart(){ ambInit(); if(AC.state==='suspended')AC.resume(); ambOn=true;
+  if(ambHifi&&GUQIN_CLIP)ambPlayClip(); else ambTick();
+  updateAmbUI(); }
+function ambStop(){ ambOn=false; clearTimeout(ambTimer);
+  if(ambSrc){try{ambSrc.stop();}catch(e){} ambSrc=null;} updateAmbUI(); }
+function ambToggle(){ ambOn?ambStop():ambStart(); }
+function ambSetVol(v){ ambVol=+v; if(ambGain)ambGain.gain.value=ambVol; }
+function ambSetHifi(on){ ambHifi=on; const note=document.getElementById('amb-note');
+  if(on&&!GUQIN_CLIP&&note)note.textContent='⚠ 未内嵌真实古琴音频，暂用程序合成（见 GUQIN_CLIP）';
+  else if(note)note.textContent=on?'高音质·内嵌真实古琴循环':'默认零字节·程序合成五声音阶';
+  if(ambHifi&&!GUQIN_CLIP)ambHifi=false,(document.getElementById('amb-hifi')||{}).checked=false;
+  if(ambOn){ambStop();ambStart();} }
+function updateAmbUI(){ const p=document.getElementById('amb-play'),c=document.getElementById('amb-chip');
+  if(p){p.textContent=ambOn?'⏸ 暂停古琴背景':'▶ 播放古琴背景';p.classList.toggle('on',ambOn);}
+  if(c)c.classList.toggle('on',ambOn); }
+function toggleAmbPanel(){ document.getElementById('amb-pop').classList.toggle('on'); }
+document.addEventListener('click',function(e){const w=document.querySelector('.amb-wrap');
+  if(w&&!w.contains(e.target)){const pop=document.getElementById('amb-pop');if(pop)pop.classList.remove('on');}});
 </script>
 </body>
 </html>
