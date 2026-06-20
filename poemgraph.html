@@ -293,10 +293,13 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .d-verse ruby rt{font-size:.42em;color:var(--ink3);font-family:var(--sans);letter-spacing:0}
 .d-verse .ln{display:block;transition:.25s;border-radius:6px;padding:0 6px;margin:0 -6px}
 .d-verse .ln.reciting{background:var(--teal-l);color:var(--teal)}
-.d-recite{margin-top:18px;padding:8px 18px;border-radius:20px;background:var(--teal);color:#fff;
+.d-recite-row{margin-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.d-recite{padding:8px 18px;border-radius:20px;background:var(--teal);color:#fff;
   font-size:14px;transition:.16s}
 .d-recite:hover{filter:brightness(1.1)}
 .d-recite.on{background:var(--ochre)}
+.d-recite-tag{font-size:12px;color:var(--ink2)}
+.d-recite-tag b{color:var(--ochre);font-family:var(--serif);font-size:14px}
 /* 古琴背景音控件 */
 .amb-wrap{position:relative}
 .amb-pop{position:absolute;right:0;top:calc(100% + 8px);width:236px;background:var(--paper);
@@ -613,7 +616,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       <div class="d-meta" id="d-meta"></div>
       <h1 class="serif" id="d-title"></h1>
       <div class="d-verse serif" id="d-verse"></div>
-      <button class="d-recite" id="d-recite" onclick="reciteToggle()">🔊 朗读</button>
+      <div class="d-recite-row">
+        <button class="d-recite" id="d-recite" onclick="reciteToggle()">🔊 朗读</button>
+        <span class="d-recite-tag" id="d-recite-tag"></span>
+      </div>
     </div>
     <div class="dtabs" id="dtabs"></div>
     <div id="dpanels"></div>
@@ -1428,6 +1434,8 @@ function openDetail(id){
   document.getElementById('d-title').textContent=p.title;
   document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'">'+rubyLine(l)+'</span>').join('');
   reciteStop();
+  const _pv=(typeof POET_VOICE!=='undefined'&&POET_VOICE[p.poet])||{desc:'端正诵读'};
+  const _tag=document.getElementById('d-recite-tag'); if(_tag)_tag.innerHTML='诗人音色 · <b>'+POETS[p.poet].name+'·'+_pv.desc+'</b>';
   // tabs
   document.getElementById('dtabs').innerHTML=D_TABS.map((t,i)=>
     '<button class="dtab'+(i===0?' on':'')+'" onclick="dTab('+i+')">'+t[0]+'</button>').join('');
@@ -2373,7 +2381,53 @@ window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(
 /* ══════════════════════════════════════════
    F · 朗读（Web Speech API，零字节离线）+ 逐句高亮
    ══════════════════════════════════════════ */
-var recVoice=null,recReciting=false,recQueue=[],recIdx=0; /* var：避免 boot 期 showView→reciteStop 的 TDZ */
+var recVoice=null,recReciting=false,recQueue=[],recIdx=0,recPersona=null; /* var：避免 boot 期 showView→reciteStop 的 TDZ */
+/* 诗人音色人设（方案 A）：按性格映射音高/语速 + 语音池，零字节、一人一声 */
+const POET_VOICE={
+  libai:{rate:1.0,pitch:1.12,pool:'clear',desc:'豪放飘逸'},
+  dufu:{rate:0.78,pitch:0.82,pool:'low',desc:'沉郁顿挫'},
+  wangwei:{rate:0.84,pitch:0.96,pool:'clear',desc:'清雅禅意'},
+  luobinwang:{rate:0.98,pitch:1.24,pool:'clear',desc:'童稚灵慧'},
+  menghaoran:{rate:0.88,pitch:1.02,pool:'clear',desc:'清淡自然'},
+  wangzhihuan:{rate:0.9,pitch:0.9,pool:'low',desc:'苍劲开阔'},
+  lishen:{rate:0.84,pitch:0.92,pool:'clear',desc:'恳切悯农'},
+  hezhizhang:{rate:0.74,pitch:0.84,pool:'elder',desc:'苍老温厚'},
+  dumu:{rate:0.94,pitch:1.06,pool:'clear',desc:'俊爽清丽'},
+  yeshaowen:{rate:0.9,pitch:1.05,pool:'clear',desc:'清新淡远'},
+  wanganshi:{rate:0.86,pitch:0.88,pool:'low',desc:'劲健刚正'},
+  sushi:{rate:0.96,pitch:1.0,pool:'clear',desc:'旷达洒脱'},
+  gongzizhen:{rate:0.92,pitch:0.94,pool:'low',desc:'激越求变'},
+  hanyuefu:{rate:0.92,pitch:1.08,pool:'clear',desc:'采莲清扬'},
+  liqiao:{rate:0.9,pitch:1.06,pool:'clear',desc:'咏物灵巧'},
+  wuming:{rate:0.86,pitch:1.0,pool:'clear',desc:'素朴端正'},
+  beichaofolk:{rate:0.82,pitch:0.86,pool:'low',desc:'苍茫豪迈'},
+  baijuyi:{rate:0.86,pitch:0.98,pool:'clear',desc:'平易亲切'},
+  yangwanli:{rate:0.95,pitch:1.1,pool:'clear',desc:'活泼清新'},
+  jiadao:{rate:0.8,pitch:0.92,pool:'low',desc:'清峭苦吟'},
+  tangyin:{rate:0.96,pitch:1.04,pool:'low',desc:'洒脱不羁'},
+  gaoding:{rate:0.88,pitch:1.0,pool:'clear',desc:'乡野闲适'}
+};
+function zhVoicePools(){
+  if(!('speechSynthesis' in window))return {clear:[],low:[],elder:[],any:[]};
+  const vs=speechSynthesis.getVoices().filter(v=>/^zh/i.test(v.lang));
+  const local=vs.filter(v=>v.localService); const base=local.length?local:vs;
+  const has=(v,arr)=>arr.some(n=>(v.name||'').includes(n));
+  const clearNames=['婷婷','Tingting','Ting-Ting','美嘉','Meijia','善怡','语舒','Yu-shu','Sinji'];
+  const elderNames=['Grandpa','Grandma','Lao','老','爷'];
+  const maleNames=['Eddy','Reed','Rocko','Rishi','Grandpa','男','Ren','Han'];
+  const clear=base.filter(v=>has(v,clearNames));
+  const elder=base.filter(v=>has(v,elderNames));
+  const low=base.filter(v=>has(v,maleNames));
+  return {clear:clear.length?clear:base, low:low.length?low:(clear.length?clear:base),
+          elder:elder.length?elder:(low.length?low:base), any:base};
+}
+function reciteVoiceFor(poetId){
+  const pv=POET_VOICE[poetId]||{rate:0.85,pitch:1.0,pool:'clear',desc:'端正诵读'};
+  const pools=zhVoicePools(); const pool=pools[pv.pool]&&pools[pv.pool].length?pools[pv.pool]:pools.any;
+  let h=0; for(const c of poetId)h=(h*31+c.charCodeAt(0))>>>0; /* 同一诗人稳定取同一把声音 */
+  const voice=pool.length?pool[h%pool.length]:pickZhVoice();
+  return {voice:voice, rate:pv.rate, pitch:pv.pitch, desc:pv.desc};
+}
 function pickZhVoice(){
   if(!('speechSynthesis' in window))return null;
   const vs=speechSynthesis.getVoices();
@@ -2390,7 +2444,7 @@ function reciteToggle(){ recReciting?reciteStop():reciteStart(); }
 function reciteStart(){
   if(!('speechSynthesis' in window)){alert('当前浏览器不支持语音朗读');return;}
   const p=ST.poem; if(!p)return;
-  recVoice=recVoice||pickZhVoice();
+  recPersona=reciteVoiceFor(p.poet);
   speechSynthesis.cancel();
   recReciting=true; recIdx=0;
   recQueue=p.lines.map(l=>l.t);
@@ -2401,8 +2455,10 @@ function reciteLine(){
   if(!recReciting||recIdx>=recQueue.length){reciteStop();return;}
   document.querySelectorAll('#d-verse .ln').forEach(el=>el.classList.toggle('reciting',+el.dataset.li===recIdx));
   const u=new SpeechSynthesisUtterance(recQueue[recIdx].replace(/[，。？！、；：]/g,'，'));
-  u.lang='zh-CN'; if(recVoice)u.voice=recVoice;
-  u.rate=0.82; u.pitch=1.0;
+  u.lang='zh-CN';
+  const per=recPersona||{voice:pickZhVoice(),rate:0.82,pitch:1.0};
+  if(per.voice)u.voice=per.voice;
+  u.rate=per.rate; u.pitch=per.pitch;
   u.onend=()=>{ if(!recReciting)return; recIdx++; setTimeout(reciteLine,360); };
   u.onerror=()=>{ if(recReciting){recIdx++;setTimeout(reciteLine,360);} };
   speechSynthesis.speak(u);
