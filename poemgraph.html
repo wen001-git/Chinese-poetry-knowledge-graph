@@ -1187,12 +1187,12 @@ function openDetail(id){
   dTab(0);
 }
 function rubyLine(l){
-  // 将整行按字符与拼音音节配对（拼音以空格分隔）
-  const sylls=l.p.trim().split(/\s+/);
+  // 拼音按"空格或标点"切分为音节，与汉字一一对应（标点不占音节）
+  const sylls=l.p.split(/[\s，。？！、；：·,.!?]+/).filter(Boolean);
   const chars=[...l.t];let out='';let si=0;
   for(const ch of chars){
-    if(/[一-龥]/.test(ch)){out+='<ruby>'+ch+'<rt>'+(sylls[si]||'').replace(/[，。？！、]/g,'')+'</rt></ruby>';si++;}
-    else{out+=ch;if(/[，。？！、]/.test(ch))si++;}
+    if(/[一-龥]/.test(ch)){out+='<ruby>'+ch+'<rt>'+(sylls[si]||'')+'</rt></ruby>';si++;}
+    else out+=ch; // 标点：不推进音节指针
   }
   return out;
 }
@@ -1484,13 +1484,38 @@ function bindGraphEvents(){
   cv.addEventListener('touchmove',e=>{if(gDrag&&!ST.is3D){const{x,y}=pos(e);gDrag.x=x;gDrag.y=y;gDrag.vx=0;gDrag.vy=0;}},{passive:true});
   cv.addEventListener('touchend',()=>{gDrag=null;});
 }
+function relatedPoemsFor(n){
+  const vp=visiblePoems();
+  switch(n.type){
+    case 'poet': return vp.filter(p=>p.poet===n.id.slice(5));
+    case 'dynasty': return vp.filter(p=>'dyn_'+p.dyn===n.id);
+    case 'place': return vp.filter(p=>'pl_'+p.placeModern===n.id);
+    case 'mood': return vp.filter(p=>'mo_'+p.emo===n.id);
+    case 'style': return vp.filter(p=>'st_'+p.style===n.id);
+    case 'imagery': return vp.filter(p=>p.imagery.some(im=>'im_'+im===n.id));
+    case 'event': return vp.filter(p=>p.history.some(h=>h.hi&&'ev_'+h.t===n.id));
+  }
+  return [];
+}
 function showGPop(n,x,y){
   const pop=document.getElementById('gpop');
-  let h='<h4>'+n.label+'</h4><p>'+GLABEL[n.type];
-  if(n.type==='poem'){const p=n.ref;h+='：'+p.dyn+'代 '+POETS[p.poet].name+'<br>'+p.lines[0].t+'</p>'+
-    '<button onclick="openDetail(\''+p.id+'\')">查看详情 →</button>';}
-  else if(n.type==='poet'){const key=n.id.slice(5);const po=POETS[key];h+='<br>'+po.dyn+'代 · '+po.years+'</p>';}
-  else h+='</p>';
+  let h;
+  if(n.type==='poem'){const p=n.ref;
+    h='<h4>'+n.label+'</h4><p>'+p.dyn+'代 · '+POETS[p.poet].name+'<br>'+p.lines[0].t+'</p>'+
+      '<button onclick="openDetail(\''+p.id+'\')">查看详情 →</button>';
+  }else{
+    const full=(n.type==='event')?n.id.slice(3):n.label;
+    h='<h4>'+full+'</h4><p>'+GLABEL[n.type];
+    if(n.type==='poet'){const po=POETS[n.id.slice(5)];h+='：'+po.dyn+'代 · '+po.years;}
+    h+='</p>';
+    const rel=relatedPoemsFor(n);
+    if(rel.length){
+      h+='<div style="font-size:12px;color:var(--ink3);margin-bottom:4px">相关诗词（'+rel.length+'）</div>';
+      rel.slice(0,6).forEach(p=>h+='<button style="display:block;text-align:left;color:var(--teal);font-size:13px;padding:2px 0" onclick="openDetail(\''+p.id+'\')">《'+p.title+'》 '+POETS[p.poet].name+'</button>');
+    }
+    if(n.type==='event')h+='<button style="margin-top:6px" onclick="showView(\'timeline\')">在时间轴查看 →</button>';
+    else if(n.type==='poet')h+='<button style="margin-top:6px" onclick="poetSel=\''+n.id.slice(5)+'\';showView(\'poets\')">查看诗人 →</button>';
+  }
   pop.innerHTML=h;
   const W=gCanvas.clientWidth;
   pop.style.left=Math.min(x,W-240)+'px';pop.style.top=(y+14)+'px';pop.style.display='block';
