@@ -15,7 +15,7 @@
 - **里程碑测试规则（强制）**：每完成一项就做一次全面测试——断网可用、五入口与详情页正常、控制台无报错、iPad/桌面响应式、水墨配色无红色主色。通过后才算完成。
 
 ## 硬约束（不可违反）
-- 单文件、完全离线、无 CDN、目标 ≤3MB（当前约 294KB）
+- 单文件、完全离线、无 CDN、目标 ≤3MB（当前约 614KB，含内嵌真实古琴音频）
 - 视觉：宣纸白 `#f7f5f0` 底 / 浓墨 `#1c1c1e` 字 / 墨青 `#2d5a6b` 强调；**禁止红色作主色或大面积色**
 - 诗词内容与**统编版**小学语文课本对齐
 - 用户进度/偏好存 `localStorage`（键 `pg_v1`），无账号系统
@@ -27,7 +27,7 @@
 - 三类互动练习（选择/情感/连线）+ 得星进度；5 维搜索；教师打印学习单
 - 知识图谱 2D 力导向 + 伪 3D；时间轴防重叠分层
 - **诗词地图**（对标参考"诗词图卷"）：A1 缩放平移 / A2 真实晕渲地形(内嵌栅格染宣纸色)+山脉名 / A3 地形⇄素雅 / A4 古⇄今地名 / B1 名胜分类图标(山水楼关岳) / B2 足迹编号①②③ / 地点 hover 高亮 + 点空白关闭 tip
-- **氛围·朗读与古琴（F）**：① 朗读——详情页「🔊 朗读」用 Web Speech API（`speechSynthesis`，零字节离线），优先本地标准普通话语音（婷婷/美嘉…），逐句诵读 + 当前句高亮跟读，离开详情自动停。② 古琴背景音——导航「🎵 古琴」面板：默认零字节程序合成（Karplus-Strong 五声音阶 + 卷积混响），可调音量；「高音质」开关播放内嵌真实古琴片段 `GUQIN_CLIP`（**当前留空→自动回退程序合成并提示**，待补可商用音频的 base64 data URI）。
+- **氛围·朗读与古琴（F）**：① 朗读——详情页「🔊 朗读」用 Web Speech API（`speechSynthesis`，零字节离线），优先本地标准普通话语音（婷婷/美嘉…），逐句诵读 + 当前句高亮跟读，离开详情自动停。② 古琴背景音——导航「🎵 古琴」面板：默认零字节程序合成（Karplus-Strong 五声音阶 + 卷积混响），可调音量；「高音质」开关（**默认开**）播放内嵌真实古琴 `GUQIN_CLIP`＝《阳关三叠》(演奏 CharlieHuang，CC BY-SA 3.0，Wikimedia，已裁 24s 单声道循环 mp3，base64≈313KB)，面板内显示署名；留空时回退程序合成。
 - **诗作列表联动（E）**：诗词地图左侧列表面板（与地图两栏，≤900px 堆叠）。E1 列表随年份游标过滤"截至 N 年·已问世 M 首"（播放时实时增长）/ E2 tab 全部·只看诗作·只看大事（大事=EVENTS）/ E3 `FAME` 传播度标注 + "仅代表作⇄全部"滑块（fame 阈值过滤）/ E4 点列表项→地图定位（缩放平移到该地+脉冲高亮+必要时推进年份点亮）、"读›"按钮→详情。
 - **时间轴驱动·时空联动（D，参考图灵魂功能）**：诗词地图底部年份游标。D1 播放/暂停 + 1×/2×/4× 调速 + 可拖动手柄 / D2 年份推进时地图按 `poemYear` 逐步"点亮"该年前的诗作地（未到则淡出 .07），并实时计数"已问世 N/M 首" / D3 选中足迹诗人时游标上标注生/卒（如李白 生701·卒762） / D4 朝代渐变色带 + 分期标签（初/盛/中/晚唐·宋·元·明·清），随朝代筛选自动重定范围。播放用 setInterval（抗后台节流）、dt 钳制防跳。
 - **诗人长廊（C）**：第六入口"✍ 诗人"。C1 诗人选择器(13 位诗人 chip，按朝代+生年排序，横滑、active 自动居中) / C2 诗人面板(印章头像+姓名+朝代生卒+简介+诗作数/足迹地数统计+代表诗作卡片(点击进详情、显示已得星)+足迹/诗作地 mini-map) / C3 足迹路线(李白/杜甫/王维有 ROUTES 者面板内画编号虚线，并"🗺 在大地图看足迹"联动 setMapPoet+showView('map')；无足迹者回退"诗作地点")
@@ -37,7 +37,7 @@
 - [x] **D** 时间轴驱动点亮（拖动/播放年份，地图随时间逐步点亮该年前的诗与到访地）✅ 已完成并测试（2026-06-20）
 - [x] **E** 诗作列表联动 / 多维筛选 ✅ 已完成并测试（2026-06-20）
 - [x] **F** 朗读（Web Speech 逐句高亮）+ 古琴背景音（程序合成）✅ 已完成并测试（2026-06-20）
-  - [ ] 待补：`GUQIN_CLIP` 填入可商用授权的真实古琴 base64（高音质开关现回退程序合成）——需用户提供文件或授权下载
+  - [x] 已内嵌真实古琴《阳关三叠》(CharlieHuang, CC BY-SA 3.0, Wikimedia)，裁 24s 单声道循环 mp3，高音质默认开、面板署名 ✅（2026-06-20）
 
 ## 文件地图
 - `poemgraph.html` — 全部代码与数据（改动主要在这里）
@@ -57,10 +57,16 @@
 - 时间轴驱动（D）：`createdYear` 模糊串经 `poemYear(p)` 解析为数字年（世纪/朝代分期/年号兜底；时间轴 xOf 与地图共用）。地图 `.tl-mark[data-yr]` 标记诗作地，`buildMapSVG` 末尾缓存 `tlNodes` 并 `applyMapYear(tlYear)`；游标状态 `tlYear/tlMin/tlMax/tlPlaying/tlSpeed`，`refreshMapTime`(按 `mapVisiblePoems` 定范围)/`renderTimeScrubber`(色带 `TL_ERAS/TL_ERA_COL` + 生卒 ticks)/`tlPlay`(setInterval)/`tlSetYear`/`tlSetSpeed`。地图所有 setMap* 走 `rebuildMapTime()`；离开视图 `showView` 调 `tlPause()`。
 - 诗人长廊：视图 `v-poets`，入口 tab `t-poets`，`showView` 分支 `renderPoets()`。核心函数 `renderPoetPicker/selectPoet(全局 poetSel)/renderPoetPanel/poetMapSVG/gotoMapPoet`；排序 `poetKeysSorted()`(DYN_ORDER+poetBirth)。足迹复用地图层 `PROVPATH/reliefImg('landclipp')/riversSVG/ROUTES`。CSS 类 `.poet-picker/.poet-chip/.poet-seal/.poet-hero/.poet-stats/.poet-sec`。
 
+## 素材授权 / 致谢（含署名义务）
+- 古琴背景音《阳关三叠》：演奏 **CharlieHuang**，**CC BY-SA 3.0**，来源 Wikimedia Commons（File:Guqin-Yangguan_Sandie.ogg）。**需署名**——已在「🎵 古琴」面板内标注；如再分发须保留署名与同源协议（share-alike）。
+- 中国省界：阿里 DataV geoatlas。河流（长江/黄河）：Natural Earth。晕渲地形底图：Wikimedia "China edcp relief location map"。
+- 以上均经投影/简化/裁剪后内联，离线零外链。
+
 ## 变更日志
 
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-06-20 | F 收尾：内嵌真实古琴《阳关三叠》(CharlieHuang, CC BY-SA 3.0, Wikimedia)——ffmpeg 裁 24s 单声道淡入淡出循环 mp3(≈235KB)、base64 内联，高音质默认开、面板显示署名。Claude Preview 测试：decodeAudioData 成功(23.98s/单声道)、AudioContext running、播放路径无报错、控制台 0 报错、文件 614KB。新增「素材授权/致谢」章节 |
 | 2026-06-20 | 完成 **F 氛围**：①朗读（Web Speech API 零字节离线，逐句诵读+高亮跟读，本地标准普通话语音如婷婷）②古琴背景音（Karplus-Strong 五声音阶程序合成+混响，音量可调，高音质开关预留内嵌真实古琴 `GUQIN_CLIP` 空则回退）。修复 boot 期 TDZ（状态改 var）、语音偏好高质量音避开趣味音色。Claude Preview 测试：婷婷离线语音选中、朗读 speaking+逐句高亮、停止清理、AudioContext running、ambPluck 无报错、面板音量/高音质回退提示、文件仅 329KB(零内嵌音频)、控制台 0 报错。待补：真实古琴授权音频 |
 | 2026-06-20 | 完成 **E 诗作列表联动**：诗词地图左侧两栏列表。E1 随年份游标过滤+实时计数 / E2 全部·只看诗作·只看大事 tab / E3 传播度数据+仅代表作⇄全部滑块 / E4 点列表→地图定位脉冲+读›进详情。Claude Preview 测试：29 条(20诗+9事)混排、730 年→7首、tab 切换(20诗/9事)、滑块仅代表作→9 首高传播度、locate 缩放 1→2.8× 平移高亮、读›开详情、row⇄column 响应式(900px)、控制台 0 报错 |
 | 2026-06-20 | 完成 **D 时间轴驱动·时空联动**（参考图灵魂功能）：地图底部年份游标 D1 播放+调速+拖动 / D2 逐年点亮诗作地+计数 / D3 诗人生卒标注 / D4 朝代渐变色带+分期标签。新增 `poemYear()` 模糊年份解析（时间轴/地图共用）。Claude Preview 测试：20 首年份解析无误(626–1839)、730 年 7/20 点亮、播放推进+暂停、4× 调速、唐代筛选重定范围(626–850)、李白生701/卒762 ticks、离开视图自动暂停、时间轴回归正常、控制台 0 报错 |
