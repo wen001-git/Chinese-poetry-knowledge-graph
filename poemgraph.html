@@ -2219,8 +2219,13 @@ function submitQuiz(){
    ══════════════════════════════════════════ */
 let gNodes=[],gEdges=[],gAnim=null,gCanvas,gCtx,gDrag=null,gAngle=0,gLayout='force',gAlpha=1,gFocus=null;
 function renderGControls(){
+  const el=document.getElementById('gcontrols');
+  if(!(gFocus&&gFocus.t==='poet')){
+    el.innerHTML='<span style="font-size:12px;color:var(--ink3)">关系维度：进入某位诗人后，可在此筛选 地点 / 情感 / 意象 / 风格 / 历史事件</span>';
+    return;
+  }
   const order=['poem','poet','dynasty','place','mood','imagery','style','event'];
-  document.getElementById('gcontrols').innerHTML=order.map(k=>{
+  el.innerHTML=order.map(k=>{
     const lock=(k==='poem');
     return '<button class="dchip'+(ST.dims[k]?' on':'')+(lock?' locked':'')+'"'+
       (lock?' title="诗词是图谱核心节点，始终显示"':'')+' onclick="togDim(\''+k+'\')">'+
