@@ -2322,7 +2322,14 @@ function layoutTree(){
   Object.values(dyns).forEach(n=>n.r=14);
   gNodes.forEach(n=>{ if(!['poem','poet','dynasty'].includes(n.type)){n.x=cx;n.y=cy;} });
 }
-function gOnNodeTap(n,x,y){ showGPop(n,x,y); }
+function gOnNodeTap(n,x,y){
+  if(n.type==='poem'){openDetail(n.ref.id);return;}
+  if(n.type==='poet'){const k=n.ref?n.ref.poet:n.id.slice(5);
+    setGraphFocus((gFocus&&gFocus.t==='poet'&&gFocus.k===k)?null:{t:'poet',k:k}); return;}
+  if(n.type==='dynasty'){const k=n.label.replace(/代$/,'');
+    setGraphFocus((gFocus&&gFocus.t==='dyn'&&gFocus.k===k)?null:{t:'dyn',k:k}); return;}
+  showGPop(n,x,y);
+}
 /* ── 图数据库式：双击节点展开它的 1-hop 邻居（累积到画布），再双击折叠 ── */
 function nodeNeighbors(n){
   const out=[];
@@ -2385,8 +2392,10 @@ function flashGBar(msg){const fb=document.getElementById('g-focus-bar');if(!fb)r
 function setGraphFocus(f){ gFocus=f; document.getElementById('gpop').style.display='none'; renderGraph(); }
 function updateFocusBar(){ const fb=document.getElementById('g-focus-bar'); if(!fb)return;
   if(fb.dataset.flash==='1')return;
-  fb.innerHTML='<button class="dchip" onclick="renderGraph()">🔄 重置为总览</button>'+
-    '<span style="font-size:13px;color:var(--ink3);align-self:center">单击节点看信息 · <b>双击节点展开它的关联</b>（再双击可收起）· 顺藤摸瓜探索</span>'; }
+  if(gFocus){ fb.innerHTML='<button class="dchip on" onclick="setGraphFocus(null)">← 返回总览</button>'+
+    '<span style="font-size:13px;color:var(--ink2);align-self:center">正在看：<b>'+(gFocus.t==='poet'?POETS[gFocus.k].name+' 的诗作':gFocus.k+'代的诗人')+'</b> · 双击节点展开关联 · 单击诗作进详情</span>'; }
+  else { fb.innerHTML='<button class="dchip" onclick="renderGraph()">🔄 重置</button>'+
+    '<span style="font-size:13px;color:var(--ink3);align-self:center"><b>单击</b>「诗人」进入TA的图谱 /「朝代」看该代诗人 · <b>双击</b>任意节点展开1-hop关联（再双击收起）</span>'; } }
 function setGLayout(m){ gLayout=m; document.querySelectorAll('.dchip.lay').forEach(b=>b.classList.toggle('on',b.id==='lay-'+m)); if(ST.is3D)toggle3D(); renderGraph(); }
 function renderGraph(){
   if(ST.view!=='graph')return;
@@ -2494,9 +2503,14 @@ function bindGraphEvents(){
     else{tip.style.opacity=0;cv.style.cursor='default';}});
   cv.addEventListener('mousedown',e=>{const{x,y}=pos(e);const n=graphHit(x,y);if(n&&!ST.is3D)gDrag=n;});
   window.addEventListener('mouseup',()=>{gDrag=null;});
+  let _gClickT=null;
   cv.addEventListener('click',e=>{const{x,y}=pos(e);const n=graphHit(x,y);
-    if(n)gOnNodeTap(n,x,y);else document.getElementById('gpop').style.display='none';});
-  cv.addEventListener('dblclick',e=>{e.preventDefault();const{x,y}=pos(e);const n=graphHit(x,y);if(n)expandNode(n);});
+    if(_gClickT){clearTimeout(_gClickT);_gClickT=null;}
+    _gClickT=setTimeout(()=>{_gClickT=null;
+      if(n)gOnNodeTap(n,x,y);else document.getElementById('gpop').style.display='none';},230);});
+  cv.addEventListener('dblclick',e=>{e.preventDefault();
+    if(_gClickT){clearTimeout(_gClickT);_gClickT=null;}
+    const{x,y}=pos(e);const n=graphHit(x,y);if(n)expandNode(n);});
   // touch（含双击检测：320ms 内点同一节点 = 展开/折叠）
   let _lastTap=0,_lastTapN=null;
   cv.addEventListener('touchstart',e=>{const{x,y}=pos(e);const n=graphHit(x,y);if(n){if(!ST.is3D)gDrag=n;
