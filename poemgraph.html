@@ -282,6 +282,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   font-size:18px;color:var(--ink);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;line-height:1}
 .map-zoom-ctrl button:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
 .map-zoom-ctrl button.rz{font-size:13px}
+.map-zoom-ctrl button.tiltbtn{font-size:17px}
+.map-zoom-ctrl button.tiltbtn.on{background:var(--teal);border-color:var(--teal);box-shadow:0 0 0 2px rgba(45,90,107,.25)}
 .map-zoom-hint{position:absolute;left:14px;bottom:14px;z-index:6;font-size:11px;color:var(--ink2);
   background:rgba(247,245,240,.88);border:1px solid var(--border);border-radius:8px;padding:3px 9px;pointer-events:none}
 
@@ -2678,7 +2680,8 @@ function ensureHoverLabel(){let el=document.getElementById('map-hover-label');
   if(!el){el=document.createElement('div');el.id='map-hover-label';el.className='map-hover-label';document.getElementById('mapwrap').appendChild(el);}return el;}
 function toggleMapTilt(){mapTilt=!mapTilt;const ho=document.getElementById('mapsvg-holder');
   if(mapTilt){resetZoom();ho.classList.add('tilt');}else{ho.classList.remove('tilt');}
-  renderMapControls();updateZoomHint();const hl=document.getElementById('map-hover-label');if(hl)hl.style.display='none';}
+  const tb=document.getElementById('map-tilt-btn');if(tb)tb.classList.toggle('on',mapTilt);
+  updateZoomHint();const hl=document.getElementById('map-hover-label');if(hl)hl.style.display='none';}
 function updateZoomHint(){const hint=document.getElementById('map-zoom-hint');if(hint)hint.textContent=mapTilt?'🏔 立体沙盘鸟瞰 · 点地标查看（缩放已暂停）':'⌘/Ctrl + 滚轮缩放 · 拖动平移';}
 /* 传播度（人工标注，越大越脍炙人口）——驱动 E3 代表作⇄全部 滑块 */
 const FAME={yonge:102,jingye:105,chunxiao:104,zeniwang:98,denggue:103,minnong:105,wanglu:100,
@@ -2884,7 +2887,6 @@ function renderMapControls(){
   h+='<button class="dchip'+(mapName==='ancient'?' on':'')+'" onclick="setMapName(\'ancient\')">古地名</button>';
   h+='<button class="dchip'+(mapName==='modern'?' on':'')+'" onclick="setMapName(\'modern\')">现代名</button>';
   h+='<button class="dchip'+(mapLandmark?' on':'')+'" style="margin-left:10px" onclick="setMapLandmark(!mapLandmark)">⛰ 名胜</button>';
-  h+='<button class="dchip'+(mapTilt?' on':'')+'" style="margin-left:10px" onclick="toggleMapTilt()">🏔 立体沙盘</button>';
   document.getElementById('map-controls').innerHTML=h;
 }
 function setMapDyn(d){mapDyn=d; if(mapPoet&&mapPoetKeys().indexOf(mapPoet)<0)mapPoet=null; renderMapControls();renderMapPoets();rebuildMapTime();}
@@ -3014,7 +3016,8 @@ function ensureZoomCtrl(){const wrap=document.getElementById('mapwrap');
       pop.style.display='none';});}
   if(document.getElementById('map-zoom-ctrl'))return;
   const d=document.createElement('div');d.id='map-zoom-ctrl';d.className='map-zoom-ctrl';
-  d.innerHTML='<button title="放大" onclick="zoomCenter(1.4)">＋</button>'+
+  d.innerHTML='<button id="map-tilt-btn" class="tiltbtn'+(mapTilt?' on':'')+'" title="立体沙盘鸟瞰（再点还原平面）" onclick="toggleMapTilt()">🏔</button>'+
+              '<button title="放大" onclick="zoomCenter(1.4)">＋</button>'+
               '<button title="缩小" onclick="zoomCenter(1/1.4)">－</button>'+
               '<button class="rz" title="复位" onclick="resetZoom()">复位</button>';
   wrap.appendChild(d);
