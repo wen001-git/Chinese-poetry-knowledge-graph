@@ -121,7 +121,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 /* ══════════ 通用图谱/地图/时间轴容器 ══════════ */
 .canvas-wrap{position:relative;background:var(--paper2);border:1px solid var(--border);
   border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
-#gcanvas{display:block;width:100%;height:560px;touch-action:none}
+#gcanvas{display:block;width:100%;height:640px;touch-action:none}
 .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
 .dchip{padding:5px 12px;border-radius:18px;border:1px solid var(--border);background:var(--paper2);
   font-size:12px;color:var(--ink2);transition:.16s}
@@ -1880,12 +1880,14 @@ const ROLE_INFO={
 const ST={
   role:null,grade:null,mode:'explore',view:'cards',
   filter:'all',sf:'all',
-  dims:{poem:1,poet:1,dynasty:1,place:1,mood:1,imagery:0,style:0,event:1},
+  dims:{poem:1,poet:1,dynasty:1,place:0,mood:0,imagery:0,style:0,event:0},
   prog:{},poem:null,tab:0,qa:{},is3D:false
 };
 function lsLoad(){try{const d=JSON.parse(localStorage.getItem('pg_v1')||'{}');
   Object.assign(ST,{role:d.role||null,grade:d.grade||null,mode:d.mode||'explore',
-    view:d.view||'cards',dims:{...ST.dims,...(d.dims||{})},prog:d.prog||{}});}catch(e){}}
+    view:d.view||'cards',dims:{...ST.dims,...(d.dims||{})},prog:d.prog||{}});
+  if(!localStorage.getItem('pg_gv2')){ST.dims={poem:1,poet:1,dynasty:1,place:0,mood:0,imagery:0,style:0,event:0};try{localStorage.setItem('pg_gv2','1');}catch(e){}lsSave();}
+  }catch(e){}}
 function lsSave(){localStorage.setItem('pg_v1',JSON.stringify({
   role:ST.role,grade:ST.grade,mode:ST.mode,view:ST.view,dims:ST.dims,prog:ST.prog}));}
 lsLoad();
@@ -2247,6 +2249,8 @@ function buildGraph(){
     n.x=W/2+Math.cos(a)*(120+Math.random()*120);
     n.y=Hh/2+Math.sin(a)*(90+Math.random()*90);
     n.z=(Math.random()-0.5)*240;});
+  const sc=Math.max(0.5,Math.min(1,Math.sqrt(130/arr.length)));
+  arr.forEach(n=>{n.r=(n.type==='poem'?20:14)*sc;});
   gNodes=arr;gEdges=edges.filter(e=>nodes[e[0]]&&nodes[e[1]]);
 }
 function layoutStatic(){ if(gLayout==='radial')layoutRadial(); else if(gLayout==='tree')layoutTree(); }
@@ -2257,7 +2261,8 @@ function layoutRadial(){
   Object.keys(byType).forEach(t=>{const list=byType[t];
     if(t==='poem')list.sort((a,b)=>(a.ref.dyn+a.ref.poet).localeCompare(b.ref.dyn+b.ref.poet));
     const r=maxR*(ringOf[t]||0.85);
-    list.forEach((n,i)=>{const ang=i/list.length*Math.PI*2-Math.PI/2; n.x=cx+Math.cos(ang)*r; n.y=cy+Math.sin(ang)*r;});});
+    const sp=2*Math.PI*r/Math.max(1,list.length); const nr=Math.max(4,Math.min(t==='poem'?15:11,sp*0.46));
+    list.forEach((n,i)=>{const ang=i/list.length*Math.PI*2-Math.PI/2; n.x=cx+Math.cos(ang)*r; n.y=cy+Math.sin(ang)*r; n.r=nr;});});
 }
 function layoutTree(){
   const W=gCanvas.clientWidth,Hh=gCanvas.clientHeight,cx=W/2,cy=Hh/2,maxR=Math.min(W,Hh)/2-22;
@@ -2274,6 +2279,11 @@ function layoutTree(){
       arr.forEach((pn,i)=>{const aa=pa+(i+0.5)/arr.length*ps; pn.x=cx+Math.cos(aa)*maxR*0.95; pn.y=cy+Math.sin(aa)*maxR*0.95;});
       pa=pa1;});
     a0=a1;});
+  const pmCount=poems.length||1; const ptCount=Object.keys(poets).length||1;
+  const prSpace=2*Math.PI*maxR*0.95/pmCount, ptSpace=2*Math.PI*maxR*0.56/ptCount;
+  poems.forEach(n=>n.r=Math.max(4,Math.min(14,prSpace*0.46)));
+  Object.values(poets).forEach(n=>n.r=Math.max(5,Math.min(12,ptSpace*0.46)));
+  Object.values(dyns).forEach(n=>n.r=14);
   gNodes.forEach(n=>{ if(!['poem','poet','dynasty'].includes(n.type)){n.x=cx;n.y=cy;} });
 }
 function setGLayout(m){ gLayout=m; document.querySelectorAll('.dchip.lay').forEach(b=>b.classList.toggle('on',b.id==='lay-'+m)); if(ST.is3D)toggle3D(); renderGraph(); }
@@ -2293,7 +2303,7 @@ function sizeCanvas(cv){const dpr=window.devicePixelRatio||1;
   cv.width=w*dpr;cv.height=h*dpr;cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);}
 function startGraph(){stopGraph();let t=0;
   const loop=()=>{
-    if(ST.is3D){gAngle+=0.006;draw3D();}
+    if(ST.is3D){gAngle+=0.0034;draw3D();}
     else{ if(gLayout==='force')tick(); draw2D(); }
     gAnim=requestAnimationFrame(loop);
   };gAnim=requestAnimationFrame(loop);}
@@ -2347,11 +2357,13 @@ function drawNode(ctx,n,x,y,r,dim){
   ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
   ctx.fillStyle=GCOL[n.type];ctx.fill();
   if(n.type==='poem'){ctx.lineWidth=2;ctx.strokeStyle='rgba(247,245,240,.9)';ctx.stroke();}
-  ctx.globalAlpha=dim;ctx.fillStyle='#f7f5f0';
-  ctx.font=(n.type==='poem'?'bold ':'')+Math.max(10,r*0.5)+'px var(--serif),serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  const lbl=n.label.length>4?n.label.slice(0,4):n.label;
-  ctx.fillText(lbl,x,y);
+  if(r>=9){
+    ctx.globalAlpha=dim;ctx.fillStyle='#f7f5f0';
+    ctx.font=(n.type==='poem'?'bold ':'')+Math.max(9,r*0.5)+'px var(--serif),serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const lbl=n.label.length>4?n.label.slice(0,4):n.label;
+    ctx.fillText(lbl,x,y);
+  }
   ctx.restore();
 }
 function graphHit(mx,my){
