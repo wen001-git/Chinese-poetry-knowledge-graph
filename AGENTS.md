@@ -58,6 +58,7 @@
 - 诗词地点按真实经纬度 `GEO[placeModern]`→`GEOXY` 定位；诗人足迹 `ROUTE_GEO`/`ROUTES`；山脉名 `RANGES_GEO`；名胜 `LANDMARKS`。
 - 地图主渲染：`buildMapSVG()`；缩放：`mapK/mapTX/mapTY` + `applyZoom/zoomAt/zoomCenter/resetZoom`；地图内容包在 `<g id="mapZoomG">` 内随缩放。
 - **滚轮缩放需按 ⌘/Ctrl**（`bindMapZoom` 的 wheel 处理：无修饰键直接 return 让页面正常滚动，避免小屏卡在地图无法下滚；触控板捏合带 ctrlKey 仍可缩放）——勿改回"无条件 preventDefault 缩放"。+/- 按钮与左下角提示 `#map-zoom-hint`。
+- 知识图谱「聚焦渐进」：gFocus(null总览=朝代+诗人 / {t:poet}=该诗人+其诗作 / {t:dyn}=该代诗人)，gOnNodeTap 点诗人/朝代下钻、点诗作进详情，setGraphFocus/updateFocusBar/#g-focus-bar 返回总览。
 - 知识图谱有三种布局 gLayout(force/radial/tree)：force 有 gAlpha 冷却定格(不再永久晃)；radial=类型同心环；tree=朝代>诗人>诗作径向层级(buildGraph 在 tree 时仅建这三类)。setGLayout 切换。
 - 知识图谱「诗词」维度为核心 hub，**故意锁定常显**（`togDim` 对 `poem` 提前 return，chip 加 `.locked`+🔒+tooltip）——非 bug，勿放开。
 - 诗词数据结构：`POEMS[]`（含 lines/anno/trans/transT/emo/imagery/place/placeModern/placeXY?/story/storyT/history/related/quiz），`POETS{}`（name/dyn/years/av/intro/born[投影xy]/route?），`EVENTS[]`。
@@ -75,6 +76,7 @@
 
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-06-21 | 知识图谱"聚焦渐进展开"(用户要最清爽方案)：gFocus 三态——默认**总览**仅显示 朝代+诗人(约77点,去掉133首诗)；**点诗人**→只展开TA的诗作(如李白15点)；**点朝代**→看该代诗人；点诗作进详情；顶部"←返回总览"+当前焦点提示(updateFocusBar/gOnNodeTap/setGraphFocus)。layoutTree 支持总览两层(朝代→诗人)。三布局均适用。测试:总览77、李白聚焦13诗、唐代33诗人、控制台0报错 |
 | 2026-06-21 | 知识图谱去拥挤(用户反馈太密)：①默认维度精简为 诗词+诗人+朝代(其余默认关)，并对老用户一次性迁移(localStorage pg_gv2)，节点 527→210；②节点大小自适配：force 按总数缩放(sqrt(130/n))、放射/树形按各环周长定大小(4~15px)避免圆圈重叠；③小节点(r<9)隐藏文字、悬停/点击仍显示，密集环变清爽小点；④立体旋转调慢(0.006→0.0034)；⑤图谱画布增高 560→640。测试:三布局清爽、控制台0报错 |
 | 2026-06-21 | 知识图谱抗抖动+布局选择(用户反馈节点多一直晃)：①力导向加冷却 gAlpha(每帧*0.985，<0.02 冻结、位移*gAlpha)，稳定后定格不再抖，重新布局/切换时重置；②新增布局切换"引力图/放射星图/朝代树形"(setGLayout)：放射=按节点类型同心环(layoutRadial)、树形=朝代→诗人→诗作径向层级(layoutTree,仅这三类)，均为确定性静态布局零抖动。测试:force 500帧后冻结(位移0)、radial 527节点入环、tree 210节点三类、控制台0报错 |
 | 2026-06-21 | 诗境图改为内联(用户反馈)：水墨意象小图直接显示在原文每句诗旁(lineScene()内联进 #d-verse 各 .ln，22px、opacity.78)，移除独立"诗画"标签(D_TABS 去 scene、详情面板回到8个)。ICONS/SCENE_SYN 复用。测试:春晓等逐句配图、标签回到8个、控制台0报错 |

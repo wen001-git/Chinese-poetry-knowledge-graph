@@ -606,6 +606,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       <button class="dchip" id="btn-3d" onclick="toggle3D()">🌐 切换立体模式</button>
       <button class="dchip" onclick="renderGraph()">🔄 重新布局</button>
     </div>
+    <div class="controls" id="g-focus-bar"></div>
     <div class="canvas-wrap" id="gcanvas-wrap">
       <canvas id="gcanvas"></canvas>
       <div id="gtooltip"></div>
@@ -2216,7 +2217,7 @@ function submitQuiz(){
 /* ══════════════════════════════════════════
    知识图谱（2D 力导向 + 伪3D）
    ══════════════════════════════════════════ */
-let gNodes=[],gEdges=[],gAnim=null,gCanvas,gCtx,gDrag=null,gAngle=0,gLayout='force',gAlpha=1;
+let gNodes=[],gEdges=[],gAnim=null,gCanvas,gCtx,gDrag=null,gAngle=0,gLayout='force',gAlpha=1,gFocus=null;
 function renderGControls(){
   const order=['poem','poet','dynasty','place','mood','imagery','style','event'];
   document.getElementById('gcontrols').innerHTML=order.map(k=>{
@@ -2229,20 +2230,27 @@ function renderGControls(){
 function togDim(k){if(k==='poem')return;ST.dims[k]=ST.dims[k]?0:1;lsSave();renderGControls();renderGraph();}
 function buildGraph(){
   const ps=visiblePoems();
-  const nodes={},edges=[];
+  const nodes={},edges=[],eset={};
   function add(id,type,label,ref){if(!nodes[id])nodes[id]={id,type,label,ref,
     x:0,y:0,vx:0,vy:0,z:0,r:type==='poem'?20:14};return nodes[id];}
+  function E(a,b){const k=a+'|'+b;if(!eset[k]){eset[k]=1;edges.push([a,b]);}}
   const tree=gLayout==='tree';
-  ps.forEach(p=>{
-    const pn=add('p_'+p.id,'poem',p.title,p);
-    if(tree||ST.dims.poet){add('poet_'+p.poet,'poet',POETS[p.poet].name);edges.push(['p_'+p.id,'poet_'+p.poet]);}
-    if(tree||ST.dims.dynasty){add('dyn_'+p.dyn,'dynasty',p.dyn+'代');edges.push(['p_'+p.id,'dyn_'+p.dyn]);}
-    if(!tree&&ST.dims.place){add('pl_'+p.placeModern,'place',p.placeModern);edges.push(['p_'+p.id,'pl_'+p.placeModern]);}
-    if(!tree&&ST.dims.mood){add('mo_'+p.emo,'mood',p.emo);edges.push(['p_'+p.id,'mo_'+p.emo]);}
-    if(!tree&&ST.dims.style){add('st_'+p.style,'style',p.style);edges.push(['p_'+p.id,'st_'+p.style]);}
-    if(!tree&&ST.dims.imagery){(p.imagery||[]).forEach(im=>{add('im_'+im,'imagery',im);edges.push(['p_'+p.id,'im_'+im]);});}
-    if(!tree&&ST.dims.event){(p.history||[]).filter(e=>e.hi).forEach(e=>{const k='ev_'+e.t;add(k,'event',e.t.length>8?e.t.slice(0,7)+'…':e.t);edges.push(['p_'+p.id,k]);});}
-  });
+  if(!gFocus){
+    ps.forEach(p=>{const pk='poet_'+p.poet,dk='dyn_'+p.dyn;
+      add(pk,'poet',POETS[p.poet].name,{poet:p.poet}); add(dk,'dynasty',p.dyn+'代'); E(pk,dk);});
+  } else if(gFocus.t==='dyn'){
+    const dk='dyn_'+gFocus.k; add(dk,'dynasty',gFocus.k+'代');
+    ps.filter(p=>p.dyn===gFocus.k).forEach(p=>{const pk='poet_'+p.poet;add(pk,'poet',POETS[p.poet].name,{poet:p.poet});E(pk,dk);});
+  } else {
+    const pk='poet_'+gFocus.k; add(pk,'poet',POETS[gFocus.k].name,{poet:gFocus.k});
+    ps.filter(p=>p.poet===gFocus.k).forEach(p=>{add('p_'+p.id,'poem',p.title,p);E('p_'+p.id,pk);
+      if(!tree&&ST.dims.dynasty){add('dyn_'+p.dyn,'dynasty',p.dyn+'代');E('p_'+p.id,'dyn_'+p.dyn);}
+      if(!tree&&ST.dims.place){add('pl_'+p.placeModern,'place',p.placeModern);E('p_'+p.id,'pl_'+p.placeModern);}
+      if(!tree&&ST.dims.mood){add('mo_'+p.emo,'mood',p.emo);E('p_'+p.id,'mo_'+p.emo);}
+      if(!tree&&ST.dims.style){add('st_'+p.style,'style',p.style);E('p_'+p.id,'st_'+p.style);}
+      if(!tree&&ST.dims.imagery){(p.imagery||[]).forEach(im=>{add('im_'+im,'imagery',im);E('p_'+p.id,'im_'+im);});}
+    });
+  }
   const arr=Object.values(nodes);
   const W=gCanvas.clientWidth,Hh=gCanvas.clientHeight;
   arr.forEach((n,i)=>{const a=i/arr.length*Math.PI*2;
@@ -2268,6 +2276,15 @@ function layoutTree(){
   const W=gCanvas.clientWidth,Hh=gCanvas.clientHeight,cx=W/2,cy=Hh/2,maxR=Math.min(W,Hh)/2-22;
   const dyns={},poets={},poems=[];
   gNodes.forEach(n=>{ if(n.type==='dynasty')dyns[n.id]=n; else if(n.type==='poet')poets[n.id]=n; else if(n.type==='poem')poems.push(n); });
+  if(poems.length===0){
+    const byD={}; Object.values(poets).forEach(pn=>{const d='dyn_'+POETS[pn.ref.poet].dyn;(byD[d]=byD[d]||[]).push(pn);});
+    const total=Object.values(poets).length||1; let aa0=-Math.PI/2;
+    Object.keys(byD).forEach(dk=>{const arr=byD[dk];const span=arr.length/total*2*Math.PI;const a1=aa0+span;const m=(aa0+a1)/2;
+      if(dyns[dk]){dyns[dk].x=cx+Math.cos(m)*maxR*0.28;dyns[dk].y=cy+Math.sin(m)*maxR*0.28;}
+      arr.forEach((pn,i)=>{const ang=aa0+(i+0.5)/arr.length*span;pn.x=cx+Math.cos(ang)*maxR*0.85;pn.y=cy+Math.sin(ang)*maxR*0.85;});aa0=a1;});
+    const sp=2*Math.PI*maxR*0.85/total; Object.values(poets).forEach(n=>n.r=Math.max(6,Math.min(13,sp*0.46))); Object.values(dyns).forEach(n=>n.r=15);
+    return;
+  }
   const byDyn={}; poems.forEach(pn=>{const dk='dyn_'+pn.ref.dyn,pk='poet_'+pn.ref.poet; (byDyn[dk]=byDyn[dk]||{}); (byDyn[dk][pk]=byDyn[dk][pk]||[]).push(pn);});
   const total=poems.length||1; let a0=-Math.PI/2;
   Object.keys(byDyn).forEach(dk=>{
@@ -2286,6 +2303,19 @@ function layoutTree(){
   Object.values(dyns).forEach(n=>n.r=14);
   gNodes.forEach(n=>{ if(!['poem','poet','dynasty'].includes(n.type)){n.x=cx;n.y=cy;} });
 }
+function gOnNodeTap(n,x,y){
+  if(n.type==='poem'){openDetail(n.ref.id);return;}
+  if(n.type==='poet'){const k=n.ref?n.ref.poet:n.id.slice(5);
+    setGraphFocus((gFocus&&gFocus.t==='poet'&&gFocus.k===k)?null:{t:'poet',k:k}); return;}
+  if(n.type==='dynasty'){const k=n.label.replace(/代$/,'');
+    setGraphFocus((gFocus&&gFocus.t==='dyn'&&gFocus.k===k)?null:{t:'dyn',k:k}); return;}
+  showGPop(n,x,y);
+}
+function setGraphFocus(f){ gFocus=f; document.getElementById('gpop').style.display='none'; renderGraph(); }
+function updateFocusBar(){ const fb=document.getElementById('g-focus-bar'); if(!fb)return;
+  if(gFocus){ fb.innerHTML='<button class="dchip on" onclick="setGraphFocus(null)">← 返回总览</button>'+
+    '<span style="font-size:13px;color:var(--ink2);align-self:center">正在看：<b>'+(gFocus.t==='poet'?POETS[gFocus.k].name+' 的诗作':gFocus.k+'代的诗人')+'</b>（点空白或返回）</span>'; }
+  else { fb.innerHTML='<span style="font-size:13px;color:var(--ink3);align-self:center">👆 总览：点「诗人」展开TA的诗作，点「朝代」看该代诗人</span>'; } }
 function setGLayout(m){ gLayout=m; document.querySelectorAll('.dchip.lay').forEach(b=>b.classList.toggle('on',b.id==='lay-'+m)); if(ST.is3D)toggle3D(); renderGraph(); }
 function renderGraph(){
   if(ST.view!=='graph')return;
@@ -2296,6 +2326,7 @@ function renderGraph(){
   gAlpha=1; if(gLayout!=='force')layoutStatic();
   document.getElementById('gpop').style.display='none';
   bindGraphEvents();
+  updateFocusBar();
   startGraph();
 }
 function sizeCanvas(cv){const dpr=window.devicePixelRatio||1;
@@ -2385,9 +2416,9 @@ function bindGraphEvents(){
   cv.addEventListener('mousedown',e=>{const{x,y}=pos(e);const n=graphHit(x,y);if(n&&!ST.is3D)gDrag=n;});
   window.addEventListener('mouseup',()=>{gDrag=null;});
   cv.addEventListener('click',e=>{const{x,y}=pos(e);const n=graphHit(x,y);
-    if(n)showGPop(n,x,y);else document.getElementById('gpop').style.display='none';});
+    if(n)gOnNodeTap(n,x,y);else document.getElementById('gpop').style.display='none';});
   // touch
-  cv.addEventListener('touchstart',e=>{const{x,y}=pos(e);const n=graphHit(x,y);if(n){if(!ST.is3D)gDrag=n;showGPop(n,x,y);}},{passive:true});
+  cv.addEventListener('touchstart',e=>{const{x,y}=pos(e);const n=graphHit(x,y);if(n){if(!ST.is3D)gDrag=n;gOnNodeTap(n,x,y);}},{passive:true});
   cv.addEventListener('touchmove',e=>{if(gDrag&&!ST.is3D){const{x,y}=pos(e);gDrag.x=x;gDrag.y=y;gDrag.vx=0;gDrag.vy=0;}},{passive:true});
   cv.addEventListener('touchend',()=>{gDrag=null;});
 }
