@@ -192,6 +192,29 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   cursor:grab;z-index:3}
 .ts-handle:active{cursor:grabbing}
 #mapsvg .tl-mark{transition:opacity .45s ease}
+/* 地图·诗人横滑选择（A） */
+.map-poets{display:flex;gap:7px;align-items:center;overflow-x:auto;padding:2px 2px 10px;margin-bottom:8px;scrollbar-width:thin}
+.map-poets .mp-lab{flex:0 0 auto;font-size:12px;color:var(--ink3)}
+.mpchip{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:18px;
+  border:1px solid var(--border);background:var(--paper2);font-size:13px;color:var(--ink);white-space:nowrap;transition:.16s}
+.mpchip:hover{border-color:var(--teal)}
+.mpchip.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.mpchip .mpav{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;
+  background:var(--ink2);color:#fff;font-family:var(--serif);font-size:13px;font-weight:700}
+.mpchip.on .mpav{background:rgba(255,255,255,.25)}
+.mpchip .mpfoot{font-size:10px;color:var(--ochre);margin-left:1px}
+.mpchip.on .mpfoot{color:#f0d8b0}
+/* 诗人简介头（A） */
+.ml-poet{display:flex;align-items:center;gap:11px;padding:11px;margin:2px 4px 8px;border-radius:11px;
+  background:var(--teal-l);border:1px solid var(--teal)}
+.ml-poet-seal{flex:0 0 auto;width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:24px;font-weight:700;color:#fff;background:var(--teal)}
+.ml-poet-info{flex:1;min-width:0}
+.ml-poet-info b{font-family:var(--serif);font-size:18px;display:block;color:var(--ink)}
+.ml-poet-info span{font-size:12px;color:var(--ink2)}
+.ml-poet-x{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--paper);color:var(--ink2);
+  font-size:15px;border:1px solid var(--border)}
+.ml-poet-x:hover{background:var(--ink);color:#fff}
 /* 诗作列表联动（E） */
 .map-layout{display:flex;gap:16px;align-items:flex-start}
 .map-main{flex:1;min-width:0}
@@ -562,6 +585,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   <section class="view" id="v-map">
     <div class="page-head"><h2 class="serif">诗词地图</h2><span class="hint">手绘古风·循着诗人的足迹漫游山河</span></div>
     <div class="controls" id="map-controls"></div>
+    <div class="map-poets" id="map-poets"></div>
     <div class="map-layout">
       <aside id="map-list" class="no-print">
         <div class="ml-head">
@@ -1823,7 +1847,7 @@ const RB=(function(){var a=proj(RELIEF_BOUNDS.L,RELIEF_BOUNDS.T),b=proj(RELIEF_B
 const RELIEF_FILTER='sepia(.5) saturate(.5) brightness(1.06) contrast(.9)';
 function reliefImg(cid){return '<image href="'+RELIEF+'" x="'+RB.x.toFixed(1)+'" y="'+RB.y.toFixed(1)+'" width="'+RB.w.toFixed(1)+'" height="'+RB.h.toFixed(1)+'" clip-path="url(#'+cid+')" preserveAspectRatio="none" style="filter:'+RELIEF_FILTER+';mix-blend-mode:multiply" opacity=".95"/>';}
 const RANGES_GEO=[['天山',86,43.2],['昆仑山',90,35.6],['喜马拉雅',88,28.6],['横断山',100.3,28],['祁连山',100,38],['秦岭',108,33.9],['太行',113.7,37.6],['阴山',111,41.4],['大兴安岭',123,46],['南岭',113,25.3]];
-function rangeLabelsSVG(){return RANGES_GEO.map(function(r){var p=proj(r[1],r[2]);return '<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="15" fill="#5a4a30" opacity=".62" font-style="italic" font-family="serif" style="pointer-events:none">'+r[0]+'</text>';}).join('');}
+function rangeLabelsSVG(){return RANGES_GEO.map(function(r){var p=proj(r[1],r[2]);return '<text class="zt" data-bfs="15" x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" text-anchor="middle" font-size="15" fill="#5a4a30" opacity=".62" font-style="italic" font-family="serif" style="pointer-events:none">'+r[0]+'</text>';}).join('');}
 const GEO={
  '今浙江金华':[119.65,29.08],'今江苏扬州一带':[119.42,32.39],'今湖北襄阳':[112.12,32.01],
  '今安徽泾县':[118.42,30.69],'今山西永济':[110.45,34.87],'今安徽亳州一带':[115.78,33.87],
@@ -1892,11 +1916,21 @@ const LANDMARKS=[
 const LM_COL={'山':'#5a8a6a','水':'#2d5a6b','楼':'#a0603a','关':'#6a5a3a','岳':'#3a4a3a'};
 function landmarksSVG(){ if(!mapLandmark)return '';
   return LANDMARKS.map(function(L){var p=proj(L.c[0],L.c[1]);var x=p[0].toFixed(1),y=p[1].toFixed(1);var col=LM_COL[L.t];
-    return '<circle cx="'+x+'" cy="'+y+'" r="8" fill="'+col+'" opacity=".9" stroke="#f7f5f0" stroke-width="1"/>'+
-      '<text x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="#f7f5f0" font-family="serif" style="pointer-events:none">'+L.t+'</text>'+
-      '<text x="'+(p[0]+11).toFixed(1)+'" y="'+(p[1]+3.5).toFixed(1)+'" font-size="11" fill="'+col+'" font-family="serif" opacity=".82" style="pointer-events:none">'+L.n+'</text>';
+    return '<circle class="zm" data-br="8" cx="'+x+'" cy="'+y+'" r="8" fill="'+col+'" opacity=".9" stroke="#f7f5f0" stroke-width="1" vector-effect="non-scaling-stroke"/>'+
+      '<text class="zt" data-bfs="9.5" x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="#f7f5f0" font-family="serif" style="pointer-events:none">'+L.t+'</text>'+
+      '<text class="zt" data-bfs="11" x="'+(p[0]+11).toFixed(1)+'" y="'+(p[1]+3.5).toFixed(1)+'" font-size="11" fill="'+col+'" font-family="serif" opacity=".82" style="pointer-events:none">'+L.n+'</text>';
   }).join('');}
-function renderMap(){renderMapControls();rebuildMapTime();}
+function renderMap(){renderMapControls();renderMapPoets();rebuildMapTime();}
+function renderMapPoets(){
+  const el=document.getElementById('map-poets'); if(!el)return;
+  let h='<span class="mp-lab">诗人：</span>';
+  h+='<button class="mpchip'+(mapPoet===null?' on':'')+'" onclick="setMapPoet(null)">全部</button>';
+  poetKeysSorted().forEach(k=>{const po=POETS[k];
+    h+='<button class="mpchip'+(mapPoet===k?' on':'')+'" onclick="setMapPoet(\''+k+'\')" title="'+po.dyn+'代 · '+po.years+'">'+
+       '<span class="mpav">'+po.av+'</span>'+po.name+(ROUTES[k]?'<span class="mpfoot">足迹</span>':'')+'</button>';});
+  el.innerHTML=h;
+  const on=el.querySelector('.mpchip.on'); if(on)el.scrollLeft=on.offsetLeft-el.clientWidth/2+on.clientWidth/2;
+}
 function rebuildMapTime(){refreshMapTime();renderMapList();buildMapSVG();renderTimeScrubber();}
 
 /* ══════ D：时间轴驱动·时空联动 ══════ */
@@ -1970,7 +2004,7 @@ function tlPause(){tlPlaying=false;clearInterval(tlRAF);const pb=document.getEle
 function tlSetSpeed(s){tlSpeed=s;document.querySelectorAll('.ts-spd button').forEach(b=>b.classList.toggle('on',b.textContent===s+'×'));}
 
 /* ══════ E：诗作列表联动 ══════ */
-function curMapPoems(){const fmin=100-mapFame;return mapVisiblePoems().filter(p=>poemFame(p)>=fmin);}
+function curMapPoems(){const fmin=100-mapFame;return mapVisiblePoems().filter(p=>poemFame(p)>=fmin&&(!mapPoet||p.poet===mapPoet));}
 function setMapTab(t){mapTab=t;document.querySelectorAll('#ml-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));renderMapList();}
 function setMapFame(v){mapFame=v;renderMapList();}
 function renderMapList(){
@@ -1979,8 +2013,13 @@ function renderMapList(){
   if(mapTab!=='event')curMapPoems().forEach(p=>items.push({k:'p',yr:poemYear(p),p:p}));
   if(mapTab!=='poem')EVENTS.forEach(e=>items.push({k:'e',yr:parseInt(e.year),e:e}));
   items.sort((a,b)=>a.yr-b.yr);
-  if(!items.length){body.innerHTML='<div class="ml-empty">暂无符合条件的内容</div>';applyListYear(tlYear);return;}
-  body.innerHTML=items.map(it=>{
+  let head='';
+  if(mapPoet&&POETS[mapPoet]){const po=POETS[mapPoet];const n=mapVisiblePoems().filter(p=>p.poet===mapPoet).length;
+    head='<div class="ml-poet"><span class="ml-poet-seal">'+po.av+'</span>'+
+      '<div class="ml-poet-info"><b>'+po.name+'</b><span>'+po.dyn+'代 · '+po.years+' · 入选 '+n+' 首</span></div>'+
+      '<button class="ml-poet-x" onclick="setMapPoet(null)">×</button></div>';}
+  if(!items.length){body.innerHTML=head+'<div class="ml-empty">该诗人暂无可定位的诗作地点</div>';applyListYear(tlYear);return;}
+  body.innerHTML=head+items.map(it=>{
     if(it.k==='p'){const p=it.p;
       return '<div class="ml-item" data-yr="'+it.yr+'" data-id="'+p.id+'" onclick="locatePoem(\''+p.id+'\')">'+
         '<div class="ml-yr">'+it.yr+'</div>'+
@@ -2022,10 +2061,6 @@ function renderMapControls(){
   const dyns=['all',...new Set(visiblePoems().map(p=>p.dyn))];
   let h='<span style="font-size:12px;color:var(--ink3)">朝代：</span>';
   dyns.forEach(d=>h+='<button class="dchip'+(mapDyn===d?' on':'')+'" onclick="setMapDyn(\''+d+'\')">'+(d==='all'?'全部':d+'代')+'</button>');
-  h+='<span style="font-size:12px;color:var(--ink3);margin-left:10px">足迹：</span>';
-  [['libai','李白'],['dufu','杜甫'],['wangwei','王维']].forEach(function(a){
-    h+='<button class="dchip'+(mapPoet===a[0]?' on':'')+'" onclick="setMapPoet(\''+a[0]+'\')">'+a[1]+'</button>';});
-  h+='<button class="dchip'+(mapPoet===null?' on':'')+'" onclick="setMapPoet(null)">关闭</button>';
   h+='<span style="font-size:12px;color:var(--ink3);margin-left:10px">底图：</span>';
   h+='<button class="dchip'+(mapTerrain?' on':'')+'" onclick="setMapTerrain(true)">地形</button>';
   h+='<button class="dchip'+(!mapTerrain?' on':'')+'" onclick="setMapTerrain(false)">素雅</button>';
@@ -2036,12 +2071,12 @@ function renderMapControls(){
   document.getElementById('map-controls').innerHTML=h;
 }
 function setMapDyn(d){mapDyn=d;renderMapControls();rebuildMapTime();}
-function setMapPoet(k){mapPoet=k;renderMapControls();rebuildMapTime();}
+function setMapPoet(k){mapPoet=k;renderMapPoets();rebuildMapTime();}
 function setMapTerrain(v){mapTerrain=v;renderMapControls();rebuildMapTime();}
 function setMapName(v){mapName=v;renderMapControls();rebuildMapTime();}
 function setMapLandmark(v){mapLandmark=v;renderMapControls();rebuildMapTime();}
 function buildMapSVG(){
-  let ps=visiblePoems(); if(mapDyn!=='all')ps=ps.filter(p=>p.dyn===mapDyn);
+  let ps=visiblePoems(); if(mapDyn!=='all')ps=ps.filter(p=>p.dyn===mapDyn); if(mapPoet)ps=ps.filter(p=>p.poet===mapPoet);
   const places={};
   ps.forEach(p=>{const k=p.placeModern; if(!places[k])places[k]={modern:p.placeModern,ancient:p.place.split('（')[0],xy:GEOXY[k],poems:[]}; places[k].poems.push(p);});
   const arr=Object.values(places).filter(pl=>pl.xy);
@@ -2049,14 +2084,14 @@ function buildMapSVG(){
   function nb(pl){return arr.filter(o=>o!==pl && Math.hypot(o.xy[0]-pl.xy[0],o.xy[1]-pl.xy[1])<78).length;}
   let dots='',labels='';
   arr.forEach(pl=>{const x=pl.xy[0],y=pl.xy[1];const yr=pl.year;
-    dots+='<circle class="tl-mark" data-yr="'+yr+'" cx="'+x+'" cy="'+y+'" r="10" fill="none" stroke="#2d3a4a" stroke-width="1" opacity=".14"/>'+
-          '<circle class="map-marker tl-mark" data-yr="'+yr+'" cx="'+x+'" cy="'+y+'" r="6" fill="#2d3a4a" style="cursor:pointer" data-place="'+pl.modern+'"/>';});
+    dots+='<circle class="tl-mark zm" data-br="9" data-yr="'+yr+'" cx="'+x+'" cy="'+y+'" r="9" fill="none" stroke="#2d3a4a" stroke-width="1" vector-effect="non-scaling-stroke" opacity=".14"/>'+
+          '<circle class="map-marker tl-mark zm" data-br="5" data-yr="'+yr+'" cx="'+x+'" cy="'+y+'" r="5" fill="#2d3a4a" stroke="#f7f5f0" stroke-width="1" vector-effect="non-scaling-stroke" style="cursor:pointer" data-place="'+pl.modern+'"/>';});
   function emit(pl,lx,ly,leader){
     var big=(mapName==='modern')?pl.modern.replace(/^今/,''):placeName(pl);
     var small=(mapName==='modern')?placeName(pl):pl.modern;var yr=pl.year;
-    if(leader)labels+='<line class="tl-mark" data-yr="'+yr+'" x1="'+pl.xy[0].toFixed(1)+'" y1="'+pl.xy[1].toFixed(1)+'" x2="'+(lx-3).toFixed(1)+'" y2="'+(ly-4).toFixed(1)+'" stroke="#8a7040" stroke-width=".8" opacity=".5"/>';
-    labels+='<text class="tl-mark" data-yr="'+yr+'" x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="15" fill="#2d3a4a" font-weight="700" font-family="serif" style="pointer-events:none">'+big+'</text>'+
-            '<text class="tl-mark" data-yr="'+yr+'" x="'+lx.toFixed(1)+'" y="'+(ly+14).toFixed(1)+'" font-size="11" fill="#7a6030" style="pointer-events:none">'+small+'</text>';}
+    if(leader)labels+='<line class="tl-mark" data-yr="'+yr+'" x1="'+pl.xy[0].toFixed(1)+'" y1="'+pl.xy[1].toFixed(1)+'" x2="'+(lx-3).toFixed(1)+'" y2="'+(ly-4).toFixed(1)+'" stroke="#8a7040" stroke-width=".8" vector-effect="non-scaling-stroke" opacity=".5"/>';
+    labels+='<text class="tl-mark zt" data-bfs="15" data-yr="'+yr+'" x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="15" fill="#2d3a4a" font-weight="700" font-family="serif" style="pointer-events:none">'+big+
+            '<tspan x="'+lx.toFixed(1)+'" dy="1.15em" font-size="0.72em" font-weight="400" fill="#7a6030">'+small+'</tspan></text>';}
   const crowded=arr.filter(pl=>nb(pl)>=2 && pl.xy[0]>600).sort((a,b)=>a.xy[1]-b.xy[1]);
   const inline=arr.filter(pl=>crowded.indexOf(pl)<0).sort((a,b)=>a.xy[1]-b.xy[1]);
   const placed=[];
@@ -2070,16 +2105,16 @@ function buildMapSVG(){
   crowded.forEach(pl=>{let ly=Math.max(pl.xy[1], prevY+32); prevY=ly; emit(pl,colX,ly,true);});
   let route='';
   if(mapPoet&&ROUTES[mapPoet]){ const r=ROUTES[mapPoet];
-    route='<polyline points="'+r.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="#5a4a8a" stroke-width="2.6" stroke-dasharray="8,6" opacity=".82" stroke-linejoin="round"/>';
+    route='<polyline points="'+r.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="#5a4a8a" stroke-width="2.4" stroke-dasharray="8,6" vector-effect="non-scaling-stroke" opacity=".82" stroke-linejoin="round"/>';
     r.forEach(function(p,i){var x=p[0].toFixed(1),y=p[1].toFixed(1);
-      route+='<circle cx="'+x+'" cy="'+y+'" r="9.5" fill="#5a4a8a" stroke="#f7f5f0" stroke-width="1.6"/>'+
-             '<text x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#f7f5f0" style="pointer-events:none">'+(i+1)+'</text>';});
-    const s=r[0]; route+='<text x="'+(s[0]-12).toFixed(1)+'" y="'+(s[1]+26).toFixed(1)+'" font-size="13" fill="#5a4a8a" font-family="serif" font-weight="700">'+POETS[mapPoet].name+'·足迹（①→②顺序）</text>';
+      route+='<circle class="zm" data-br="8.5" cx="'+x+'" cy="'+y+'" r="8.5" fill="#5a4a8a" stroke="#f7f5f0" stroke-width="1.4" vector-effect="non-scaling-stroke"/>'+
+             '<text class="zt" data-bfs="11" x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#f7f5f0" style="pointer-events:none">'+(i+1)+'</text>';});
+    const s=r[0]; route+='<text class="zt" data-bfs="13" x="'+(s[0]-12).toFixed(1)+'" y="'+(s[1]+26).toFixed(1)+'" font-size="13" fill="#5a4a8a" font-family="serif" font-weight="700">'+POETS[mapPoet].name+'·足迹（①→②顺序）</text>';
   }
-  let regions=''; REGIONS.forEach(function(rg){const xy=proj(rg[1],rg[2]); regions+='<text x="'+xy[0].toFixed(1)+'" y="'+xy[1].toFixed(1)+'" text-anchor="middle" font-size="17" fill="#9a8050" opacity=".45" font-style="italic" font-family="serif" style="pointer-events:none">'+rg[0]+'</text>';});
+  let regions=''; REGIONS.forEach(function(rg){const xy=proj(rg[1],rg[2]); regions+='<text class="zt" data-bfs="17" x="'+xy[0].toFixed(1)+'" y="'+xy[1].toFixed(1)+'" text-anchor="middle" font-size="17" fill="#9a8050" opacity=".45" font-style="italic" font-family="serif" style="pointer-events:none">'+rg[0]+'</text>';});
   const rl1=proj(112.5,33.5), rl2=proj(118.5,32.6);
-  const rlabels='<text x="'+rl1[0].toFixed(1)+'" y="'+rl1[1].toFixed(1)+'" font-size="13" fill="#5a8aa0" opacity=".7" font-family="serif" font-style="italic">黄河</text>'+
-                '<text x="'+rl2[0].toFixed(1)+'" y="'+rl2[1].toFixed(1)+'" font-size="13" fill="#5a8aa0" opacity=".7" font-family="serif" font-style="italic">长江</text>';
+  const rlabels='<text class="zt" data-bfs="13" x="'+rl1[0].toFixed(1)+'" y="'+rl1[1].toFixed(1)+'" font-size="13" fill="#5a8aa0" opacity=".7" font-family="serif" font-style="italic">黄河</text>'+
+                '<text class="zt" data-bfs="13" x="'+rl2[0].toFixed(1)+'" y="'+rl2[1].toFixed(1)+'" font-size="13" fill="#5a8aa0" opacity=".7" font-family="serif" font-style="italic">长江</text>';
   const terrainLayer=mapTerrain
     ?('<path d="'+PROVPATH+'" fill="#ddd0a6"/>'+reliefImg('landclip')+'<path d="'+PROVPATH+'" fill="none" stroke="#9a8050" stroke-width=".7" stroke-linejoin="round"/>')
     :('<path d="'+PROVPATH+'" fill="#e7ddb6" stroke="#a98f5e" stroke-width=".7" stroke-linejoin="round"/>');
@@ -2100,11 +2135,17 @@ function buildMapSVG(){
   tlNodes=[].slice.call(document.querySelectorAll('#mapsvg .tl-mark')).map(el=>({el:el,yr:+el.dataset.yr}));
   applyMapYear(tlYear);
 }
+/* B 清晰度：缩放时反向缩放标记半径/字号，使其保持恒定屏幕尺寸、不糊不重叠 */
+function applyMarkScale(){const k=mapK||1;
+  const sv=document.getElementById('mapsvg'); if(!sv)return;
+  sv.querySelectorAll('.zm').forEach(c=>c.setAttribute('r',(+c.dataset.br/k).toFixed(2)));
+  sv.querySelectorAll('.zt').forEach(t=>t.style.fontSize=(+t.dataset.bfs/k).toFixed(2)+'px');
+}
 /* ── 地图缩放/平移 ── */
 let mapK=1,mapTX=0,mapTY=0;
 function clampZoom(){mapK=Math.max(1,Math.min(6,mapK));
   mapTX=Math.max(VW*(1-mapK),Math.min(0,mapTX)); mapTY=Math.max(VH*(1-mapK),Math.min(0,mapTY));}
-function applyZoom(){const g=document.getElementById('mapZoomG');if(g)g.setAttribute('transform','translate('+mapTX.toFixed(2)+' '+mapTY.toFixed(2)+') scale('+mapK.toFixed(4)+')');}
+function applyZoom(){const g=document.getElementById('mapZoomG');if(g)g.setAttribute('transform','translate('+mapTX.toFixed(2)+' '+mapTY.toFixed(2)+') scale('+mapK.toFixed(4)+')');applyMarkScale();}
 function zoomAt(vbx,vby,factor){const nk=Math.max(1,Math.min(6,mapK*factor));factor=nk/mapK;
   mapTX=vbx-(vbx-mapTX)*factor; mapTY=vby-(vby-mapTY)*factor; mapK=nk; clampZoom(); applyZoom();}
 function svgPt(e){const sv=document.getElementById('mapsvg');const r=sv.getBoundingClientRect();
