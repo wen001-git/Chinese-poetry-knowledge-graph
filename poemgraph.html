@@ -270,8 +270,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .map-legend span{display:inline-flex;align-items:center;gap:6px}
 .map-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
 #mapsvg{cursor:grab;touch-action:none}
-.map-marker{cursor:pointer;transition:transform .15s ease,fill .15s ease;transform-box:fill-box;transform-origin:center}
-.map-marker:hover{fill:#a0603a;transform:scale(1.8)}
+.map-marker{cursor:pointer}
+.map-marker .mk-head{transition:transform .15s ease,filter .15s ease;transform-box:fill-box;transform-origin:center}
+.map-marker:hover .mk-head{filter:brightness(1.3) drop-shadow(0 1px 2px rgba(28,28,30,.5));transform:scale(1.5)}
+#mapsvg-holder{transition:transform .55s cubic-bezier(.4,0,.2,1)}
+#mapsvg-holder.tilt{transform:perspective(1700px) rotateX(46deg) scale(1.05);transform-origin:50% 58%}
+.map-hover-label{position:absolute;pointer-events:none;display:none;z-index:8;background:rgba(247,245,240,.95);border:1px solid var(--silk-line);border-radius:8px;padding:2px 9px;font-size:12.5px;font-weight:700;color:#2d3a4a;font-family:serif;box-shadow:0 3px 10px rgba(28,28,30,.16);white-space:nowrap;transform:translate(-50%,-150%)}
 #mapsvg.grabbing{cursor:grabbing}
 .map-zoom-ctrl{position:absolute;right:14px;bottom:14px;display:flex;flex-direction:column;gap:6px;z-index:7}
 .map-zoom-ctrl button{width:34px;height:34px;border-radius:9px;background:rgba(247,245,240,.95);border:1px solid var(--silk-line);
@@ -2669,7 +2673,13 @@ function miniMapSVG(p){
     '<text x="'+(x+15)+'" y="'+(y-2)+'" font-size="22" fill="#2d3a4a" font-weight="700" font-family="serif">'+anc+'</text>'+
     '<text x="'+(x+15)+'" y="'+(y+20)+'" font-size="14" fill="#7a6030">'+p.placeModern+'</text></svg>';
 }
-let mapPoet=null,mapDyn='all',mapTerrain=true,mapName='ancient',mapLandmark=true,mapTab='all',mapFame=100;
+let mapPoet=null,mapDyn='all',mapTerrain=true,mapName='ancient',mapLandmark=true,mapTab='all',mapFame=100,mapTilt=false;
+function ensureHoverLabel(){let el=document.getElementById('map-hover-label');
+  if(!el){el=document.createElement('div');el.id='map-hover-label';el.className='map-hover-label';document.getElementById('mapwrap').appendChild(el);}return el;}
+function toggleMapTilt(){mapTilt=!mapTilt;const ho=document.getElementById('mapsvg-holder');
+  if(mapTilt){resetZoom();ho.classList.add('tilt');}else{ho.classList.remove('tilt');}
+  renderMapControls();updateZoomHint();const hl=document.getElementById('map-hover-label');if(hl)hl.style.display='none';}
+function updateZoomHint(){const hint=document.getElementById('map-zoom-hint');if(hint)hint.textContent=mapTilt?'🏔 立体沙盘鸟瞰 · 点地标查看（缩放已暂停）':'⌘/Ctrl + 滚轮缩放 · 拖动平移';}
 /* 传播度（人工标注，越大越脍炙人口）——驱动 E3 代表作⇄全部 滑块 */
 const FAME={yonge:102,jingye:105,chunxiao:104,zeniwang:98,denggue:103,minnong:105,wanglu:100,
   huixiang:96,jueju:95,shanxing:99,jiuyue:97,yeshu:88,yuanri:94,qingming:103,tixilin:98,
@@ -2874,6 +2884,7 @@ function renderMapControls(){
   h+='<button class="dchip'+(mapName==='ancient'?' on':'')+'" onclick="setMapName(\'ancient\')">古地名</button>';
   h+='<button class="dchip'+(mapName==='modern'?' on':'')+'" onclick="setMapName(\'modern\')">现代名</button>';
   h+='<button class="dchip'+(mapLandmark?' on':'')+'" style="margin-left:10px" onclick="setMapLandmark(!mapLandmark)">⛰ 名胜</button>';
+  h+='<button class="dchip'+(mapTilt?' on':'')+'" style="margin-left:10px" onclick="toggleMapTilt()">🏔 立体沙盘</button>';
   document.getElementById('map-controls').innerHTML=h;
 }
 function setMapDyn(d){mapDyn=d; if(mapPoet&&mapPoetKeys().indexOf(mapPoet)<0)mapPoet=null; renderMapControls();renderMapPoets();rebuildMapTime();}
@@ -2890,25 +2901,30 @@ function buildMapSVG(){
   function nb(pl){return arr.filter(o=>o!==pl && Math.hypot(o.xy[0]-pl.xy[0],o.xy[1]-pl.xy[1])<78).length;}
   let dots='',labels='';
   arr.forEach(pl=>{const x=pl.xy[0],y=pl.xy[1];const yr=pl.year;
-    dots+='<circle class="tl-mark zm" data-br="9" data-yr="'+yr+'" cx="'+x+'" cy="'+y+'" r="9" fill="none" stroke="#2d3a4a" stroke-width="1" vector-effect="non-scaling-stroke" opacity=".14"/>'+
-          '<circle class="map-marker tl-mark zm" data-br="5" data-yr="'+yr+'" cx="'+x+'" cy="'+y+'" r="5" fill="#2d3a4a" stroke="#f7f5f0" stroke-width="1" vector-effect="non-scaling-stroke" style="cursor:pointer" data-place="'+pl.modern+'"/>';});
-  function emit(pl,lx,ly,leader){
+    dots+='<g class="map-marker tl-mark" data-yr="'+yr+'" data-place="'+pl.modern+'" style="cursor:pointer">'+
+      '<ellipse class="zme" data-brx="6.5" data-bry="2.6" cx="'+x+'" cy="'+(y+3.4).toFixed(1)+'" rx="6.5" ry="2.6" fill="#10161e" opacity=".22"/>'+
+      '<circle class="mk-head zm" data-br="5.6" cx="'+x+'" cy="'+y+'" r="5.6" fill="url(#beadG)" stroke="#f7f5f0" stroke-width="1" vector-effect="non-scaling-stroke" filter="url(#mksh)"/>'+
+      '</g>';});
+  function emit(pl,lx,ly,leader,endAnchor){
     var big=(mapName==='modern')?pl.modern.replace(/^今/,''):placeName(pl);
     var small=(mapName==='modern')?placeName(pl):pl.modern;var yr=pl.year;
-    if(leader)labels+='<line class="tl-mark" data-yr="'+yr+'" x1="'+pl.xy[0].toFixed(1)+'" y1="'+pl.xy[1].toFixed(1)+'" x2="'+(lx-3).toFixed(1)+'" y2="'+(ly-4).toFixed(1)+'" stroke="#8a7040" stroke-width=".8" vector-effect="non-scaling-stroke" opacity=".5"/>';
-    labels+='<text class="tl-mark zt" data-bfs="15" data-yr="'+yr+'" x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="15" fill="#2d3a4a" font-weight="700" font-family="serif" style="pointer-events:none">'+big+
-            '<tspan x="'+lx.toFixed(1)+'" dy="1.15em" font-size="0.72em" font-weight="400" fill="#7a6030">'+small+'</tspan></text>';}
-  const crowded=arr.filter(pl=>nb(pl)>=2 && pl.xy[0]>600).sort((a,b)=>a.xy[1]-b.xy[1]);
-  const inline=arr.filter(pl=>crowded.indexOf(pl)<0).sort((a,b)=>a.xy[1]-b.xy[1]);
+    var lxe=endAnchor?(lx+3):(lx-3);
+    if(leader)labels+='<line class="tl-mark" data-yr="'+yr+'" x1="'+pl.xy[0].toFixed(1)+'" y1="'+pl.xy[1].toFixed(1)+'" x2="'+lxe.toFixed(1)+'" y2="'+(ly-4).toFixed(1)+'" stroke="#8a7040" stroke-width=".8" vector-effect="non-scaling-stroke" opacity=".42"/>';
+    labels+='<text class="tl-mark zt" data-bfs="15" data-yr="'+yr+'" x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="'+(endAnchor?'end':'start')+'" font-size="15" fill="#2d3a4a" font-weight="700" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3" stroke-linejoin="round" style="pointer-events:none">'+big+
+            '<tspan x="'+lx.toFixed(1)+'" dy="1.15em" font-size="0.72em" font-weight="400" fill="#7a6030" paint-order="stroke" stroke="#f7f5f0" stroke-width="2.4">'+small+'</tspan></text>';}
+  // 标签精选：选诗人→其全部地点；否则按重要度(诗数+传播度)取前若干，余者悬停显示，杜绝右侧引线长列
+  arr.forEach(pl=>{pl.imp=pl.poems.length*1000+Math.max.apply(null,pl.poems.map(poemFame));});
+  let toLabel = mapPoet ? arr.slice()
+    : arr.filter(pl=>pl.poems.length>=2||Math.max.apply(null,pl.poems.map(poemFame))>=98)
+         .sort((a,b)=>b.imp-a.imp).slice(0,15);
   const placed=[];
-  inline.forEach(pl=>{let lx=pl.xy[0]+12,ly=pl.xy[1]-1,tries=0;
+  toLabel.sort((a,b)=>a.xy[1]-b.xy[1]).forEach(pl=>{
+    const right=pl.xy[0]<VW-150; let lx=pl.xy[0]+(right?11:-11),ly=pl.xy[1]-1,tries=0;
     const w=Math.max(placeName(pl).length,pl.modern.length+1)*15+14;
-    while(placed.some(b=>lx<b.x+b.w&&lx+w>b.x&&(ly-16)<b.y+b.h&&(ly+16)>b.y)&&tries<60){ly+=7;tries++;}
-    placed.push({x:lx,y:ly-16,w:w,h:30});
-    emit(pl,lx,ly,Math.abs(ly-(pl.xy[1]-1))>5);});
-  // 拥挤簇 → 右侧海域成列
-  const colX=VW-152; let prevY=-1e9;
-  crowded.forEach(pl=>{let ly=Math.max(pl.xy[1], prevY+32); prevY=ly; emit(pl,colX,ly,true);});
+    let x0=right?lx:lx-w;
+    while(placed.some(b=>x0<b.x+b.w&&x0+w>b.x&&(ly-16)<b.y+b.h&&(ly+16)>b.y)&&tries<50){ly+=8;tries++;}
+    placed.push({x:x0,y:ly-16,w:w,h:30});
+    emit(pl,lx,ly,Math.abs(ly-(pl.xy[1]-1))>5,!right);});
   let route='';
   if(mapPoet&&ROUTES[mapPoet]){ const r=ROUTES[mapPoet];
     route='<polyline points="'+r.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="#5a4a8a" stroke-width="2.4" stroke-dasharray="8,6" vector-effect="non-scaling-stroke" opacity=".82" stroke-linejoin="round"/>';
@@ -2926,8 +2942,15 @@ function buildMapSVG(){
     :('<path d="'+PROVPATH+'" fill="#e7ddb6" stroke="#a98f5e" stroke-width=".7" stroke-linejoin="round"/>');
   const rangeL=mapTerrain?rangeLabelsSVG():'';
   const svg='<svg id="mapsvg" viewBox="0 0 '+VW+' '+VH+'" xmlns="http://www.w3.org/2000/svg">'+
-    '<defs><clipPath id="landclip"><path d="'+PROVPATH+'"/></clipPath></defs>'+
+    '<defs><clipPath id="landclip"><path d="'+PROVPATH+'"/></clipPath>'+
+      '<radialGradient id="beadG" cx="38%" cy="30%" r="78%"><stop offset="0%" stop-color="#6b7b8c"/><stop offset="50%" stop-color="#2d3a4a"/><stop offset="100%" stop-color="#141d27"/></radialGradient>'+
+      '<radialGradient id="skyG" cx="50%" cy="32%" r="85%"><stop offset="0%" stop-color="#f4f0e3"/><stop offset="100%" stop-color="#e6ddc2"/></radialGradient>'+
+      '<filter id="landsh" x="-15%" y="-15%" width="135%" height="140%"><feGaussianBlur stdDeviation="7"/></filter>'+
+      '<filter id="mksh" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0.5" dy="1.5" stdDeviation="1" flood-color="#10161e" flood-opacity="0.45"/></filter>'+
+    '</defs>'+
+    '<rect x="0" y="0" width="'+VW+'" height="'+VH+'" fill="url(#skyG)"/>'+
     '<g id="mapZoomG">'+
+    '<path d="'+PROVPATH+'" fill="#2a2114" opacity=".22" filter="url(#landsh)" transform="translate(7,12)"/>'+
     terrainLayer+
     riversSVG(2.0,1.6,.55)+regions+rangeL+rlabels+landmarksSVG()+dots+route+labels+
     '</g>'+
@@ -2937,6 +2960,14 @@ function buildMapSVG(){
   document.getElementById('mapsvg-holder').innerHTML=svg;
   document.getElementById('map-pop').style.display='none';
   document.querySelectorAll('.map-marker').forEach(mk=>mk.addEventListener('click',function(e){showMapPop(places[mk.dataset.place],e);}));
+  const _hl=ensureHoverLabel(), _mw=document.getElementById('mapwrap');
+  document.querySelectorAll('#mapsvg .map-marker').forEach(mk=>{
+    mk.addEventListener('mouseenter',function(){const pl=places[mk.dataset.place];if(!pl)return;
+      const r=mk.getBoundingClientRect(),wr=_mw.getBoundingClientRect();
+      _hl.textContent=(mapName==='modern')?pl.modern.replace(/^今/,''):pl.ancient;
+      _hl.style.left=(r.left-wr.left+r.width/2)+'px';_hl.style.top=(r.top-wr.top)+'px';_hl.style.display='block';});
+    mk.addEventListener('mouseleave',function(){_hl.style.display='none';});
+  });
   applyZoom(); bindMapZoom(); ensureZoomCtrl();
   tlNodes=[].slice.call(document.querySelectorAll('#mapsvg .tl-mark')).map(el=>({el:el,yr:+el.dataset.yr}));
   applyMapYear(tlYear);
@@ -2945,6 +2976,7 @@ function buildMapSVG(){
 function applyMarkScale(){const k=mapK||1;
   const sv=document.getElementById('mapsvg'); if(!sv)return;
   sv.querySelectorAll('.zm').forEach(c=>c.setAttribute('r',(+c.dataset.br/k).toFixed(2)));
+  sv.querySelectorAll('.zme').forEach(e=>{e.setAttribute('rx',(+e.dataset.brx/k).toFixed(2));e.setAttribute('ry',(+e.dataset.bry/k).toFixed(2));});
   sv.querySelectorAll('.zt').forEach(t=>t.style.fontSize=(+t.dataset.bfs/k).toFixed(2)+'px');
 }
 /* ── 地图缩放/平移 ── */
@@ -2962,11 +2994,12 @@ function zoomCenter(factor){const sv=document.getElementById('mapsvg');const r=s
 function resetZoom(){mapK=1;mapTX=0;mapTY=0;applyZoom();}
 function bindMapZoom(){const sv=document.getElementById('mapsvg');if(!sv||sv._zbound)return;sv._zbound=true;
   sv.addEventListener('wheel',function(e){
+    if(mapTilt)return;
     if(!(e.ctrlKey||e.metaKey))return; /* 无修饰键时让页面正常滚动；⌘/Ctrl+滚轮（或触控板捏合）才缩放 */
     e.preventDefault();const p=svgPt(e);zoomAt(p.x,p.y,e.deltaY<0?1.18:1/1.18);},{passive:false});
-  sv.addEventListener('dblclick',function(e){const p=svgPt(e);zoomAt(p.x,p.y,1.6);});
+  sv.addEventListener('dblclick',function(e){if(mapTilt)return;const p=svgPt(e);zoomAt(p.x,p.y,1.6);});
   let drag=false,lx=0,ly=0,moved=0,ratio=1;
-  sv.addEventListener('pointerdown',function(e){if(e.target.classList&&e.target.classList.contains('map-marker'))return;
+  sv.addEventListener('pointerdown',function(e){if(mapTilt)return;if(e.target.closest&&e.target.closest('.map-marker'))return;
     drag=true;moved=0;lx=e.clientX;ly=e.clientY;ratio=VW/sv.getBoundingClientRect().width;sv.classList.add('grabbing');sv.setPointerCapture&&sv.setPointerCapture(e.pointerId);});
   sv.addEventListener('pointermove',function(e){if(!drag)return;const dx=(e.clientX-lx),dy=(e.clientY-ly);moved+=Math.abs(dx)+Math.abs(dy);
     mapTX+=dx*ratio;mapTY+=dy*ratio;lx=e.clientX;ly=e.clientY;clampZoom();applyZoom();});
