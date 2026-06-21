@@ -599,6 +599,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
     <div class="page-head"><h2 class="serif">知识图谱</h2><span class="hint">拖动节点探索诗·人·地·事的关系</span></div>
     <div class="controls" id="gcontrols"></div>
     <div class="controls">
+      <span style="font-size:12px;color:var(--ink3);align-self:center">布局：</span>
+      <button class="dchip lay on" id="lay-force" onclick="setGLayout('force')">引力图</button>
+      <button class="dchip lay" id="lay-radial" onclick="setGLayout('radial')">放射星图</button>
+      <button class="dchip lay" id="lay-tree" onclick="setGLayout('tree')">朝代树形</button>
       <button class="dchip" id="btn-3d" onclick="toggle3D()">🌐 切换立体模式</button>
       <button class="dchip" onclick="renderGraph()">🔄 重新布局</button>
     </div>
@@ -2210,7 +2214,7 @@ function submitQuiz(){
 /* ══════════════════════════════════════════
    知识图谱（2D 力导向 + 伪3D）
    ══════════════════════════════════════════ */
-let gNodes=[],gEdges=[],gAnim=null,gCanvas,gCtx,gDrag=null,gAngle=0;
+let gNodes=[],gEdges=[],gAnim=null,gCanvas,gCtx,gDrag=null,gAngle=0,gLayout='force',gAlpha=1;
 function renderGControls(){
   const order=['poem','poet','dynasty','place','mood','imagery','style','event'];
   document.getElementById('gcontrols').innerHTML=order.map(k=>{
@@ -2226,15 +2230,16 @@ function buildGraph(){
   const nodes={},edges=[];
   function add(id,type,label,ref){if(!nodes[id])nodes[id]={id,type,label,ref,
     x:0,y:0,vx:0,vy:0,z:0,r:type==='poem'?20:14};return nodes[id];}
+  const tree=gLayout==='tree';
   ps.forEach(p=>{
     const pn=add('p_'+p.id,'poem',p.title,p);
-    if(ST.dims.poet){add('poet_'+p.poet,'poet',POETS[p.poet].name);edges.push(['p_'+p.id,'poet_'+p.poet]);}
-    if(ST.dims.dynasty){add('dyn_'+p.dyn,'dynasty',p.dyn+'代');edges.push(['p_'+p.id,'dyn_'+p.dyn]);}
-    if(ST.dims.place){add('pl_'+p.placeModern,'place',p.placeModern);edges.push(['p_'+p.id,'pl_'+p.placeModern]);}
-    if(ST.dims.mood){add('mo_'+p.emo,'mood',p.emo);edges.push(['p_'+p.id,'mo_'+p.emo]);}
-    if(ST.dims.style){add('st_'+p.style,'style',p.style);edges.push(['p_'+p.id,'st_'+p.style]);}
-    if(ST.dims.imagery){(p.imagery||[]).forEach(im=>{add('im_'+im,'imagery',im);edges.push(['p_'+p.id,'im_'+im]);});}
-    if(ST.dims.event){(p.history||[]).filter(e=>e.hi).forEach(e=>{const k='ev_'+e.t;add(k,'event',e.t.length>8?e.t.slice(0,7)+'…':e.t);edges.push(['p_'+p.id,k]);});}
+    if(tree||ST.dims.poet){add('poet_'+p.poet,'poet',POETS[p.poet].name);edges.push(['p_'+p.id,'poet_'+p.poet]);}
+    if(tree||ST.dims.dynasty){add('dyn_'+p.dyn,'dynasty',p.dyn+'代');edges.push(['p_'+p.id,'dyn_'+p.dyn]);}
+    if(!tree&&ST.dims.place){add('pl_'+p.placeModern,'place',p.placeModern);edges.push(['p_'+p.id,'pl_'+p.placeModern]);}
+    if(!tree&&ST.dims.mood){add('mo_'+p.emo,'mood',p.emo);edges.push(['p_'+p.id,'mo_'+p.emo]);}
+    if(!tree&&ST.dims.style){add('st_'+p.style,'style',p.style);edges.push(['p_'+p.id,'st_'+p.style]);}
+    if(!tree&&ST.dims.imagery){(p.imagery||[]).forEach(im=>{add('im_'+im,'imagery',im);edges.push(['p_'+p.id,'im_'+im]);});}
+    if(!tree&&ST.dims.event){(p.history||[]).filter(e=>e.hi).forEach(e=>{const k='ev_'+e.t;add(k,'event',e.t.length>8?e.t.slice(0,7)+'…':e.t);edges.push(['p_'+p.id,k]);});}
   });
   const arr=Object.values(nodes);
   const W=gCanvas.clientWidth,Hh=gCanvas.clientHeight;
@@ -2244,12 +2249,41 @@ function buildGraph(){
     n.z=(Math.random()-0.5)*240;});
   gNodes=arr;gEdges=edges.filter(e=>nodes[e[0]]&&nodes[e[1]]);
 }
+function layoutStatic(){ if(gLayout==='radial')layoutRadial(); else if(gLayout==='tree')layoutTree(); }
+function layoutRadial(){
+  const W=gCanvas.clientWidth,Hh=gCanvas.clientHeight,cx=W/2,cy=Hh/2,maxR=Math.min(W,Hh)/2-26;
+  const ringOf={dynasty:0.2,poet:0.42,mood:0.62,style:0.62,place:0.62,imagery:0.8,poem:0.93,event:1.0};
+  const byType={}; gNodes.forEach(n=>{(byType[n.type]=byType[n.type]||[]).push(n);});
+  Object.keys(byType).forEach(t=>{const list=byType[t];
+    if(t==='poem')list.sort((a,b)=>(a.ref.dyn+a.ref.poet).localeCompare(b.ref.dyn+b.ref.poet));
+    const r=maxR*(ringOf[t]||0.85);
+    list.forEach((n,i)=>{const ang=i/list.length*Math.PI*2-Math.PI/2; n.x=cx+Math.cos(ang)*r; n.y=cy+Math.sin(ang)*r;});});
+}
+function layoutTree(){
+  const W=gCanvas.clientWidth,Hh=gCanvas.clientHeight,cx=W/2,cy=Hh/2,maxR=Math.min(W,Hh)/2-22;
+  const dyns={},poets={},poems=[];
+  gNodes.forEach(n=>{ if(n.type==='dynasty')dyns[n.id]=n; else if(n.type==='poet')poets[n.id]=n; else if(n.type==='poem')poems.push(n); });
+  const byDyn={}; poems.forEach(pn=>{const dk='dyn_'+pn.ref.dyn,pk='poet_'+pn.ref.poet; (byDyn[dk]=byDyn[dk]||{}); (byDyn[dk][pk]=byDyn[dk][pk]||[]).push(pn);});
+  const total=poems.length||1; let a0=-Math.PI/2;
+  Object.keys(byDyn).forEach(dk=>{
+    const pm=byDyn[dk]; const cnt=Object.values(pm).reduce((s,a)=>s+a.length,0); const span=cnt/total*Math.PI*2; const a1=a0+span;
+    if(dyns[dk]){const m=(a0+a1)/2; dyns[dk].x=cx+Math.cos(m)*maxR*0.22; dyns[dk].y=cy+Math.sin(m)*maxR*0.22;}
+    let pa=a0;
+    Object.keys(pm).forEach(pk=>{const arr=pm[pk]; const ps=arr.length/cnt*span, pa1=pa+ps, pmid=(pa+pa1)/2;
+      if(poets[pk]){poets[pk].x=cx+Math.cos(pmid)*maxR*0.56; poets[pk].y=cy+Math.sin(pmid)*maxR*0.56;}
+      arr.forEach((pn,i)=>{const aa=pa+(i+0.5)/arr.length*ps; pn.x=cx+Math.cos(aa)*maxR*0.95; pn.y=cy+Math.sin(aa)*maxR*0.95;});
+      pa=pa1;});
+    a0=a1;});
+  gNodes.forEach(n=>{ if(!['poem','poet','dynasty'].includes(n.type)){n.x=cx;n.y=cy;} });
+}
+function setGLayout(m){ gLayout=m; document.querySelectorAll('.dchip.lay').forEach(b=>b.classList.toggle('on',b.id==='lay-'+m)); if(ST.is3D)toggle3D(); renderGraph(); }
 function renderGraph(){
   if(ST.view!=='graph')return;
   renderGControls();
   gCanvas=document.getElementById('gcanvas');gCtx=gCanvas.getContext('2d');
   sizeCanvas(gCanvas);
   buildGraph();
+  gAlpha=1; if(gLayout!=='force')layoutStatic();
   document.getElementById('gpop').style.display='none';
   bindGraphEvents();
   startGraph();
@@ -2260,11 +2294,12 @@ function sizeCanvas(cv){const dpr=window.devicePixelRatio||1;
 function startGraph(){stopGraph();let t=0;
   const loop=()=>{
     if(ST.is3D){gAngle+=0.006;draw3D();}
-    else{tick();draw2D();t++;}
+    else{ if(gLayout==='force')tick(); draw2D(); }
     gAnim=requestAnimationFrame(loop);
   };gAnim=requestAnimationFrame(loop);}
 function stopGraph(){if(gAnim){cancelAnimationFrame(gAnim);gAnim=null;}}
 function tick(){
+  if(gAlpha<0.02)return;
   const W=gCanvas.clientWidth,Hh=gCanvas.clientHeight;
   for(let i=0;i<gNodes.length;i++){const a=gNodes[i];
     for(let j=i+1;j<gNodes.length;j++){const b=gNodes[j];
@@ -2277,8 +2312,9 @@ function tick(){
     const fx=dx/d*f,fy=dy/d*f;a.vx+=fx;a.vy+=fy;b.vx-=fx;b.vy-=fy;});
   gNodes.forEach(n=>{n.vx+=(W/2-n.x)*0.0016;n.vy+=(Hh/2-n.y)*0.0016;
     if(n===gDrag)return;
-    n.vx*=0.84;n.vy*=0.84;n.x+=n.vx;n.y+=n.vy;
+    n.vx*=0.84;n.vy*=0.84;n.x+=n.vx*gAlpha;n.y+=n.vy*gAlpha;
     n.x=Math.max(n.r,Math.min(W-n.r,n.x));n.y=Math.max(n.r,Math.min(Hh-n.r,n.y));});
+  gAlpha*=0.985;
 }
 function draw2D(){
   const ctx=gCtx,W=gCanvas.clientWidth,Hh=gCanvas.clientHeight;

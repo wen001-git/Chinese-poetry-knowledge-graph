@@ -58,6 +58,7 @@
 - 诗词地点按真实经纬度 `GEO[placeModern]`→`GEOXY` 定位；诗人足迹 `ROUTE_GEO`/`ROUTES`；山脉名 `RANGES_GEO`；名胜 `LANDMARKS`。
 - 地图主渲染：`buildMapSVG()`；缩放：`mapK/mapTX/mapTY` + `applyZoom/zoomAt/zoomCenter/resetZoom`；地图内容包在 `<g id="mapZoomG">` 内随缩放。
 - **滚轮缩放需按 ⌘/Ctrl**（`bindMapZoom` 的 wheel 处理：无修饰键直接 return 让页面正常滚动，避免小屏卡在地图无法下滚；触控板捏合带 ctrlKey 仍可缩放）——勿改回"无条件 preventDefault 缩放"。+/- 按钮与左下角提示 `#map-zoom-hint`。
+- 知识图谱有三种布局 gLayout(force/radial/tree)：force 有 gAlpha 冷却定格(不再永久晃)；radial=类型同心环；tree=朝代>诗人>诗作径向层级(buildGraph 在 tree 时仅建这三类)。setGLayout 切换。
 - 知识图谱「诗词」维度为核心 hub，**故意锁定常显**（`togDim` 对 `poem` 提前 return，chip 加 `.locked`+🔒+tooltip）——非 bug，勿放开。
 - 诗词数据结构：`POEMS[]`（含 lines/anno/trans/transT/emo/imagery/place/placeModern/placeXY?/story/storyT/history/related/quiz），`POETS{}`（name/dyn/years/av/intro/born[投影xy]/route?），`EVENTS[]`。
 - 氛围（F）：朗读模块 `recLang`(mandarin/cantonese，存 `pg_reclang`)/**通用选音** `_pickByLang`(filterRe,goodNames)：以语言代码(zh-CN/zh-HK)为锚、**离线 localService 优先**、避开 `REC_NOVELTY` 趣味音、再挑各平台标准名(Apple 语舒/婷婷·MS Huihui/Yaoyao·Android Google·zh-HK 善怡/Tracy)，跨 Mac/iPad/Android/Windows 自适应，网络音仅末位兜底/`pickMandarinVoice`/`pickCantoneseVoice`/`recVoicePick`/`setRecLang`(切语种+重读)/`reciteStart→reciteLine`(统一 rate 0.84·pitch 1.0，utterance.lang 按语种 zh-CN/zh-HK，逐句链 + `.ln.reciting` 高亮)/`reciteStop`(showView 非 detail 时调用)；语种切换 UI `#rec-lang`（`openDetail` 调 `recApplyLangAvail` 同步 active）；**跨设备保护** `recApplyLangAvail`：无 zh-HK 语音时置灰"粤语"按钮+提示+把已存粤语偏好回退普通话（`setRecLang`/`voiceschanged` 也调用）——应对 Windows 默认无粤语、安卓需下载粤语包的情况。**状态用 `var` 声明**避免 boot 期 TDZ。〔本机语种实况：zh-CN 标准音=语舒/婷婷；zh-HK 粤语仅善怡；zh-TW=美嘉；Eddy/Grandpa 等为趣味音勿用。〕古琴模块 `ambInit`(AudioContext+卷积混响)/`ksBuffer`(Karplus-Strong 缓存)/`ambPluck`/`ambTick`(随机五声音阶调度)/`ambStart/Stop/Toggle/SetVol/SetHifi`；`GUQIN_CLIP` 空串=回退程序合成；面板 `#amb-pop`。
@@ -74,6 +75,7 @@
 
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-06-21 | 知识图谱抗抖动+布局选择(用户反馈节点多一直晃)：①力导向加冷却 gAlpha(每帧*0.985，<0.02 冻结、位移*gAlpha)，稳定后定格不再抖，重新布局/切换时重置；②新增布局切换"引力图/放射星图/朝代树形"(setGLayout)：放射=按节点类型同心环(layoutRadial)、树形=朝代→诗人→诗作径向层级(layoutTree,仅这三类)，均为确定性静态布局零抖动。测试:force 500帧后冻结(位移0)、radial 527节点入环、tree 210节点三类、控制台0报错 |
 | 2026-06-21 | 诗境图改为内联(用户反馈)：水墨意象小图直接显示在原文每句诗旁(lineScene()内联进 #d-verse 各 .ln，22px、opacity.78)，移除独立"诗画"标签(D_TABS 去 scene、详情面板回到8个)。ICONS/SCENE_SYN 复用。测试:春晓等逐句配图、标签回到8个、控制台0报错 |
 | 2026-06-21 | 地图诗人选择行优化(用户反馈)：①**切朝代时诗人列表同步**——setMapDyn 调 renderMapPoets，新增 mapPoetKeys() 仅列当前朝代+年级有诗作的诗人(已按朝代+生年排序)，选中诗人若不属该朝代则重置；②**诗人搜索框**(#mp-search/filterMapPoets)，按姓名实时筛选(如输"杜"→杜甫/杜牧)。测试:全部68位、切宋代→16位宋人、搜索正常、控制台0报错 |
 | 2026-06-21 | 教学增强三连(用户选做1/2/3)：①**配乐诵读**——朗读时自动轻起古琴(ambAutoR,音量降到0.18)、读毕自动停；②**诗境图·一句一画**——新增"诗画"详情标签(D_TABS加scene)，建22个水墨意象图标(ICONS)+同义映射(SCENE_SYN)，按诗句关键词逐句配图(poemSceneSVG)；③**炼字赏析卡**——独立 LIANZI 表(22首名篇)，详情"原文"标签内显示"品一个字"卡片。顺带健壮化:renderMiniGraph/buildGraph/relatedPoemsFor 的 p.imagery/p.history 加 ||[] 守卫(批量诗无imagery字段)。测试:三功能正常、迷你图谱/练习/知识图谱(527节点)无报错、控制台0报错、716KB |
