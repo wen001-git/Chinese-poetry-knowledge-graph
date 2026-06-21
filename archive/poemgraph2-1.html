@@ -510,15 +510,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   <h1 class="serif">选择年级</h1>
   <div class="sub" style="margin-bottom:30px">挑选你所在的年级，开启诗词之旅</div>
   <div class="grade-grid">
-    <button class="grade-btn" onclick="pickGrade(1)">一年级<small>小学·启蒙</small></button>
-    <button class="grade-btn" onclick="pickGrade(2)">二年级<small>小学·识趣</small></button>
-    <button class="grade-btn" onclick="pickGrade(3)">三年级<small>小学·渐进</small></button>
-    <button class="grade-btn" onclick="pickGrade(4)">四年级<small>小学·明理</small></button>
-    <button class="grade-btn" onclick="pickGrade(5)">五年级<small>小学·感怀</small></button>
-    <button class="grade-btn" onclick="pickGrade(6)">六年级<small>小学·致远</small></button>
-    <button class="grade-btn" onclick="pickGrade(7)">七年级<small>初中·启程</small></button>
-    <button class="grade-btn" onclick="pickGrade(8)">八年级<small>初中·渐深</small></button>
-    <button class="grade-btn" onclick="pickGrade(9)">九年级<small>初中·全部</small></button>
+    <button class="grade-btn" onclick="pickGrade(1)">一年级<small>启蒙 · 4首</small></button>
+    <button class="grade-btn" onclick="pickGrade(2)">二年级<small>识趣 · 累计9首</small></button>
+    <button class="grade-btn" onclick="pickGrade(3)">三年级<small>渐进 · 累计14首</small></button>
+    <button class="grade-btn" onclick="pickGrade(4)">四年级<small>明理 · 累计17首</small></button>
+    <button class="grade-btn" onclick="pickGrade(5)">五年级<small>感怀 · 累计19首</small></button>
+    <button class="grade-btn" onclick="pickGrade(6)">六年级<small>致远 · 全部20首</small></button>
   </div>
   <button class="back-link" onclick="document.getElementById('role-overlay').style.display='flex';this.parentElement.style.display='none'">← 重新选择身份</button>
 </div>
@@ -699,47 +696,6 @@ const POETS={
   sushi:{name:'苏轼',dyn:'宋',years:'1037–1101',av:'轼',intro:'字子瞻，号东坡居士，宋代文学巨匠，诗词文书画俱绝，豪放旷达。',born:[255,320]},
   dufu:{name:'杜甫',dyn:'唐',years:'712–770',av:'甫',intro:'字子美，唐代现实主义大诗人，人称"诗圣"，其诗为"诗史"，沉郁顿挫。',born:[340,250],route:[[340,250],[255,320]]},
   gongzizhen:{name:'龚自珍',dyn:'清',years:'1792–1841',av:'龚',intro:'清代思想家、诗人，《己亥杂诗》共315首，呼唤变革、振奋人心。',born:[510,335]},
-wentingyun:{name:'温庭筠',dyn:'唐',years:'约812–约866',av:'温',intro:'晚唐诗人、花间词派鼻祖，辞采秾丽，《商山早行》写早行羁愁。',born:[340,250]},
-qiujin:{name:'秋瑾',dyn:'清',years:'1875–1907',av:'瑾',intro:'近代民主革命志士、女词人，号鉴湖女侠，词风豪迈悲壮、慷慨激昂。',born:[470,320]},
-wangji:{name:'王绩',dyn:'唐',years:'约589–644',av:'绩',intro:'初唐诗人，《野望》是现存最早的成熟五言律诗，质朴清新。',born:[330,235]},
-liuzhen:{name:'刘桢',dyn:'汉',years:'?–217',av:'桢',intro:'建安七子之一，《赠从弟》以松柏喻坚贞，刚劲挺拔。',born:[420,250]},
-changjian:{name:'常建',dyn:'唐',years:'生卒不详',av:'常',intro:'盛唐诗人，《题破山寺后禅院》写禅院清幽，意境空寂。',born:[470,300]},
-censhen:{name:'岑参',dyn:'唐',years:'约715–770',av:'岑',intro:'盛唐边塞诗派代表，诗风奇丽雄放，善写大漠风雪与从军豪情。',born:[340,250]},
-liyi:{name:'李益',dyn:'唐',years:'748–829',av:'益',intro:'中唐边塞诗人，七绝尤工，《夜上受降城闻笛》苍凉动人。',born:[340,250]},
-hanyu:{name:'韩愈',dyn:'唐',years:'768–824',av:'韩',intro:'唐宋八大家之首，倡导古文运动，诗文气盛言宜、雄奇奔放。',born:[340,250]},
-  xinqiji:{name:'辛弃疾',dyn:'宋',years:'1140–1207',av:'辛',intro:'南宋豪放派词宗，词雄健悲壮、满怀报国之志，与苏轼并称苏辛。',born:[460,300]},
-lihe:{name:'李贺',dyn:'唐',years:'790–816',av:'贺',intro:'中唐诗人，人称诗鬼，想象奇诡、辞采瑰丽，《马诗》托马言志。',born:[340,250]},
-yuqian:{name:'于谦',dyn:'明',years:'1398–1457',av:'谦',intro:'明代名臣、民族英雄，《石灰吟》以石灰自喻，清白刚正。',born:[470,320]},
-zhengxie:{name:'郑燮',dyn:'清',years:'1693–1766',av:'郑',intro:'即郑板桥，清代书画家、诗人，扬州八怪之一，《竹石》托竹言志、坚劲不屈。',born:[490,320]},
-hanhong:{name:'韩翃',dyn:'唐',years:'生卒不详',av:'翃',intro:'大历十才子之一，《寒食》写长安寒食风物，含蓄微讽。',born:[340,250]},
-gushi19:{name:'《古诗十九首》',dyn:'汉',years:'东汉',av:'古',intro:'东汉文人五言诗代表，情思深婉，《迢迢牵牛星》借星抒离情。',born:[420,260]},
-wangjian:{name:'王建',dyn:'唐',years:'约767–约830',av:'建',intro:'唐代诗人，《十五夜望月》写中秋望月怀人，清丽含蓄。',born:[340,250]},
-leizhen:{name:'雷震',dyn:'宋',years:'生卒不详',av:'雷',intro:'南宋诗人，《村晚》写乡村黄昏牧童横笛，闲适恬淡。',born:[470,310]},
-zhangji:{name:'张继',dyn:'唐',years:'生卒不详',av:'继',intro:'唐代诗人，《枫桥夜泊》写羁旅愁思，意境清远，流传千古。',born:[470,300]},
-nalanxingde:{name:'纳兰性德',dyn:'清',years:'1655–1685',av:'纳',intro:'清代词人，词风清丽哀婉，《长相思》写边塞行役的思乡之苦。',born:[420,250]},
-linsheng:{name:'林升',dyn:'宋',years:'生卒不详',av:'林',intro:'南宋诗人，《题临安邸》讽刺南宋朝廷偏安享乐，沉痛警策。',born:[470,320]},
-fanchengda:{name:'范成大',dyn:'宋',years:'1126–1193',av:'范',intro:'南宋诗人，《四时田园杂兴》组诗描绘乡村四季劳作，质朴清新。',born:[470,310]},
-lulun:{name:'卢纶',dyn:'唐',years:'约739–799',av:'纶',intro:'大历十才子之一，《塞下曲》写边塞将士，雄健豪迈。',born:[340,250]},
-wangmian:{name:'王冕',dyn:'元',years:'1287–1359',av:'冕',intro:'元代画家、诗人，善画墨梅，《墨梅》托物言志、清高自守。',born:[460,310]},
-luyue:{name:'卢钺',dyn:'宋',years:'生卒不详',av:'卢',intro:'南宋诗人，《雪梅》以梅雪争春寓哲理，理趣盎然。',born:[460,310]},
-wangchangling:{name:'王昌龄',dyn:'唐',years:'698–757',av:'昌',intro:'盛唐边塞诗人，有七绝圣手之称，《出塞》雄浑悲壮。',born:[340,250]},
-wanghan:{name:'王翰',dyn:'唐',years:'687–726',av:'翰',intro:'盛唐诗人，《凉州词》写边塞豪饮，旷达悲壮。',born:[340,250]},
-liqingzhao:{name:'李清照',dyn:'宋',years:'1084–约1155',av:'照',intro:'宋代婉约词宗，号易安居士，词清丽深婉，亦有《夏日绝句》之豪健。',born:[460,300]},
-zengji:{name:'曾几',dyn:'宋',years:'1085–1166',av:'曾',intro:'南宋诗人，诗风清新活泼，《三衢道中》写初夏山行之乐，明快可喜。',born:[460,310]},
-fanzhongyan:{name:'范仲淹',dyn:'宋',years:'989–1052',av:'范',intro:'北宋政治家、文学家，戍边名臣，先天下之忧而忧，词风苍凉悲壮。',born:[420,260]},
-wentianxiang:{name:'文天祥',dyn:'宋',years:'1236–1283',av:'文',intro:'南宋末抗元名臣、民族英雄，《过零丁洋》气节凛然、忠贞不屈。',born:[470,320]},
-zhangyanghao:{name:'张养浩',dyn:'元',years:'1270–1329',av:'张',intro:'元代散曲家，关注民生，《山坡羊·潼关怀古》沉郁悲悯、警策深刻。',born:[420,250]},
-shijing:{name:'《诗经》',dyn:'先秦',years:'西周至春秋',av:'诗',intro:'我国最早的诗歌总集，收诗305篇，分风雅颂，开现实主义之源，质朴真挚。',born:[420,260]},
-wangbo:{name:'王勃',dyn:'唐',years:'650–676',av:'勃',intro:'初唐四杰之首，才华横溢，《滕王阁序》《送杜少府》传诵千古。',born:[340,250]},
-cuihao:{name:'崔颢',dyn:'唐',years:'约704–754',av:'颢',intro:'盛唐诗人，《黄鹤楼》被誉为唐人七律第一，气象苍茫、情韵悠长。',born:[420,250]},
-taoyuanming:{name:'陶渊明',dyn:'晋',years:'约365–427',av:'陶',intro:'东晋诗人，田园诗派开创者，归隐躬耕，诗风冲淡自然、超然物外。',born:[460,300]},
-chenziang:{name:'陈子昂',dyn:'唐',years:'661–702',av:'陈',intro:'初唐诗人，倡导诗歌革新，《登幽州台歌》苍凉悲慨、感人至深。',born:[340,250]},
-luyou:{name:'陆游',dyn:'宋',years:'1125–1210',av:'陆',intro:'南宋爱国诗人，存诗近万首，诗风雄浑悲壮、忧国忧民。',born:[460,300]},
-caocao:{name:'曹操',dyn:'汉',years:'155–220',av:'操',intro:'东汉末政治家、军事家、诗人，建安文学代表，诗风慷慨悲凉、气魄雄浑。',born:[420,250]},
-wangwan:{name:'王湾',dyn:'唐',years:'生卒不详',av:'湾',intro:'唐代诗人，《次北固山下》写江南行旅，意境开阔。',born:[470,300]},
-maozhiyuan:{name:'马致远',dyn:'元',years:'约1250–1321',av:'马',intro:'元代戏曲家、散曲家，元曲四大家之一，《天净沙·秋思》被誉为秋思之祖。',born:[420,250]},
-lishangyin:{name:'李商隐',dyn:'唐',years:'约813–858',av:'商',intro:'晚唐诗人，与杜牧并称小李杜，诗风深情绵邈、辞采华美。',born:[340,250]},
-liuyuxi:{name:'刘禹锡',dyn:'唐',years:'772–842',av:'禹',intro:'唐代诗人，有诗豪之称，诗风刚健爽朗、昂扬乐观。',born:[420,250]},
   hanyuefu:{name:'汉乐府',dyn:'汉',years:'两汉',av:'乐',intro:'汉代乐府机关采集的民间歌辞，语言清新质朴，多写劳动与生活，《江南》为其名篇。',born:[470,300]},
   liqiao:{name:'李峤',dyn:'唐',years:'645–714',av:'峤',intro:'初唐诗人，曾任宰相，《风》以谜语笔法咏风，灵巧生动。',born:[340,250]},
   wuming:{name:'佚名',dyn:'—',years:'作者不详',av:'佚',intro:'作者不详的古诗，多为流传久远的童蒙名篇。',born:[340,250]},
@@ -1087,7 +1043,7 @@ const POEMS=[
      {type:'match',q:'把词语和意思连起来',pairs:[['空山','空旷幽静的山'],['浣女','洗衣的女子'],['歇','凋谢']]}
    ],tags:['山水','田园','秋天']},
 
-  {id:'jihai',title:'己亥杂诗',grade:5,volume:'五年级上册',dyn:'清',poet:'gongzizhen',
+  {id:'jihai',title:'己亥杂诗',grade:6,volume:'六年级上册',dyn:'清',poet:'gongzizhen',
    lines:[{t:'九州生气恃风雷，',p:'jiǔ zhōu shēng qì shì fēng léi，'},{t:'万马齐喑究可哀。',p:'wàn mǎ qí yīn jiū kě āi。'},{t:'我劝天公重抖擞，',p:'wǒ quàn tiān gōng chóng dǒu sǒu，'},{t:'不拘一格降人才。',p:'bù jū yì gé jiàng rén cái。'}],
    anno:[{w:'九州',m:'指中国'},{w:'生气',m:'生机、活力'},{w:'恃',m:'依靠'},{w:'万马齐喑',m:'所有的马都沉默，比喻社会沉闷'},{w:'抖擞',m:'振作精神'},{w:'不拘一格',m:'不局限于一种规格、方式'}],
    trans:'中国要重新焕发生机，得依靠风雷般的巨大变革；如今万马齐喑、死气沉沉的局面实在令人悲哀。我奉劝天公重新振作精神，不要拘泥于一种规格，多多降下各种人才吧！',
@@ -1103,373 +1059,6 @@ const POEMS=[
      {type:'emotion',q:'这首诗表达了诗人怎样的愿望？',o:[{e:'⚡',t:'渴望变革图强'},{e:'😌',t:'安于现状'},{e:'😢',t:'消极避世'},{e:'😴',t:'无所谓'}],a:0},
      {type:'match',q:'把词语和意思连起来',pairs:[['九州','中国'],['恃','依靠'],['不拘一格','不限一种方式']]}
    ],tags:['爱国','变革','励志']},
-
-  {id:'chouletian',title:'酬乐天扬州初逢席上见赠',grade:9,volume:'九年级上册',dyn:'唐',poet:'liuyuxi',
-   lines:[{t:'巴山楚水凄凉地，',p:'bā shān chǔ shuǐ qī liáng dì'},{t:'二十三年弃置身。',p:'èr shí sān nián qì zhì shēn'},{t:'怀旧空吟闻笛赋，',p:'huái jiù kōng yín wén dí fù'},{t:'到乡翻似烂柯人。',p:'dào xiāng fān shì làn kē rén'},{t:'沉舟侧畔千帆过，',p:'chén zhōu cè pàn qiān fān guò'},{t:'病树前头万木春。',p:'bìng shù qián tou wàn mù chūn'},{t:'今日听君歌一曲，',p:'jīn rì tīng jūn gē yī qū'},{t:'暂凭杯酒长精神。',p:'zàn píng bēi jiǔ zhǎng jīng shén'}],
-   trans:'贬谪二十三年归来，怀旧伤逝，却以"沉舟侧畔千帆过，病树前头万木春"豁然自振。',emo:'豁达',style:'抒情',place:'扬州',placeModern:'今江苏扬州一带',createdYear:'826年',
-   history:[{y:'826年',t:'酬乐天扬州初逢席上见赠·唐代',hi:true}],related:[]},
-  {id:'zuoqian',title:'左迁至蓝关示侄孙湘',grade:9,volume:'九年级上册',dyn:'唐',poet:'hanyu',
-   lines:[{t:'一封朝奏九重天，',p:'yī fēng zhāo zòu jiǔ chóng tiān'},{t:'夕贬潮州路八千。',p:'xī biǎn cháo zhōu lù bā qiān'},{t:'欲为圣明除弊事，',p:'yù wèi shèng míng chú bì shì'},{t:'肯将衰朽惜残年！',p:'kěn jiāng shuāi xiǔ xī cán nián'},{t:'云横秦岭家何在？',p:'yún héng qín lǐng jiā hé zài'},{t:'雪拥蓝关马不前。',p:'xuě yōng lán guān mǎ bù qián'},{t:'知汝远来应有意，',p:'zhī rǔ yuǎn lái yīng yǒu yì'},{t:'好收吾骨瘴江边。',p:'hǎo shōu wú gǔ zhàng jiāng biān'}],
-   trans:'一封谏书获罪贬潮州八千里，云横秦岭、雪拥蓝关，忠而获谴的悲慨与赴难的从容。',emo:'忧国',style:'抒情',place:'蓝关',placeModern:'今陕西蓝田',createdYear:'819年',
-   history:[{y:'819年',t:'左迁至蓝关示侄孙湘·唐代',hi:true}],related:[]},
-  {id:'shangshan',title:'商山早行',grade:9,volume:'九年级上册',dyn:'唐',poet:'wentingyun',
-   lines:[{t:'晨起动征铎，',p:'chén qǐ dòng zhēng duó'},{t:'客行悲故乡。',p:'kè xíng bēi gù xiāng'},{t:'鸡声茅店月，',p:'jī shēng máo diàn yuè'},{t:'人迹板桥霜。',p:'rén jì bǎn qiáo shuāng'},{t:'槲叶落山路，',p:'hú yè luò shān lù'},{t:'枳花明驿墙。',p:'zhǐ huā míng yì qiáng'},{t:'因思杜陵梦，',p:'yīn sī dù líng mèng'},{t:'凫雁满回塘。',p:'fú yàn mǎn huí táng'}],
-   trans:'晨起征铎、客行悲乡，"鸡声茅店月，人迹板桥霜"以名物列景写尽早行的清冷与乡思。',emo:'思乡',style:'写景',place:'商山',placeModern:'今陕西商洛',createdYear:'唐代',
-   history:[{y:'唐代',t:'商山早行·唐代',hi:true}],related:[]},
-  {id:'poszhenzi',title:'破阵子·为陈同甫赋壮词以寄之',grade:9,volume:'九年级下册',dyn:'宋',poet:'xinqiji',
-   lines:[{t:'醉里挑灯看剑，',p:'zuì lǐ tiǎo dēng kàn jiàn'},{t:'梦回吹角连营。',p:'mèng huí chuī jiǎo lián yíng'},{t:'八百里分麾下炙，',p:'bā bǎi lǐ fēn huī xià zhì'},{t:'五十弦翻塞外声。',p:'wǔ shí xián fān sài wài shēng'},{t:'沙场秋点兵。',p:'shā chǎng qiū diǎn bīng'},{t:'马作的卢飞快，',p:'mǎ zuò de lú fēi kuài'},{t:'弓如霹雳弦惊。',p:'gōng rú pī lì xián jīng'},{t:'了却君王天下事，',p:'liǎo què jūn wáng tiān xià shì'},{t:'赢得生前身后名。',p:'yíng dé shēng qián shēn hòu míng'},{t:'可怜白发生！',p:'kě lián bái fà shēng'}],
-   trans:'醉里挑灯看剑、梦回沙场点兵，欲了君王天下事、赢得生前身后名，结以"可怜白发生"的悲慨。',emo:'壮志',style:'豪放',place:'军营',placeModern:'今江西上饶',createdYear:'约1188年',
-   history:[{y:'约1188年',t:'破阵子·为陈同甫赋壮词以寄之·宋代',hi:true}],related:[]},
-  {id:'baixuege',title:'白雪歌送武判官归京',grade:9,volume:'九年级下册',dyn:'唐',poet:'censhen',
-   lines:[{t:'北风卷地白草折，',p:'běi fēng juǎn dì bái cǎo zhé'},{t:'胡天八月即飞雪。',p:'hú tiān bā yuè jí fēi xuě'},{t:'忽如一夜春风来，',p:'hū rú yī yè chūn fēng lái'},{t:'千树万树梨花开。',p:'qiān shù wàn shù lí huā kāi'},{t:'散入珠帘湿罗幕，',p:'sàn rù zhū lián shī luó mù'},{t:'狐裘不暖锦衾薄。',p:'hú qiú bù nuǎn jǐn qīn báo'},{t:'将军角弓不得控，',p:'jiāng jūn jiǎo gōng bù dé kòng'},{t:'都护铁衣冷难着。',p:'dōu hù tiě yī lěng nán zhuó'},{t:'瀚海阑干百丈冰，',p:'hàn hǎi lán gān bǎi zhàng bīng'},{t:'愁云惨淡万里凝。',p:'chóu yún cǎn dàn wàn lǐ níng'},{t:'中军置酒饮归客，',p:'zhōng jūn zhì jiǔ yǐn guī kè'},{t:'胡琴琵琶与羌笛。',p:'hú qín pí pá yǔ qiāng dí'},{t:'纷纷暮雪下辕门，',p:'fēn fēn mù xuě xià yuán mén'},{t:'风掣红旗冻不翻。',p:'fēng chè hóng qí dòng bù fān'},{t:'轮台东门送君去，',p:'lún tái dōng mén sòng jūn qù'},{t:'去时雪满天山路。',p:'qù shí xuě mǎn tiān shān lù'},{t:'山回路转不见君，',p:'shān huí lù zhuǎn bú jiàn jūn'},{t:'雪上空留马行处。',p:'xuě shàng kōng liú mǎ xíng chù'}],
-   trans:'胡天飞雪如梨花满树，雪中置酒送归客，山回路转不见君、雪上空留马行处，奇丽中含别情。',emo:'送别',style:'边塞',place:'轮台',placeModern:'今新疆一带',createdYear:'约754年',
-   history:[{y:'约754年',t:'白雪歌送武判官归京·唐代',hi:true}],related:[]},
-  {id:'nanxiangzi',title:'南乡子·登京口北固亭有怀',grade:9,volume:'九年级下册',dyn:'宋',poet:'xinqiji',
-   lines:[{t:'何处望神州？',p:'hé chù wàng shén zhōu'},{t:'满眼风光北固楼。',p:'mǎn yǎn fēng guāng běi gù lóu'},{t:'千古兴亡多少事？',p:'qiān gǔ xīng wáng duō shǎo shì'},{t:'悠悠。',p:'yōu yōu'},{t:'不尽长江滚滚流。',p:'bù jìn cháng jiāng gǔn gǔn liú'},{t:'年少万兜鍪，',p:'nián shào wàn dōu móu'},{t:'坐断东南战未休。',p:'zuò duàn dōng nán zhàn wèi xiū'},{t:'天下英雄谁敌手？',p:'tiān xià yīng xióng shuí dí shǒu'},{t:'曹刘。',p:'cáo liú'},{t:'生子当如孙仲谋。',p:'shēng zi dāng rú sūn zhòng móu'}],
-   trans:'登北固亭望神州，叹千古兴亡，盛赞少年孙权坐断东南，借古讽今、寄报国之慨。',emo:'爱国',style:'咏史',place:'北固亭',placeModern:'今江苏镇江',createdYear:'约1204年',
-   history:[{y:'约1204年',t:'南乡子·登京口北固亭有怀·宋代',hi:true}],related:[]},
-  {id:'shiwucongjun',title:'十五从军征',grade:9,volume:'九年级下册',dyn:'汉',poet:'hanyuefu',
-   lines:[{t:'十五从军征，',p:'shí wǔ cóng jūn zhēng'},{t:'八十始得归。',p:'bā shí shǐ dé guī'},{t:'道逢乡里人：',p:'dào féng xiāng lǐ rén'},{t:'家中有阿谁？',p:'jiā zhōng yǒu ā shuí'},{t:'遥看是君家，',p:'yáo kàn shì jūn jiā'},{t:'松柏冢累累。',p:'sōng bǎi zhǒng lěi lěi'},{t:'兔从狗窦入，',p:'tù cóng gǒu dòu rù'},{t:'雉从梁上飞。',p:'zhì cóng liáng shàng fēi'},{t:'中庭生旅谷，',p:'zhōng tíng shēng lǚ gǔ'},{t:'井上生旅葵。',p:'jǐng shàng shēng lǚ kuí'},{t:'舂谷持作饭，',p:'chōng gǔ chí zuò fàn'},{t:'采葵持作羹。',p:'cǎi kuí chí zuò gēng'},{t:'羹饭一时熟，',p:'gēng fàn yī shí shú'},{t:'不知饴阿谁。',p:'bù zhī yí ā shuí'},{t:'出门东向看，',p:'chū mén dōng xiàng kàn'},{t:'泪落沾我衣。',p:'lèi luò zhān wǒ yī'}],
-   trans:'十五从军、八十始归，松柏冢累、中庭生谷，羹饭谁共，泪落沾衣——控诉兵役之苦、写尽悲凉。',emo:'忧国',style:'叙事',place:'故乡',placeModern:'今华北一带',createdYear:'汉代',
-   history:[{y:'汉代',t:'十五从军征·汉代',hi:true}],related:[]},
-  {id:'manjianghong',title:'满江红·小住京华',grade:9,volume:'九年级下册',dyn:'清',poet:'qiujin',
-   lines:[{t:'小住京华，',p:'xiǎo zhù jīng huá'},{t:'早又是、中秋佳节。',p:'zǎo yòu shì zhōng qiū jiā jié'},{t:'为篱下、黄花开遍，',p:'wèi lí xià huáng huā kāi biàn'},{t:'秋容如拭。',p:'qiū róng rú shì'},{t:'四面歌残终破楚，',p:'sì miàn gē cán zhōng pò chǔ'},{t:'八年风味徒思浙。',p:'bā nián fēng wèi tú sī zhè'},{t:'苦将侬、强派作蛾眉，',p:'kǔ jiāng nóng qiǎng pài zuò é méi'},{t:'殊未屑！',p:'shū wèi xiè'},{t:'身不得，男儿列；',p:'shēn bù dé nán ér liè'},{t:'心却比，男儿烈！',p:'xīn què bǐ nán ér liè'},{t:'算平生肝胆，',p:'suàn píng shēng gān dǎn'},{t:'因人常热。',p:'yīn rén cháng rè'},{t:'俗子胸襟谁识我？',p:'sú zi xiōng jīn shuí shí wǒ'},{t:'英雄末路当磨折。',p:'yīng xióng mò lù dāng mó zhé'},{t:'莽红尘、何处觅知音？',p:'mǎng hóng chén hé chù mì zhī yīn'},{t:'青衫湿！',p:'qīng shān shī'}],
-   trans:'中秋感怀，身不得列男儿、心却比男儿烈，叹知音难觅、英雄末路，抒巾帼报国的壮怀。',emo:'爱国',style:'豪放',place:'京华',placeModern:'今北京',createdYear:'1903年',
-   history:[{y:'1903年',t:'满江红·小住京华·清代',hi:true}],related:[]},
-
-  {id:'yewang',title:'野望',grade:8,volume:'八年级上册',dyn:'唐',poet:'wangji',
-   lines:[{t:'东皋薄暮望，',p:'dōng gāo bó mù wàng'},{t:'徙倚欲何依。',p:'xǐ yǐ yù hé yī'},{t:'树树皆秋色，',p:'shù shù jiē qiū sè'},{t:'山山唯落晖。',p:'shān shān wéi luò huī'},{t:'牧人驱犊返，',p:'mù rén qū dú fǎn'},{t:'猎马带禽归。',p:'liè mǎ dài qín guī'},{t:'相顾无相识，',p:'xiāng gù wú xiāng shí'},{t:'长歌怀采薇。',p:'zhǎng gē huái cǎi wēi'}],
-   trans:'东皋薄暮、树秋山晖，牧人猎马归来，相顾无相识，唯怀采薇之古意，写隐居的孤寂。',emo:'闲适',style:'写景',place:'东皋',placeModern:'今山西河津',createdYear:'唐代',
-   history:[{y:'唐代',t:'野望·唐代',hi:true}],related:[]},
-  {id:'guisuishou',title:'龟虽寿',grade:8,volume:'八年级上册',dyn:'汉',poet:'caocao',
-   lines:[{t:'神龟虽寿，',p:'shén guī suī shòu'},{t:'犹有竟时。',p:'yóu yǒu jìng shí'},{t:'螣蛇乘雾，',p:'tè shé chéng wù'},{t:'终为土灰。',p:'zhōng wèi tǔ huī'},{t:'老骥伏枥，',p:'lǎo jì fú lì'},{t:'志在千里。',p:'zhì zài qiān lǐ'},{t:'烈士暮年，',p:'liè shì mù nián'},{t:'壮心不已。',p:'zhuàng xīn bù yǐ'},{t:'盈缩之期，',p:'yíng suō zhī qī'},{t:'不但在天；',p:'bù dàn zài tiān'},{t:'养怡之福，',p:'yǎng yí zhī fú'},{t:'可得永年。',p:'kě dé yǒng nián'},{t:'幸甚至哉，',p:'xìng shèn zhì zāi'},{t:'歌以咏志。',p:'gē yǐ yǒng zhì'}],
-   trans:'神龟虽寿、终有竟时，老骥伏枥志在千里，烈士暮年壮心不已，抒发积极进取的人生豪情。',emo:'壮志',style:'抒情',place:'碣石',placeModern:'今河北昌黎',createdYear:'约207年',
-   history:[{y:'约207年',t:'龟虽寿·汉代',hi:true}],related:[]},
-  {id:'zengcongdi',title:'赠从弟·其二',grade:8,volume:'八年级上册',dyn:'汉',poet:'liuzhen',
-   lines:[{t:'亭亭山上松，',p:'tíng tíng shān shàng sōng'},{t:'瑟瑟谷中风。',p:'sè sè gǔ zhòng fēng'},{t:'风声一何盛，',p:'fēng shēng yī hé shèng'},{t:'松枝一何劲！',p:'sōng zhī yī hé jìn'},{t:'冰霜正惨凄，',p:'bīng shuāng zhèng cǎn qī'},{t:'终岁常端正。',p:'zhōng suì cháng duān zhèng'},{t:'岂不罹凝寒？',p:'qǐ bù lí níng hán'},{t:'松柏有本性。',p:'sōng bǎi yǒu běn xìng'}],
-   trans:'亭亭山松、瑟瑟谷风，风盛枝劲、冰霜端正，借松柏不畏严寒赞坚贞不屈的本性。',emo:'豁达',style:'咏物',place:'—',placeModern:'今黄河流域',createdYear:'汉代',
-   history:[{y:'汉代',t:'赠从弟·其二·汉代',hi:true}],related:[]},
-  {id:'tingzhong',title:'庭中有奇树',grade:8,volume:'八年级上册',dyn:'汉',poet:'gushi19',
-   lines:[{t:'庭中有奇树，',p:'tíng zhōng yǒu qí shù'},{t:'绿叶发华滋。',p:'lǜ yè fā huá zī'},{t:'攀条折其荣，',p:'pān tiáo zhé qí róng'},{t:'将以遗所思。',p:'jiāng yǐ wèi suǒ sī'},{t:'馨香盈怀袖，',p:'xīn xiāng yíng huái xiù'},{t:'路远莫致之。',p:'lù yuǎn mò zhì zhī'},{t:'此物何足贵？',p:'cǐ wù hé zú guì'},{t:'但感别经时。',p:'dàn gǎn bié jīng shí'}],
-   trans:'庭中奇树花繁，攀条折花欲赠所思，路远难致，借折花寄托对远人的思念。',emo:'离愁',style:'抒情',place:'庭院',placeModern:'今黄河流域',createdYear:'东汉',
-   history:[{y:'东汉',t:'庭中有奇树·汉代',hi:true}],related:[]},
-  {id:'maitanweng',title:'卖炭翁',grade:8,volume:'八年级下册',dyn:'唐',poet:'baijuyi',
-   lines:[{t:'卖炭翁，伐薪烧炭南山中。',p:'mài tàn wēng fá xīn shāo tàn nán shān zhōng'},{t:'满面尘灰烟火色，',p:'mǎn miàn chén huī yān huǒ sè'},{t:'两鬓苍苍十指黑。',p:'liǎng bìn cāng cāng shí zhǐ hēi'},{t:'卖炭得钱何所营？',p:'mài tàn dé qián hé suǒ yíng'},{t:'身上衣裳口中食。',p:'shēn shàng yī cháng kǒu zhōng shí'},{t:'可怜身上衣正单，',p:'kě lián shēn shàng yī zhèng dān'},{t:'心忧炭贱愿天寒。',p:'xīn yōu tàn jiàn yuàn tiān hán'},{t:'夜来城外一尺雪，',p:'yè lái chéng wài yī chǐ xuě'},{t:'晓驾炭车辗冰辙。',p:'xiǎo jià tàn chē niǎn bīng zhé'},{t:'牛困人饥日已高，',p:'niú kùn rén jī rì yǐ gāo'},{t:'市南门外泥中歇。',p:'shì nán mén wài ní zhōng xiē'},{t:'翩翩两骑来是谁？',p:'piān piān liǎng jì lái shì shuí'},{t:'黄衣使者白衫儿。',p:'huáng yī shǐ zhě bái shān ér'},{t:'手把文书口称敕，',p:'shǒu bǎ wén shū kǒu chēng chì'},{t:'回车叱牛牵向北。',p:'huí chē chì niú qiān xiàng běi'},{t:'一车炭，千余斤，',p:'yī chē tàn qiān yú jīn'},{t:'宫使驱将惜不得。',p:'gōng shǐ qū jiāng xī bù dé'},{t:'半匹红纱一丈绫，',p:'bàn pǐ hóng shā yī zhàng líng'},{t:'系向牛头充炭直。',p:'jì xiàng niú tóu chōng tàn zhí'}],
-   trans:'卖炭翁伐薪烧炭、衣单愿寒，一车炭却被宫使强夺，半匹红纱充直，揭露宫市掠夺、同情劳苦。',emo:'忧国',style:'叙事',place:'长安',placeModern:'今陕西西安',createdYear:'约809年',
-   history:[{y:'约809年',t:'卖炭翁·唐代',hi:true}],related:[]},
-  {id:'poshansisi',title:'题破山寺后禅院',grade:8,volume:'八年级下册',dyn:'唐',poet:'changjian',
-   lines:[{t:'清晨入古寺，',p:'qīng chén rù gǔ sì'},{t:'初日照高林。',p:'chū rì zhào gāo lín'},{t:'曲径通幽处，',p:'qū jìng tōng yōu chù'},{t:'禅房花木深。',p:'chán fáng huā mù shēn'},{t:'山光悦鸟性，',p:'shān guāng yuè niǎo xìng'},{t:'潭影空人心。',p:'tán yǐng kōng rén xīn'},{t:'万籁此都寂，',p:'wàn lài cǐ dōu jì'},{t:'但余钟磬音。',p:'dàn yú zhōng qìng yīn'}],
-   trans:'清晨古寺、初日高林，曲径通幽、潭影空心，万籁俱寂唯余钟磬，写禅院的清幽与禅意。',emo:'闲适',style:'写景',place:'破山寺',placeModern:'今江苏苏州一带',createdYear:'唐代',
-   history:[{y:'唐代',t:'题破山寺后禅院·唐代',hi:true}],related:[]},
-  {id:'songyouren',title:'送友人',grade:8,volume:'八年级下册',dyn:'唐',poet:'libai',
-   lines:[{t:'青山横北郭，',p:'qīng shān héng běi guō'},{t:'白水绕东城。',p:'bái shuǐ rào dōng chéng'},{t:'此地一为别，',p:'cǐ dì yī wèi bié'},{t:'孤蓬万里征。',p:'gū péng wàn lǐ zhēng'},{t:'浮云游子意，',p:'fú yún yóu zi yì'},{t:'落日故人情。',p:'luò rì gù rén qíng'},{t:'挥手自兹去，',p:'huī shǒu zì zī qù'},{t:'萧萧班马鸣。',p:'xiāo xiāo bān mǎ míng'}],
-   trans:'青山白水送别，孤蓬万里、浮云落日寄情，挥手自兹去、萧萧班马鸣，写依依惜别之情。',emo:'友情',style:'送别',place:'城郊',placeModern:'今江南一带',createdYear:'唐代',
-   history:[{y:'唐代',t:'送友人·唐代',hi:true}],related:[]},
-  {id:'wangdongtinghu',title:'望洞庭湖赠张丞相',grade:8,volume:'八年级下册',dyn:'唐',poet:'menghaoran',
-   lines:[{t:'八月湖水平，',p:'bā yuè hú shuǐ píng'},{t:'涵虚混太清。',p:'hán xū hùn tài qīng'},{t:'气蒸云梦泽，',p:'qì zhēng yún mèng zé'},{t:'波撼岳阳城。',p:'bō hàn yuè yáng chéng'},{t:'欲济无舟楫，',p:'yù jì wú zhōu jí'},{t:'端居耻圣明。',p:'duān jū chǐ shèng míng'},{t:'坐观垂钓者，',p:'zuò guān chuí diào zhě'},{t:'徒有羡鱼情。',p:'tú yǒu xiàn yú qíng'}],
-   trans:'八月湖平、气蒸云梦、波撼岳阳，欲济无舟、徒有羡鱼，含蓄表达渴望出仕、求人引荐之意。',emo:'壮志',style:'抒情',place:'洞庭湖',placeModern:'今湖南岳阳',createdYear:'733年',
-   history:[{y:'733年',t:'望洞庭湖赠张丞相·唐代',hi:true}],related:[]},
-
-  {id:'emeishan',title:'峨眉山月歌',grade:7,volume:'七年级上册',dyn:'唐',poet:'libai',
-   lines:[{t:'峨眉山月半轮秋，',p:'é méi shān yuè bàn lún qiū'},{t:'影入平羌江水流。',p:'yǐng rù píng qiāng jiāng shuǐ liú'},{t:'夜发清溪向三峡，',p:'yè fā qīng xī xiàng sān xiá'},{t:'思君不见下渝州。',p:'sī jūn bú jiàn xià yú zhōu'}],
-   trans:'峨眉半轮秋月映入平羌江水，夜发清溪、思君不见，写出蜀途中对友与乡的眷念。',emo:'思乡',style:'写景',place:'峨眉山',placeModern:'今四川峨眉',createdYear:'725年',
-   history:[{y:'725年',t:'峨眉山月歌·唐代',hi:true}],related:[]},
-  {id:'jiangnanfeng',title:'江南逢李龟年',grade:7,volume:'七年级上册',dyn:'唐',poet:'dufu',
-   lines:[{t:'岐王宅里寻常见，',p:'qí wáng zhái lǐ xún cháng jiàn'},{t:'崔九堂前几度闻。',p:'cuī jiǔ táng qián jǐ dù wén'},{t:'正是江南好风景，',p:'zhèng shì jiāng nán hǎo fēng jǐng'},{t:'落花时节又逢君。',p:'luò huā shí jié yòu féng jūn'}],
-   trans:'岐王宅、崔九堂的旧游，与落花江南重逢，盛衰之感、身世之悲尽在不言中。',emo:'离愁',style:'抒情',place:'潭州',placeModern:'今湖南长沙',createdYear:'770年',
-   history:[{y:'770年',t:'江南逢李龟年·唐代',hi:true}],related:[]},
-  {id:'xingjun9',title:'行军九日思长安故园',grade:7,volume:'七年级上册',dyn:'唐',poet:'censhen',
-   lines:[{t:'强欲登高去，',p:'qiǎng yù dēng gāo qù'},{t:'无人送酒来。',p:'wú rén sòng jiǔ lái'},{t:'遥怜故园菊，',p:'yáo lián gù yuán jú'},{t:'应傍战场开。',p:'yīng bàng zhàn chǎng kāi'}],
-   trans:'重阳行军，强欲登高却无人送酒，遥怜故园之菊开在战场旁，写战乱中的思乡与忧国。',emo:'思乡',style:'抒情',place:'长安',placeModern:'今陕西西安',createdYear:'757年',
-   history:[{y:'757年',t:'行军九日思长安故园·唐代',hi:true}],related:[]},
-  {id:'yeshangshou',title:'夜上受降城闻笛',grade:7,volume:'七年级上册',dyn:'唐',poet:'liyi',
-   lines:[{t:'回乐烽前沙似雪，',p:'huí lè fēng qián shā shì xuě'},{t:'受降城外月如霜。',p:'shòu xiáng chéng wài yuè rú shuāng'},{t:'不知何处吹芦管，',p:'bù zhī hé chù chuī lú guǎn'},{t:'一夜征人尽望乡。',p:'yī yè zhēng rén jǐn wàng xiāng'}],
-   trans:'回乐烽沙似雪、受降城月如霜，芦管声起，一夜征人尽望乡，写戍边的思乡之苦。',emo:'思乡',style:'边塞',place:'受降城',placeModern:'今内蒙古阴山一带',createdYear:'唐代',
-   history:[{y:'唐代',t:'夜上受降城闻笛·唐代',hi:true}],related:[]},
-  {id:'fengrujing',title:'逢入京使',grade:7,volume:'七年级下册',dyn:'唐',poet:'censhen',
-   lines:[{t:'故园东望路漫漫，',p:'gù yuán dōng wàng lù màn màn'},{t:'双袖龙钟泪不干。',p:'shuāng xiù lóng zhōng lèi bù gàn'},{t:'马上相逢无纸笔，',p:'mǎ shàng xiāng féng wú zhǐ bǐ'},{t:'凭君传语报平安。',p:'píng jūn chuán yǔ bào píng ān'}],
-   trans:'故园东望路漫漫，马上相逢无纸笔，凭君捎个口信报平安，写戍途偶遇的乡思与豁达。',emo:'思乡',style:'抒情',place:'西行途中',placeModern:'今甘肃武威',createdYear:'749年',
-   history:[{y:'749年',t:'逢入京使·唐代',hi:true}],related:[]},
-  {id:'wanchun',title:'晚春',grade:7,volume:'七年级下册',dyn:'唐',poet:'hanyu',
-   lines:[{t:'草树知春不久归，',p:'cǎo shù zhī chūn bù jiǔ guī'},{t:'百般红紫斗芳菲。',p:'bǎi bān hóng zǐ dòu fāng fēi'},{t:'杨花榆荚无才思，',p:'yáng huā yú jiá wú cái sī'},{t:'惟解漫天作雪飞。',p:'wéi jiě màn tiān zuò xuě fēi'}],
-   trans:'草树知春将归，百般红紫争芳；连无才思的杨花榆荚也漫天作雪飞，写晚春的生机与谐趣。',emo:'喜悦',style:'写景',place:'洛阳',placeModern:'今河南洛阳',createdYear:'唐代',
-   history:[{y:'唐代',t:'晚春·唐代',hi:true}],related:[]},
-
-  {id:'mashi',title:'马诗',grade:6,volume:'六年级下册',dyn:'唐',poet:'lihe',
-   lines:[{t:'大漠沙如雪，',p:'dà mò shā rú xuě'},{t:'燕山月似钩。',p:'yān shān yuè shì gōu'},{t:'何当金络脑，',p:'hé dāng jīn luò nǎo'},{t:'快走踏清秋。',p:'kuài zǒu tà qīng qiū'}],
-   trans:'大漠如雪、燕山月钩，何时被金络脑、快走踏清秋——借良马渴望驰骋，抒怀才不遇、盼建功的志向。',emo:'壮志',style:'咏物',place:'燕山',placeModern:'今河北一带',createdYear:'唐代',
-   history:[{y:'唐代',t:'马诗·唐代',hi:true}],related:[]},
-  {id:'shihuiyin',title:'石灰吟',grade:6,volume:'六年级下册',dyn:'明',poet:'yuqian',
-   lines:[{t:'千锤万凿出深山，',p:'qiān chuí wàn záo chū shēn shān'},{t:'烈火焚烧若等闲。',p:'liè huǒ fén shāo ruò děng xián'},{t:'粉骨碎身浑不怕，',p:'fěn gǔ suì shēn hún bù pà'},{t:'要留清白在人间。',p:'yào liú qīng bái zài rén jiān'}],
-   trans:'千锤万凿、烈火焚烧浑不怕，只为把清白留在人间——借石灰自喻，表清白坚贞的节操。',emo:'豁达',style:'咏物',place:'—',placeModern:'今黄河流域',createdYear:'明代',
-   history:[{y:'明代',t:'石灰吟·明代',hi:true}],related:[]},
-  {id:'zhushi',title:'竹石',grade:6,volume:'六年级下册',dyn:'清',poet:'zhengxie',
-   lines:[{t:'咬定青山不放松，',p:'yǎo dìng qīng shān bù fàng sōng'},{t:'立根原在破岩中。',p:'lì gēn yuán zài pò yán zhōng'},{t:'千磨万击还坚劲，',p:'qiān mó wàn jī hái jiān jìn'},{t:'任尔东西南北风。',p:'rèn ěr dōng xī nán běi fēng'}],
-   trans:'咬定青山、立根破岩，千磨万击还坚劲，任尔东西南北风——借竹石赞坚韧不拔的品格。',emo:'豁达',style:'咏物',place:'—',placeModern:'今江南一带',createdYear:'清代',
-   history:[{y:'清代',t:'竹石·清代',hi:true}],related:[]},
-
-  {id:'sujiande',title:'宿建德江',grade:6,volume:'六年级上册',dyn:'唐',poet:'menghaoran',
-   lines:[{t:'移舟泊烟渚，',p:'yí zhōu pō yān zhǔ'},{t:'日暮客愁新。',p:'rì mù kè chóu xīn'},{t:'野旷天低树，',p:'yě kuàng tiān dī shù'},{t:'江清月近人。',p:'jiāng qīng yuè jìn rén'}],
-   trans:'移舟泊烟渚，日暮客愁新，野旷天低、江清月近，写江畔暮宿的羁旅愁思。',emo:'思乡',style:'写景',place:'建德江',placeModern:'今浙江建德',createdYear:'730年',
-   history:[{y:'730年',t:'宿建德江·唐代',hi:true}],related:[]},
-  {id:'wanghulou',title:'六月二十七日望湖楼醉书',grade:6,volume:'六年级上册',dyn:'宋',poet:'sushi',
-   lines:[{t:'黑云翻墨未遮山，',p:'hēi yún fān mò wèi zhē shān'},{t:'白雨跳珠乱入船。',p:'bái yǔ tiào zhū luàn rù chuán'},{t:'卷地风来忽吹散，',p:'juǎn dì fēng lái hū chuī sàn'},{t:'望湖楼下水如天。',p:'wàng hú lóu xià shuǐ rú tiān'}],
-   trans:'黑云翻墨、白雨跳珠，卷地风来忽散，望湖楼下水如天，写夏日西湖骤雨的瞬息万变。',emo:'喜悦',style:'写景',place:'望湖楼',placeModern:'今浙江杭州',createdYear:'1072年',
-   history:[{y:'1072年',t:'六月二十七日望湖楼醉书·宋代',hi:true}],related:[]},
-  {id:'xijiangyue',title:'西江月·夜行黄沙道中',grade:6,volume:'六年级上册',dyn:'宋',poet:'xinqiji',
-   lines:[{t:'明月别枝惊鹊，',p:'míng yuè bié zhī jīng què'},{t:'清风半夜鸣蝉。',p:'qīng fēng bàn yè míng chán'},{t:'稻花香里说丰年，',p:'dào huā xiāng lǐ shuō fēng nián'},{t:'听取蛙声一片。',p:'tīng qǔ wā shēng yī piàn'},{t:'七八个星天外，',p:'qī bā gè xīng tiān wài'},{t:'两三点雨山前。',p:'liǎng sān diǎn yǔ shān qián'},{t:'旧时茅店社林边，',p:'jiù shí máo diàn shè lín biān'},{t:'路转溪桥忽见。',p:'lù zhuǎn xī qiáo hū xiàn'}],
-   trans:'明月惊鹊、清风鸣蝉，稻花香里说丰年、听取蛙声一片，写夏夜山行的恬美与丰收之喜。',emo:'喜悦',style:'田园',place:'黄沙岭',placeModern:'今江西上饶',createdYear:'南宋',
-   history:[{y:'南宋',t:'西江月·夜行黄沙道中·宋代',hi:true}],related:[]},
-  {id:'hanshi',title:'寒食',grade:6,volume:'六年级下册',dyn:'唐',poet:'hanhong',
-   lines:[{t:'春城无处不飞花，',p:'chūn chéng wú chǔ bù fēi huā'},{t:'寒食东风御柳斜。',p:'hán shí dōng fēng yù liǔ xié'},{t:'日暮汉宫传蜡烛，',p:'rì mù hàn gōng chuán là zhú'},{t:'轻烟散入五侯家。',p:'qīng yān sàn rù wǔ hóu jiā'}],
-   trans:'春城飞花、寒食御柳，日暮汉宫传烛、轻烟散入五侯家，写寒食长安风物，暗寓微讽。',emo:'闲适',style:'写景',place:'长安',placeModern:'今陕西西安',createdYear:'唐代',
-   history:[{y:'唐代',t:'寒食·唐代',hi:true}],related:[]},
-  {id:'tiaotiao',title:'迢迢牵牛星',grade:6,volume:'六年级下册',dyn:'汉',poet:'gushi19',
-   lines:[{t:'迢迢牵牛星，',p:'tiáo tiáo qiān niú xīng'},{t:'皎皎河汉女。',p:'jiǎo jiǎo hé hàn nǚ'},{t:'纤纤擢素手，',p:'xiān xiān zhuó sù shǒu'},{t:'札札弄机杼。',p:'zhá zhá nòng jī zhù'},{t:'终日不成章，',p:'zhōng rì bù chéng zhāng'},{t:'泣涕零如雨。',p:'qì tì líng rú yǔ'},{t:'河汉清且浅，',p:'hé hàn qīng qiě qiǎn'},{t:'相去复几许？',p:'xiāng qù fù jǐ xǔ'},{t:'盈盈一水间，',p:'yíng yíng yī shuǐ jiān'},{t:'脉脉不得语。',p:'mò mò bù dé yǔ'}],
-   trans:'迢迢牛郎、皎皎织女，盈盈一水间却脉脉不得语，借牛女双星写人间离别相思之苦。',emo:'离愁',style:'抒情',place:'银河',placeModern:'今黄河流域',createdYear:'东汉',
-   history:[{y:'东汉',t:'迢迢牵牛星·汉代',hi:true}],related:[]},
-  {id:'shiwuye',title:'十五夜望月',grade:6,volume:'六年级下册',dyn:'唐',poet:'wangjian',
-   lines:[{t:'中庭地白树栖鸦，',p:'zhōng tíng dì bái shù qī yā'},{t:'冷露无声湿桂花。',p:'lěng lù wú shēng shī guì huā'},{t:'今夜月明人尽望，',p:'jīn yè yuè míng rén jǐn wàng'},{t:'不知秋思落谁家。',p:'bù zhī qiū sī luò shuí jiā'}],
-   trans:'中庭地白、桂花含露，今夜月明人尽望，不知秋思落谁家，写中秋望月的清冷与怀人。',emo:'思乡',style:'抒情',place:'庭院',placeModern:'今黄河流域',createdYear:'唐代',
-   history:[{y:'唐代',t:'十五夜望月·唐代',hi:true}],related:[]},
-
-  {id:'sishitian31',title:'四时田园杂兴·其三十一',grade:5,volume:'五年级下册',dyn:'宋',poet:'fanchengda',
-   lines:[{t:'昼出耘田夜绩麻，',p:'zhòu chū yún tián yè jì má'},{t:'村庄儿女各当家。',p:'cūn zhuāng ér nǚ gè dāng jiā'},{t:'童孙未解供耕织，',p:'tóng sūn wèi jiě gōng gēng zhī'},{t:'也傍桑阴学种瓜。',p:'yě bàng sāng yīn xué zhǒng guā'}],
-   trans:'昼耘夜绩、村庄各当家，童孙也学着在桑阴下种瓜，写农家劳作的勤勉与童趣。',emo:'喜悦',style:'田园',place:'石湖',placeModern:'今江苏苏州一带',createdYear:'南宋',
-   history:[{y:'南宋',t:'四时田园杂兴·其三十一·宋代',hi:true}],related:[]},
-  {id:'zhizinongbing',title:'稚子弄冰',grade:5,volume:'五年级下册',dyn:'宋',poet:'yangwanli',
-   lines:[{t:'稚子金盆脱晓冰，',p:'zhì zi jīn pén tuō xiǎo bīng'},{t:'彩丝穿取当银钲。',p:'cǎi sī chuān qǔ dāng yín zhēng'},{t:'敲成玉磬穿林响，',p:'qiāo chéng yù qìng chuān lín xiǎng'},{t:'忽作玻璃碎地声。',p:'hū zuò bō lí suì dì shēng'}],
-   trans:'稚子脱冰穿丝作钲，敲冰成玉磬之声，忽而冰碎如玻璃落地，写孩童冬日玩冰的天真。',emo:'喜悦',style:'童趣',place:'乡间',placeModern:'今江西吉水',createdYear:'南宋',
-   history:[{y:'南宋',t:'稚子弄冰·宋代',hi:true}],related:[]},
-  {id:'cunwan',title:'村晚',grade:5,volume:'五年级下册',dyn:'宋',poet:'leizhen',
-   lines:[{t:'草满池塘水满陂，',p:'cǎo mǎn chí táng shuǐ mǎn bēi'},{t:'山衔落日浸寒漪。',p:'shān xián luò rì jìn hán yī'},{t:'牧童归去横牛背，',p:'mù tóng guī qù héng niú bèi'},{t:'短笛无腔信口吹。',p:'duǎn dí wú qiāng xìn kǒu chuī'}],
-   trans:'草满池塘、山衔落日，牧童横坐牛背信口吹笛，写乡村黄昏的恬静悠闲。',emo:'闲适',style:'田园',place:'乡村',placeModern:'今江南一带',createdYear:'南宋',
-   history:[{y:'南宋',t:'村晚·宋代',hi:true}],related:[]},
-  {id:'congjunxing',title:'从军行',grade:5,volume:'五年级下册',dyn:'唐',poet:'wangchangling',
-   lines:[{t:'青海长云暗雪山，',p:'qīng hǎi zhǎng yún àn xuě shān'},{t:'孤城遥望玉门关。',p:'gū chéng yáo wàng yù mén guān'},{t:'黄沙百战穿金甲，',p:'huáng shā bǎi zhàn chuān jīn jiǎ'},{t:'不破楼兰终不还。',p:'bù pò lóu lán zhōng bù hái'}],
-   trans:'青海长云、孤城玉门，黄沙百战穿金甲，不破楼兰终不还，写戍边将士的豪情壮志。',emo:'爱国',style:'边塞',place:'青海',placeModern:'今青海一带',createdYear:'唐代',
-   history:[{y:'唐代',t:'从军行·唐代',hi:true}],related:[]},
-  {id:'qiuyejiangxiao',title:'秋夜将晓出篱门迎凉有感',grade:5,volume:'五年级下册',dyn:'宋',poet:'luyou',
-   lines:[{t:'三万里河东入海，',p:'sān wàn lǐ hé dōng rù hǎi'},{t:'五千仞岳上摩天。',p:'wǔ qiān rèn yuè shàng mó tiān'},{t:'遗民泪尽胡尘里，',p:'yí mín lèi jǐn hú chén lǐ'},{t:'南望王师又一年。',p:'nán wàng wáng shī yòu yī nián'}],
-   trans:'三万里河、五千仞岳，遗民泪尽胡尘里，南望王师又一年，写沦陷之痛与盼归之切。',emo:'忧国',style:'抒情',place:'山阴',placeModern:'今浙江绍兴',createdYear:'1192年',
-   history:[{y:'1192年',t:'秋夜将晓出篱门迎凉有感·宋代',hi:true}],related:[]},
-  {id:'wenguanjun',title:'闻官军收河南河北',grade:5,volume:'五年级下册',dyn:'唐',poet:'dufu',
-   lines:[{t:'剑外忽传收蓟北，',p:'jiàn wài hū chuán shōu jì běi'},{t:'初闻涕泪满衣裳。',p:'chū wén tì lèi mǎn yī cháng'},{t:'却看妻子愁何在，',p:'què kàn qī zǐ chóu hé zài'},{t:'漫卷诗书喜欲狂。',p:'màn juǎn shī shū xǐ yù kuáng'},{t:'白日放歌须纵酒，',p:'bái rì fàng gē xū zòng jiǔ'},{t:'青春作伴好还乡。',p:'qīng chūn zuò bàn hǎo huán xiāng'},{t:'即从巴峡穿巫峡，',p:'jí cóng bā xiá chuān wū xiá'},{t:'便下襄阳向洛阳。',p:'biàn xià xiāng yáng xiàng luò yáng'}],
-   trans:'忽传收复失地，涕泪满裳、漫卷诗书喜欲狂，即从巴峡向洛阳——杜甫生平第一快诗。',emo:'喜悦',style:'抒情',place:'梓州',placeModern:'今四川东部',createdYear:'763年',
-   history:[{y:'763年',t:'闻官军收河南河北·唐代',hi:true}],related:[]},
-
-  {id:'fengqiao',title:'枫桥夜泊',grade:5,volume:'五年级上册',dyn:'唐',poet:'zhangji',
-   lines:[{t:'月落乌啼霜满天，',p:'yuè luò wū tí shuāng mǎn tiān'},{t:'江枫渔火对愁眠。',p:'jiāng fēng yú huǒ duì chóu mián'},{t:'姑苏城外寒山寺，',p:'gū sū chéng wài hán shān sì'},{t:'夜半钟声到客船。',p:'yè bàn zhōng shēng dào kè chuán'}],
-   trans:'月落乌啼、江枫渔火，夜半钟声到客船，写羁旅秋夜的孤寂与愁思。',emo:'思乡',style:'写景',place:'姑苏',placeModern:'今江苏苏州一带',createdYear:'唐代',
-   history:[{y:'唐代',t:'枫桥夜泊·唐代',hi:true}],related:[]},
-  {id:'changxiangsi',title:'长相思',grade:5,volume:'五年级上册',dyn:'清',poet:'nalanxingde',
-   lines:[{t:'山一程，',p:'shān yī chéng'},{t:'水一程，',p:'shuǐ yī chéng'},{t:'身向榆关那畔行，',p:'shēn xiàng yú guān nà pàn xíng'},{t:'夜深千帐灯。',p:'yè shēn qiān zhàng dēng'},{t:'风一更，',p:'fēng yī gēng'},{t:'雪一更，',p:'xuě yī gēng'},{t:'聒碎乡心梦不成，',p:'guā suì xiāng xīn mèng bù chéng'},{t:'故园无此声。',p:'gù yuán wú cǐ shēng'}],
-   trans:'山一程水一程，身向榆关、夜深千帐灯，风雪聒碎乡心，写戍途思乡之苦。',emo:'思乡',style:'边塞',place:'榆关道上',placeModern:'今华北一带',createdYear:'1682年',
-   history:[{y:'1682年',t:'长相思·清代',hi:true}],related:[]},
-  {id:'shier',title:'示儿',grade:5,volume:'五年级上册',dyn:'宋',poet:'luyou',
-   lines:[{t:'死去元知万事空，',p:'sǐ qù yuán zhī wàn shì kōng'},{t:'但悲不见九州同。',p:'dàn bēi bú jiàn jiǔ zhōu tóng'},{t:'王师北定中原日，',p:'wáng shī běi dìng zhōng yuán rì'},{t:'家祭无忘告乃翁。',p:'jiā jì wú wàng gào nǎi wēng'}],
-   trans:'临终遗诗：死去元知万事空，但悲不见九州同，盼王师北定中原，赤诚的爱国绝唱。',emo:'爱国',style:'抒情',place:'山阴',placeModern:'今浙江绍兴',createdYear:'1210年',
-   history:[{y:'1210年',t:'示儿·宋代',hi:true}],related:[]},
-  {id:'tilinandi',title:'题临安邸',grade:5,volume:'五年级上册',dyn:'宋',poet:'linsheng',
-   lines:[{t:'山外青山楼外楼，',p:'shān wài qīng shān lóu wài lóu'},{t:'西湖歌舞几时休？',p:'xī hú gē wǔ jǐ shí xiū'},{t:'暖风熏得游人醉，',p:'nuǎn fēng xūn dé yóu rén zuì'},{t:'直把杭州作汴州。',p:'zhí bǎ háng zhōu zuò biàn zhōu'}],
-   trans:'山外青山楼外楼，西湖歌舞几时休？讽刺南宋君臣偏安享乐、忘却故土，沉痛深刻。',emo:'忧国',style:'咏史',place:'临安',placeModern:'今浙江杭州',createdYear:'南宋',
-   history:[{y:'南宋',t:'题临安邸·宋代',hi:true}],related:[]},
-
-  {id:'suxinshi',title:'宿新市徐公店',grade:4,volume:'四年级下册',dyn:'宋',poet:'yangwanli',
-   lines:[{t:'篱落疏疏一径深，',p:'lí luò shū shū yī jìng shēn'},{t:'树头新绿未成阴。',p:'shù tóu xīn lǜ wèi chéng yīn'},{t:'儿童急走追黄蝶，',p:'ér tóng jí zǒu zhuī huáng dié'},{t:'飞入菜花无处寻。',p:'fēi rù cài huā wú chǔ xún'}],
-   trans:'篱落小径、树头新绿，儿童追蝶飞入菜花无处寻，写暮春乡村的童趣盎然。',emo:'喜悦',style:'田园',place:'新市',placeModern:'今浙江一带',createdYear:'南宋',
-   history:[{y:'南宋',t:'宿新市徐公店·宋代',hi:true}],related:[]},
-  {id:'sishitianyuan',title:'四时田园杂兴·其二十五',grade:4,volume:'四年级下册',dyn:'宋',poet:'fanchengda',
-   lines:[{t:'梅子金黄杏子肥，',p:'méi zi jīn huáng xìng zi féi'},{t:'麦花雪白菜花稀。',p:'mài huā xuě bái cài huā xī'},{t:'日长篱落无人过，',p:'rì cháng lí luò wú rén guò'},{t:'惟有蜻蜓蛱蝶飞。',p:'wéi yǒu qīng tíng jiá dié fēi'}],
-   trans:'梅黄杏肥、麦白菜稀，日长人静蜻蜓蛱蝶飞，写初夏江南田园的恬静。',emo:'闲适',style:'田园',place:'石湖',placeModern:'今江苏苏州一带',createdYear:'南宋',
-   history:[{y:'南宋',t:'四时田园杂兴·其二十五·宋代',hi:true}],related:[]},
-  {id:'qingpingyue',title:'清平乐·村居',grade:4,volume:'四年级下册',dyn:'宋',poet:'xinqiji',
-   lines:[{t:'茅檐低小，',p:'máo yán dī xiǎo'},{t:'溪上青青草。',p:'xī shàng qīng qīng cǎo'},{t:'醉里吴音相媚好，',p:'zuì lǐ wú yīn xiāng mèi hǎo'},{t:'白发谁家翁媪？',p:'bái fà shuí jiā wēng ǎo'},{t:'大儿锄豆溪东，',p:'dà ér chú dòu xī dōng'},{t:'中儿正织鸡笼。',p:'zhōng ér zhèng zhī jī lóng'},{t:'最喜小儿亡赖，',p:'zuì xǐ xiǎo ér wú lài'},{t:'溪头卧剥莲蓬。',p:'xī tóu wò bāo lián péng'}],
-   trans:'茅檐溪上、吴音相媚，大儿锄豆、小儿卧剥莲蓬，一幅其乐融融的农家生活图。',emo:'喜悦',style:'田园',place:'上饶',placeModern:'今江西上饶',createdYear:'南宋',
-   history:[{y:'南宋',t:'清平乐·村居·宋代',hi:true}],related:[]},
-  {id:'furonglou',title:'芙蓉楼送辛渐',grade:4,volume:'四年级下册',dyn:'唐',poet:'wangchangling',
-   lines:[{t:'寒雨连江夜入吴，',p:'hán yǔ lián jiāng yè rù wú'},{t:'平明送客楚山孤。',p:'píng míng sòng kè chǔ shān gū'},{t:'洛阳亲友如相问，',p:'luò yáng qīn yǒu rú xiāng wèn'},{t:'一片冰心在玉壶。',p:'yī piàn bīng xīn zài yù hú'}],
-   trans:'寒雨连江送客，"一片冰心在玉壶"以冰心玉壶自喻高洁，托友人转告亲朋。',emo:'友情',style:'送别',place:'芙蓉楼',placeModern:'今江苏镇江',createdYear:'约742年',
-   history:[{y:'约742年',t:'芙蓉楼送辛渐·唐代',hi:true}],related:[]},
-  {id:'saixiaqu',title:'塞下曲',grade:4,volume:'四年级下册',dyn:'唐',poet:'lulun',
-   lines:[{t:'月黑雁飞高，',p:'yuè hēi yàn fēi gāo'},{t:'单于夜遁逃。',p:'chán yú yè dùn táo'},{t:'欲将轻骑逐，',p:'yù jiāng qīng jì zhú'},{t:'大雪满弓刀。',p:'dà xuě mǎn gōng dāo'}],
-   trans:'月黑雁飞、单于夜遁，将军欲率轻骑追击，大雪满弓刀，写边塞夜战的紧张豪迈。',emo:'爱国',style:'边塞',place:'边塞',placeModern:'今内蒙古阴山一带',createdYear:'唐代',
-   history:[{y:'唐代',t:'塞下曲·唐代',hi:true}],related:[]},
-  {id:'momei',title:'墨梅',grade:4,volume:'四年级下册',dyn:'元',poet:'wangmian',
-   lines:[{t:'我家洗砚池头树，',p:'wǒ jiā xǐ yàn chí tóu shù'},{t:'朵朵花开淡墨痕。',p:'duǒ duǒ huā kāi dàn mò hén'},{t:'不要人夸好颜色，',p:'bú yào rén kuā hǎo yán sè'},{t:'只留清气满乾坤。',p:'zhǐ liú qīng qì mǎn qián kūn'}],
-   trans:'洗砚池边墨梅淡痕，不求人夸颜色、只愿清气满乾坤，借墨梅自表高洁的志节。',emo:'豁达',style:'咏物',place:'江南',placeModern:'今浙江一带',createdYear:'元代',
-   history:[{y:'元代',t:'墨梅·元代',hi:true}],related:[]},
-
-  {id:'mujiangyin',title:'暮江吟',grade:4,volume:'四年级上册',dyn:'唐',poet:'baijuyi',
-   lines:[{t:'一道残阳铺水中，',p:'yī dào cán yáng pù shuǐ zhōng'},{t:'半江瑟瑟半江红。',p:'bàn jiāng sè sè bàn jiāng hóng'},{t:'可怜九月初三夜，',p:'kě lián jiǔ yuè chū sān yè'},{t:'露似真珠月似弓。',p:'lù shì zhēn zhū yuè shì gōng'}],
-   trans:'残阳铺水、半江瑟瑟半江红，九月初三露似珍珠月似弓，写江边黄昏到夜晚的清丽。',emo:'喜悦',style:'写景',place:'长江',placeModern:'今安徽芜湖',createdYear:'822年',
-   history:[{y:'822年',t:'暮江吟·唐代',hi:true}],related:[]},
-  {id:'xuemei',title:'雪梅',grade:4,volume:'四年级上册',dyn:'宋',poet:'luyue',
-   lines:[{t:'梅雪争春未肯降，',p:'méi xuě zhēng chūn wèi kěn xiáng'},{t:'骚人阁笔费评章。',p:'sāo rén gē bǐ fèi píng zhāng'},{t:'梅须逊雪三分白，',p:'méi xū xùn xuě sān fēn bái'},{t:'雪却输梅一段香。',p:'xuě què shū méi yī duàn xiāng'}],
-   trans:'梅雪争春，各有所长——梅逊雪白、雪输梅香，借物说理，妙趣横生。',emo:'哲理',style:'咏物',place:'江南',placeModern:'今江南一带',createdYear:'南宋',
-   history:[{y:'南宋',t:'雪梅·宋代',hi:true}],related:[]},
-  {id:'chusai',title:'出塞',grade:4,volume:'四年级上册',dyn:'唐',poet:'wangchangling',
-   lines:[{t:'秦时明月汉时关，',p:'qín shí míng yuè hàn shí guān'},{t:'万里长征人未还。',p:'wàn lǐ cháng zhēng rén wèi hái'},{t:'但使龙城飞将在，',p:'dàn shǐ lóng chéng fēi jiāng zài'},{t:'不教胡马度阴山。',p:'bù jiào hú mǎ dù yīn shān'}],
-   trans:'秦月汉关、万里征人未还，盼有良将镇守、不教胡马越阴山，写戍边的悲壮与渴望。',emo:'爱国',style:'边塞',place:'边关',placeModern:'今甘肃武威',createdYear:'唐代',
-   history:[{y:'唐代',t:'出塞·唐代',hi:true}],related:[]},
-  {id:'liangzhouci',title:'凉州词',grade:4,volume:'四年级上册',dyn:'唐',poet:'wanghan',
-   lines:[{t:'葡萄美酒夜光杯，',p:'pú táo měi jiǔ yè guāng bēi'},{t:'欲饮琵琶马上催。',p:'yù yǐn pí pá mǎ shàng cuī'},{t:'醉卧沙场君莫笑，',p:'zuì wò shā chǎng jūn mò xiào'},{t:'古来征战几人回？',p:'gǔ lái zhēng zhàn jǐ rén huí'}],
-   trans:'葡萄美酒夜光杯，醉卧沙场莫笑——古来征战几人回，于豪饮中见悲凉旷达。',emo:'豁达',style:'边塞',place:'凉州',placeModern:'今甘肃武威',createdYear:'唐代',
-   history:[{y:'唐代',t:'凉州词·唐代',hi:true}],related:[]},
-  {id:'xiarijueju',title:'夏日绝句',grade:4,volume:'四年级上册',dyn:'宋',poet:'liqingzhao',
-   lines:[{t:'生当作人杰，',p:'shēng dàng zuò rén jié'},{t:'死亦为鬼雄。',p:'sǐ yì wèi guǐ xióng'},{t:'至今思项羽，',p:'zhì jīn sī xiàng yǔ'},{t:'不肯过江东。',p:'bù kěn guò jiāng dōng'}],
-   trans:'生作人杰、死为鬼雄，借项羽不肯过江东，抒发刚烈气节与对苟安的讽喻。',emo:'爱国',style:'咏史',place:'乌江',placeModern:'今安徽和县',createdYear:'约1129年',
-   history:[{y:'约1129年',t:'夏日绝句·宋代',hi:true}],related:[]},
-
-  {id:'wangtianmen',title:'望天门山',grade:3,volume:'三年级上册',dyn:'唐',poet:'libai',
-   lines:[{t:'天门中断楚江开，',p:'tiān mén zhōng duàn chǔ jiāng kāi'},{t:'碧水东流至此回。',p:'bì shuǐ dōng liú zhì cǐ huí'},{t:'两岸青山相对出，',p:'liǎng àn qīng shān xiāng duì chū'},{t:'孤帆一片日边来。',p:'gū fān yī piàn rì biān lái'}],
-   trans:'天门中断、碧水东流，两岸青山相对而出，孤帆从日边驶来，写长江天门的雄奇壮丽。',emo:'喜悦',style:'写景',place:'天门山',placeModern:'今安徽芜湖',createdYear:'725年',
-   history:[{y:'725年',t:'望天门山·唐代',hi:true}],related:[]},
-  {id:'yinhushang',title:'饮湖上初晴后雨',grade:3,volume:'三年级上册',dyn:'宋',poet:'sushi',
-   lines:[{t:'水光潋滟晴方好，',p:'shuǐ guāng liàn yàn qíng fāng hǎo'},{t:'山色空蒙雨亦奇。',p:'shān sè kōng méng yǔ yì qí'},{t:'欲把西湖比西子，',p:'yù bǎ xī hú bǐ xī zi'},{t:'淡妆浓抹总相宜。',p:'dàn zhuāng nóng mǒ zǒng xiāng yí'}],
-   trans:'晴天潋滟、雨中空蒙，西湖如西施淡妆浓抹总相宜，写尽西湖晴雨皆美。',emo:'喜悦',style:'写景',place:'西湖',placeModern:'今浙江杭州',createdYear:'1073年',
-   history:[{y:'1073年',t:'饮湖上初晴后雨·宋代',hi:true}],related:[]},
-  {id:'wangdongting',title:'望洞庭',grade:3,volume:'三年级上册',dyn:'唐',poet:'liuyuxi',
-   lines:[{t:'湖光秋月两相和，',p:'hú guāng qiū yuè liǎng xiāng hé'},{t:'潭面无风镜未磨。',p:'tán miàn wú fēng jìng wèi mó'},{t:'遥望洞庭山水翠，',p:'yáo wàng dòng tíng shān shuǐ cuì'},{t:'白银盘里一青螺。',p:'bái yín pán lǐ yī qīng luó'}],
-   trans:'秋夜遥望洞庭，湖光月色两相和，山水如白银盘里一青螺，比喻新巧、意境空灵。',emo:'豁达',style:'写景',place:'洞庭湖',placeModern:'今湖南岳阳',createdYear:'824年',
-   history:[{y:'824年',t:'望洞庭·唐代',hi:true}],related:[]},
-  {id:'zengliujingwen',title:'赠刘景文',grade:3,volume:'三年级上册',dyn:'宋',poet:'sushi',
-   lines:[{t:'荷尽已无擎雨盖，',p:'hé jǐn yǐ wú qíng yǔ gài'},{t:'菊残犹有傲霜枝。',p:'jú cán yóu yǒu ào shuāng zhī'},{t:'一年好景君须记，',p:'yī nián hǎo jǐng jūn xū jì'},{t:'最是橙黄橘绿时。',p:'zuì shì chéng huáng jú lǜ shí'}],
-   trans:'荷尽菊残却橙黄橘绿，勉励友人珍重一年最好的初冬时光，于萧瑟中见昂扬。',emo:'豁达',style:'写景',place:'杭州',placeModern:'今浙江杭州',createdYear:'1090年',
-   history:[{y:'1090年',t:'赠刘景文·宋代',hi:true}],related:[]},
-  {id:'huichong',title:'惠崇春江晚景',grade:3,volume:'三年级下册',dyn:'宋',poet:'sushi',
-   lines:[{t:'竹外桃花三两枝，',p:'zhú wài táo huā sān liǎng zhī'},{t:'春江水暖鸭先知。',p:'chūn jiāng shuǐ nuǎn yā xiān zhī'},{t:'蒌蒿满地芦芽短，',p:'lóu hāo mǎn dì lú yá duǎn'},{t:'正是河豚欲上时。',p:'zhèng shì hé tún yù shàng shí'}],
-   trans:'题惠崇画作：竹外桃花、春江水暖鸭先知，蒌蒿芦芽中预见河豚欲上，画中有生机。',emo:'喜悦',style:'写景',place:'江南',placeModern:'今浙江杭州',createdYear:'1085年',
-   history:[{y:'1085年',t:'惠崇春江晚景·宋代',hi:true}],related:[]},
-  {id:'sanqudaozhong',title:'三衢道中',grade:3,volume:'三年级下册',dyn:'宋',poet:'zengji',
-   lines:[{t:'梅子黄时日日晴，',p:'méi zi huáng shí rì rì qíng'},{t:'小溪泛尽却山行。',p:'xiǎo xī fàn jǐn què shān xíng'},{t:'绿阴不减来时路，',p:'lǜ yīn bù jiǎn lái shí lù'},{t:'添得黄鹂四五声。',p:'tiān dé huáng lí sì wǔ shēng'}],
-   trans:'梅子黄时晴日，山行溪尽，绿阴不减、黄鹂添声，写初夏山行的明快愉悦。',emo:'喜悦',style:'写景',place:'三衢',placeModern:'今浙江衢州',createdYear:'南宋',
-   history:[{y:'南宋',t:'三衢道中·宋代',hi:true}],related:[]},
-
-  {id:'xinglunan',title:'行路难·其一',grade:9,volume:'九年级上册',dyn:'唐',poet:'libai',
-   lines:[{t:'金樽清酒斗十千，',p:'jīn zūn qīng jiǔ dòu shí qiān'},{t:'玉盘珍羞直万钱。',p:'yù pán zhēn xiū zhí wàn qián'},{t:'停杯投箸不能食，',p:'tíng bēi tóu zhù bù néng shí'},{t:'拔剑四顾心茫然。',p:'bá jiàn sì gù xīn máng rán'},{t:'欲渡黄河冰塞川，',p:'yù dù huáng hé bīng sè chuān'},{t:'将登太行雪满山。',p:'jiāng dēng tài háng xuě mǎn shān'},{t:'闲来垂钓碧溪上，',p:'xián lái chuí diào bì xī shàng'},{t:'忽复乘舟梦日边。',p:'hū fù chéng zhōu mèng rì biān'},{t:'行路难，行路难，',p:'xíng lù nán xíng lù nán'},{t:'多歧路，今安在？',p:'duō qí lù jīn ān zài'},{t:'长风破浪会有时，',p:'cháng fēng pò làng huì yǒu shí'},{t:'直挂云帆济沧海。',p:'zhí guà yún fān jì cāng hǎi'}],
-   trans:'面对人生道路的艰难，李白几度迷惘后高呼"长风破浪会有时，直挂云帆济沧海"，自信豪迈。',emo:'壮志',style:'抒情',place:'长安',placeModern:'今陕西西安',createdYear:'约744年',
-   history:[{y:'约744年',t:'行路难·其一·唐',hi:true}],related:[]},
-  {id:'shuidiaogetou',title:'水调歌头·明月几时有',grade:9,volume:'九年级上册',dyn:'宋',poet:'sushi',
-   lines:[{t:'明月几时有？',p:'míng yuè jǐ shí yǒu'},{t:'把酒问青天。',p:'bǎ jiǔ wèn qīng tiān'},{t:'不知天上宫阙，',p:'bù zhī tiān shàng gōng què'},{t:'今夕是何年。',p:'jīn xī shì hé nián'},{t:'我欲乘风归去，',p:'wǒ yù chéng fēng guī qù'},{t:'又恐琼楼玉宇，',p:'yòu kǒng qióng lóu yù yǔ'},{t:'高处不胜寒。',p:'gāo chù bù shèng hán'},{t:'起舞弄清影，',p:'qǐ wǔ nòng qīng yǐng'},{t:'何似在人间。',p:'hé shì zài rén jiān'},{t:'转朱阁，低绮户，照无眠。',p:'zhuǎn zhū gé dī qǐ hù zhào wú mián'},{t:'不应有恨，',p:'bù yīng yǒu hèn'},{t:'何事长向别时圆？',p:'hé shì zhǎng xiàng bié shí yuán'},{t:'人有悲欢离合，',p:'rén yǒu bēi huān lí hé'},{t:'月有阴晴圆缺，',p:'yuè yǒu yīn qíng yuán quē'},{t:'此事古难全。',p:'cǐ shì gǔ nán quán'},{t:'但愿人长久，',p:'dàn yuàn rén cháng jiǔ'},{t:'千里共婵娟。',p:'qiān lǐ gòng chán juān'}],
-   trans:'中秋醉后怀念弟弟，由问月、思亲到旷达释怀，"但愿人长久，千里共婵娟"成千古绝唱。',emo:'豁达',style:'抒情',place:'密州',placeModern:'今山东诸城',createdYear:'1076年',
-   history:[{y:'1076年',t:'水调歌头·明月几时有·宋',hi:true}],related:[]},
-  {id:'yueyeyi',title:'月夜忆舍弟',grade:9,volume:'九年级上册',dyn:'唐',poet:'dufu',
-   lines:[{t:'戍鼓断人行，',p:'shù gǔ duàn rén xíng'},{t:'边秋一雁声。',p:'biān qiū yī yàn shēng'},{t:'露从今夜白，',p:'lù cóng jīn yè bái'},{t:'月是故乡明。',p:'yuè shì gù xiāng míng'},{t:'有弟皆分散，',p:'yǒu dì jiē fēn sàn'},{t:'无家问死生。',p:'wú jiā wèn sǐ shēng'},{t:'寄书长不达，',p:'jì shū zhǎng bù dá'},{t:'况乃未休兵。',p:'kuàng nǎi wèi xiū bīng'}],
-   trans:'战乱中思念离散的兄弟，"露从今夜白，月是故乡明"道尽乱世思亲之痛。',emo:'思乡',style:'抒情',place:'秦州',placeModern:'今甘肃天水',createdYear:'759年',
-   history:[{y:'759年',t:'月夜忆舍弟·唐',hi:true}],related:[]},
-  {id:'yujiaao',title:'渔家傲·秋思',grade:9,volume:'九年级下册',dyn:'宋',poet:'fanzhongyan',
-   lines:[{t:'塞下秋来风景异，',p:'sāi xià qiū lái fēng jǐng yì'},{t:'衡阳雁去无留意。',p:'héng yáng yàn qù wú liú yì'},{t:'四面边声连角起，',p:'sì miàn biān shēng lián jiǎo qǐ'},{t:'千嶂里，长烟落日孤城闭。',p:'qiān zhàng lǐ zhǎng yān luò rì gū chéng bì'},{t:'浊酒一杯家万里，',p:'zhuó jiǔ yī bēi jiā wàn lǐ'},{t:'燕然未勒归无计。',p:'yān rán wèi lēi guī wú jì'},{t:'羌管悠悠霜满地，',p:'qiāng guǎn yōu yōu shuāng mǎn dì'},{t:'人不寐，将军白发征夫泪。',p:'rén bú mèi jiāng jūn bái fà zhēng fū lèi'}],
-   trans:'戍边将士久戍思归、功业未成，"浊酒一杯家万里"写尽边关苍凉与报国之志。',emo:'忧国',style:'边塞',place:'边塞',placeModern:'今陕西延安',createdYear:'1040年',
-   history:[{y:'1040年',t:'渔家傲·秋思·宋',hi:true}],related:[]},
-  {id:'jiangchengzi',title:'江城子·密州出猎',grade:9,volume:'九年级下册',dyn:'宋',poet:'sushi',
-   lines:[{t:'老夫聊发少年狂，',p:'lǎo fū liáo fā shào nián kuáng'},{t:'左牵黄，右擎苍，',p:'zuǒ qiān huáng yòu qíng cāng'},{t:'锦帽貂裘，千骑卷平冈。',p:'jǐn mào diāo qiú qiān qí juǎn píng gāng'},{t:'为报倾城随太守，',p:'wèi bào qīng chéng suí tài shǒu'},{t:'亲射虎，看孙郎。',p:'qīn shè hǔ kàn sūn láng'},{t:'酒酣胸胆尚开张，',p:'jiǔ hān xiōng dǎn shàng kāi zhāng'},{t:'鬓微霜，又何妨！',p:'bìn wēi shuāng yòu hé fáng'},{t:'持节云中，何日遣冯唐？',p:'chí jié yún zhōng hé rì qiǎn féng táng'},{t:'会挽雕弓如满月，',p:'huì wǎn diāo gōng rú mǎn yuè'},{t:'西北望，射天狼。',p:'xī běi wàng shè tiān láng'}],
-   trans:'出猎抒怀，"会挽雕弓如满月，西北望，射天狼"豪情勃发，渴望为国杀敌建功。',emo:'壮志',style:'豪放',place:'密州',placeModern:'今山东诸城',createdYear:'1075年',
-   history:[{y:'1075年',t:'江城子·密州出猎·宋',hi:true}],related:[]},
-  {id:'guolingding',title:'过零丁洋',grade:9,volume:'九年级下册',dyn:'宋',poet:'wentianxiang',
-   lines:[{t:'辛苦遭逢起一经，',p:'xīn kǔ zāo féng qǐ yī jīng'},{t:'干戈寥落四周星。',p:'gān gē liáo luò sì zhōu xīng'},{t:'山河破碎风飘絮，',p:'shān hé pò suì fēng piāo xù'},{t:'身世浮沉雨打萍。',p:'shēn shì fú chén yǔ dǎ píng'},{t:'惶恐滩头说惶恐，',p:'huáng kǒng tān tóu shuō huáng kǒng'},{t:'零丁洋里叹零丁。',p:'líng dīng yáng lǐ tàn líng dīng'},{t:'人生自古谁无死？',p:'rén shēng zì gǔ shéi wú sǐ'},{t:'留取丹心照汗青。',p:'liú qǔ dān xīn zhào hàn qīng'}],
-   trans:'被俘过零丁洋，回顾身世家国，以"人生自古谁无死？留取丹心照汗青"明志，气节千古。',emo:'爱国',style:'抒情',place:'零丁洋',placeModern:'今广东珠江口',createdYear:'1279年',
-   history:[{y:'1279年',t:'过零丁洋·宋',hi:true}],related:[]},
-  {id:'shanpoyang',title:'山坡羊·潼关怀古',grade:9,volume:'九年级下册',dyn:'元',poet:'zhangyanghao',
-   lines:[{t:'峰峦如聚，',p:'fēng luán rú jù'},{t:'波涛如怒，',p:'bō tāo rú nù'},{t:'山河表里潼关路。',p:'shān hé biǎo lǐ tóng guān lù'},{t:'望西都，意踌躇。',p:'wàng xī dōu yì chóu chú'},{t:'伤心秦汉经行处，',p:'shāng xīn qín hàn jīng xíng chù'},{t:'宫阙万间都做了土。',p:'gōng què wàn jiān dōu zuò le tǔ'},{t:'兴，百姓苦；',p:'xīng bǎi xìng kǔ'},{t:'亡，百姓苦。',p:'wáng bǎi xìng kǔ'}],
-   trans:'凭吊潼关，目睹历代兴亡，"兴，百姓苦；亡，百姓苦"道尽悲悯民生的深沉感慨。',emo:'忧国',style:'咏史',place:'潼关',placeModern:'今陕西潼关',createdYear:'约1329年',
-   history:[{y:'约1329年',t:'山坡羊·潼关怀古·元',hi:true}],related:[]},
-
-  {id:'guanju',title:'关雎',grade:8,volume:'八年级下册',dyn:'先秦',poet:'shijing',
-   lines:[{t:'关关雎鸠，',p:'guān guān jū jiū'},{t:'在河之洲。',p:'zài hé zhī zhōu'},{t:'窈窕淑女，',p:'yǎo tiǎo shū nǚ'},{t:'君子好逑。',p:'jūn zǐ hǎo qiú'},{t:'参差荇菜，',p:'cēn cī xìng cài'},{t:'左右流之。',p:'zuǒ yòu liú zhī'},{t:'窈窕淑女，',p:'yǎo tiǎo shū nǚ'},{t:'寤寐求之。',p:'wù mèi qiú zhī'},{t:'求之不得，',p:'qiú zhī bù dé'},{t:'寤寐思服。',p:'wù mèi sī fú'},{t:'悠哉悠哉，',p:'yōu zāi yōu zāi'},{t:'辗转反侧。',p:'zhǎn zhuǎn fǎn cè'},{t:'参差荇菜，',p:'cēn cī xìng cài'},{t:'左右采之。',p:'zuǒ yòu cǎi zhī'},{t:'窈窕淑女，',p:'yǎo tiǎo shū nǚ'},{t:'琴瑟友之。',p:'qín sè yǒu zhī'},{t:'参差荇菜，',p:'cēn cī xìng cài'},{t:'左右芼之。',p:'zuǒ yòu mào zhī'},{t:'窈窕淑女，',p:'yǎo tiǎo shū nǚ'},{t:'钟鼓乐之。',p:'zhōng gǔ lè zhī'}],
-   trans:'《诗经》开篇，写君子对窈窕淑女的爱慕与追求，是最早的爱情诗，温柔敦厚。',emo:'喜悦',style:'抒情',place:'黄河之滨',placeModern:'今黄河流域',createdYear:'先秦',
-   history:[{y:'先秦',t:'关雎·先秦',hi:true}],related:[]},
-  {id:'jianjia',title:'蒹葭',grade:8,volume:'八年级下册',dyn:'先秦',poet:'shijing',
-   lines:[{t:'蒹葭苍苍，',p:'jiān jiā cāng cāng'},{t:'白露为霜。',p:'bái lù wèi shuāng'},{t:'所谓伊人，',p:'suǒ wèi yī rén'},{t:'在水一方。',p:'zài shuǐ yī fāng'},{t:'溯洄从之，',p:'sù huí cóng zhī'},{t:'道阻且长。',p:'dào zǔ qiě zhǎng'},{t:'溯游从之，',p:'sù yóu cóng zhī'},{t:'宛在水中央。',p:'wǎn zài shuǐ zhōng yāng'},{t:'蒹葭萋萋，',p:'jiān jiā qī qī'},{t:'白露未晞。',p:'bái lù wèi xī'},{t:'所谓伊人，',p:'suǒ wèi yī rén'},{t:'在水之湄。',p:'zài shuǐ zhī méi'},{t:'溯洄从之，',p:'sù huí cóng zhī'},{t:'道阻且跻。',p:'dào zǔ qiě jī'},{t:'溯游从之，',p:'sù yóu cóng zhī'},{t:'宛在水中坻。',p:'wǎn zài shuǐ zhōng chí'},{t:'蒹葭采采，',p:'jiān jiā cǎi cǎi'},{t:'白露未已。',p:'bái lù wèi yǐ'},{t:'所谓伊人，',p:'suǒ wèi yī rén'},{t:'在水之涘。',p:'zài shuǐ zhī sì'},{t:'溯洄从之，',p:'sù huí cóng zhī'},{t:'道阻且右。',p:'dào zǔ qiě yòu'},{t:'溯游从之，',p:'sù yóu cóng zhī'},{t:'宛在水中沚。',p:'wǎn zài shuǐ zhōng zhǐ'}],
-   trans:'《诗经·秦风》，以秋水苍苍、伊人宛在写可望难即的追寻，意境朦胧悠远。',emo:'思乡',style:'抒情',place:'水滨',placeModern:'今黄河流域',createdYear:'先秦',
-   history:[{y:'先秦',t:'蒹葭·先秦',hi:true}],related:[]},
-  {id:'songdushaofu',title:'送杜少府之任蜀州',grade:8,volume:'八年级下册',dyn:'唐',poet:'wangbo',
-   lines:[{t:'城阙辅三秦，',p:'chéng què fǔ sān qín'},{t:'风烟望五津。',p:'fēng yān wàng wǔ jīn'},{t:'与君离别意，',p:'yǔ jūn lí bié yì'},{t:'同是宦游人。',p:'tóng shì huàn yóu rén'},{t:'海内存知己，',p:'hǎi nèi cún zhī jǐ'},{t:'天涯若比邻。',p:'tiān yá ruò bǐ lín'},{t:'无为在歧路，',p:'wú wéi zài qí lù'},{t:'儿女共沾巾。',p:'ér nǚ gòng zhān jīn'}],
-   trans:'送友赴蜀，"海内存知己，天涯若比邻"一扫离别哀伤，胸襟开阔、情谊豪迈。',emo:'友情',style:'抒情',place:'长安',placeModern:'今陕西西安',createdYear:'唐代',
-   history:[{y:'唐代',t:'送杜少府之任蜀州·唐',hi:true}],related:[]},
-  {id:'maowu',title:'茅屋为秋风所破歌',grade:8,volume:'八年级下册',dyn:'唐',poet:'dufu',
-   lines:[{t:'八月秋高风怒号，',p:'bā yuè qiū gāo fēng nù háo'},{t:'卷我屋上三重茅。',p:'juǎn wǒ wū shàng sān chóng máo'},{t:'茅飞渡江洒江郊，',p:'máo fēi dù jiāng sǎ jiāng jiāo'},{t:'高者挂罥长林梢，',p:'gāo zhě guà juàn zhǎng lín shāo'},{t:'下者飘转沉塘坳。',p:'xià zhě piāo zhuǎn chén táng ào'},{t:'南村群童欺我老无力，',p:'nán cūn qún tóng qī wǒ lǎo wú lì'},{t:'忍能对面为盗贼。',p:'rěn néng duì miàn wèi dào zéi'},{t:'公然抱茅入竹去，',p:'gōng rán bào máo rù zhú qù'},{t:'唇焦口燥呼不得，',p:'chún jiāo kǒu zào hū bù dé'},{t:'归来倚杖自叹息。',p:'guī lái yǐ zhàng zì tàn xī'},{t:'俄顷风定云墨色，',p:'é qǐng fēng dìng yún mò sè'},{t:'秋天漠漠向昏黑。',p:'qiū tiān mò mò xiàng hūn hēi'},{t:'布衾多年冷似铁，',p:'bù qīn duō nián lěng shì tiě'},{t:'娇儿恶卧踏里裂。',p:'jiāo ér è wò tà lǐ liè'},{t:'床头屋漏无干处，',p:'chuáng tóu wū lòu wú gān chù'},{t:'雨脚如麻未断绝。',p:'yǔ jiǎo rú má wèi duàn jué'},{t:'自经丧乱少睡眠，',p:'zì jīng sāng luàn shǎo shuì mián'},{t:'长夜沾湿何由彻！',p:'cháng yè zhān shī hé yóu chè'},{t:'安得广厦千万间，',p:'ān dé guǎng shà qiān wàn jiān'},{t:'大庇天下寒士俱欢颜，',p:'dà bì tiān xià hán shì jù huān yán'},{t:'风雨不动安如山！',p:'fēng yǔ bù dòng ān rú shān'},{t:'呜呼！何时眼前突兀见此屋，',p:'wū hū hé shí yǎn qián tū wù xiàn cǐ wū'},{t:'吾庐独破受冻死亦足！',p:'wú lú dú pò shòu dòng sǐ yì zú'}],
-   trans:'秋风破屋、长夜沾湿，杜甫推己及人，发出"安得广厦千万间，大庇天下寒士俱欢颜"的济世呼号。',emo:'忧国',style:'抒情',place:'成都草堂',placeModern:'今四川成都',createdYear:'761年',
-   history:[{y:'761年',t:'茅屋为秋风所破歌·唐',hi:true}],related:[]},
-
-  {id:'huanghelou',title:'黄鹤楼',grade:8,volume:'八年级上册',dyn:'唐',poet:'cuihao',
-   lines:[{t:'昔人已乘黄鹤去，',p:'xī rén yǐ chéng huáng hè qù'},{t:'此地空余黄鹤楼。',p:'cǐ dì kòng yú huáng hè lóu'},{t:'黄鹤一去不复返，',p:'huáng hè yī qù bù fù fǎn'},{t:'白云千载空悠悠。',p:'bái yún qiān zǎi kōng yōu yōu'},{t:'晴川历历汉阳树，',p:'qíng chuān lì lì hàn yáng shù'},{t:'芳草萋萋鹦鹉洲。',p:'fāng cǎo qī qī yīng wǔ zhōu'},{t:'日暮乡关何处是？',p:'rì mù xiāng guān hé chù shì'},{t:'烟波江上使人愁。',p:'yān bō jiāng shàng shǐ rén chóu'}],
-   trans:'登黄鹤楼怀古思乡，"日暮乡关何处是，烟波江上使人愁"为千古登临名篇。',emo:'思乡',style:'抒情',place:'黄鹤楼',placeModern:'今湖北武汉',createdYear:'唐代',
-   history:[{y:'唐代',t:'黄鹤楼·唐代',hi:true}],related:[]},
-  {id:'shizhisaishang',title:'使至塞上',grade:8,volume:'八年级上册',dyn:'唐',poet:'wangwei',
-   lines:[{t:'单车欲问边，',p:'dān chē yù wèn biān'},{t:'属国过居延。',p:'shǔ guó guò jū yán'},{t:'征蓬出汉塞，',p:'zhēng péng chū hàn sāi'},{t:'归雁入胡天。',p:'guī yàn rù hú tiān'},{t:'大漠孤烟直，',p:'dà mò gū yān zhí'},{t:'长河落日圆。',p:'cháng hé luò rì yuán'},{t:'萧关逢候骑，',p:'xiāo guān féng hòu qí'},{t:'都护在燕然。',p:'dū hù zài yān rán'}],
-   trans:'奉命出使边塞，"大漠孤烟直，长河落日圆"以雄浑笔法写尽塞外壮丽。',emo:'豁达',style:'边塞',place:'塞上',placeModern:'今甘肃居延一带',createdYear:'737年',
-   history:[{y:'737年',t:'使至塞上·唐代',hi:true}],related:[]},
-  {id:'dujingmen',title:'渡荆门送别',grade:8,volume:'八年级上册',dyn:'唐',poet:'libai',
-   lines:[{t:'渡远荆门外，',p:'dù yuǎn jīng mén wài'},{t:'来从楚国游。',p:'lái cóng chǔ guó yóu'},{t:'山随平野尽，',p:'shān suí píng yě jǐn'},{t:'江入大荒流。',p:'jiāng rù dà huāng liú'},{t:'月下飞天镜，',p:'yuè xià fēi tiān jìng'},{t:'云生结海楼。',p:'yún shēng jié hǎi lóu'},{t:'仍怜故乡水，',p:'réng lián gù xiāng shuǐ'},{t:'万里送行舟。',p:'wàn lǐ sòng xíng zhōu'}],
-   trans:'出蜀远游，"山随平野尽，江入大荒流"写开阔江景，结以故乡水万里相送之情。',emo:'思乡',style:'写景',place:'荆门',placeModern:'今湖北荆门',createdYear:'725年',
-   history:[{y:'725年',t:'渡荆门送别·唐代',hi:true}],related:[]},
-  {id:'qiantanghu',title:'钱塘湖春行',grade:8,volume:'八年级上册',dyn:'唐',poet:'baijuyi',
-   lines:[{t:'孤山寺北贾亭西，',p:'gū shān sì běi jiǎ tíng xī'},{t:'水面初平云脚低。',p:'shuǐ miàn chū píng yún jiǎo dī'},{t:'几处早莺争暖树，',p:'jǐ chù zǎo yīng zhēng nuǎn shù'},{t:'谁家新燕啄春泥。',p:'shuí jiā xīn yàn zhuó chūn ní'},{t:'乱花渐欲迷人眼，',p:'luàn huā jiàn yù mí rén yǎn'},{t:'浅草才能没马蹄。',p:'qiǎn cǎo cái néng mò mǎ tí'},{t:'最爱湖东行不足，',p:'zuì ài hú dōng xíng bù zú'},{t:'绿杨阴里白沙堤。',p:'lǜ yáng yīn lǐ bái shā dī'}],
-   trans:'早春漫步西湖，乱花浅草、莺燕争春，写尽西湖早春的勃勃生机。',emo:'喜悦',style:'写景',place:'钱塘湖',placeModern:'今浙江杭州',createdYear:'约822年',
-   history:[{y:'约822年',t:'钱塘湖春行·唐代',hi:true}],related:[]},
-  {id:'yinjiu',title:'饮酒·其五',grade:8,volume:'八年级上册',dyn:'晋',poet:'taoyuanming',
-   lines:[{t:'结庐在人境，',p:'jié lú zài rén jìng'},{t:'而无车马喧。',p:'ér wú chē mǎ xuān'},{t:'问君何能尔？',p:'wèn jūn hé néng ěr'},{t:'心远地自偏。',p:'xīn yuǎn dì zì piān'},{t:'采菊东篱下，',p:'cǎi jú dōng lí xià'},{t:'悠然见南山。',p:'yōu rán jiàn nán shān'},{t:'山气日夕佳，',p:'shān qì rì xī jiā'},{t:'飞鸟相与还。',p:'fēi niǎo xiāng yǔ hái'},{t:'此中有真意，',p:'cǐ zhōng yǒu zhēn yì'},{t:'欲辨已忘言。',p:'yù biàn yǐ wàng yán'}],
-   trans:'归隐田园，"采菊东篱下，悠然见南山"写超脱尘世、物我两忘的恬淡。',emo:'闲适',style:'田园',place:'田园',placeModern:'今江西九江',createdYear:'约417年',
-   history:[{y:'约417年',t:'饮酒·其五·晋代',hi:true}],related:[]},
-  {id:'chibi',title:'赤壁',grade:8,volume:'八年级上册',dyn:'唐',poet:'dumu',
-   lines:[{t:'折戟沉沙铁未销，',p:'zhé jǐ chén shā tiě wèi xiāo'},{t:'自将磨洗认前朝。',p:'zì jiāng mó xǐ rèn qián cháo'},{t:'东风不与周郎便，',p:'dōng fēng bù yǔ zhōu láng biàn'},{t:'铜雀春深锁二乔。',p:'tóng què chūn shēn suǒ èr qiáo'}],
-   trans:'借折戟咏赤壁之战，"东风不与周郎便，铜雀春深锁二乔"以小见大议论历史。',emo:'哲理',style:'咏史',place:'赤壁',placeModern:'今湖北赤壁',createdYear:'唐代',
-   history:[{y:'唐代',t:'赤壁·唐代',hi:true}],related:[]},
-
-  {id:'mulan',title:'木兰诗',grade:7,volume:'七年级下册',dyn:'南北朝',poet:'beichaofolk',
-   lines:[{t:'唧唧复唧唧，',p:'jī jī fù jī jī'},{t:'木兰当户织。',p:'mù lán dāng hù zhī'},{t:'不闻机杼声，',p:'bù wén jī zhù shēng'},{t:'惟闻女叹息。',p:'wéi wén nǚ tàn xī'},{t:'问女何所思，',p:'wèn nǚ hé suǒ sī'},{t:'问女何所忆。',p:'wèn nǚ hé suǒ yì'},{t:'女亦无所思，',p:'nǚ yì wú suǒ sī'},{t:'女亦无所忆。',p:'nǚ yì wú suǒ yì'},{t:'昨夜见军帖，',p:'zuó yè jiàn jūn tiě'},{t:'可汗大点兵，',p:'kè hán dà diǎn bīng'},{t:'军书十二卷，',p:'jūn shū shí èr juǎn'},{t:'卷卷有爷名。',p:'juàn juàn yǒu yé míng'},{t:'阿爷无大儿，',p:'ā yé wú dà ér'},{t:'木兰无长兄，',p:'mù lán wú zhǎng xiōng'},{t:'愿为市鞍马，',p:'yuàn wèi shì ān mǎ'},{t:'从此替爷征。',p:'cóng cǐ tì yé zhēng'},{t:'东市买骏马，',p:'dōng shì mǎi jùn mǎ'},{t:'西市买鞍鞯，',p:'xī shì mǎi ān jiān'},{t:'南市买辔头，',p:'nán shì mǎi pèi tóu'},{t:'北市买长鞭。',p:'běi shì mǎi zhǎng biān'},{t:'旦辞爷娘去，',p:'dàn cí yé niáng qù'},{t:'暮宿黄河边，',p:'mù sù huáng hé biān'},{t:'不闻爷娘唤女声，',p:'bù wén yé niáng huàn nǚ shēng'},{t:'但闻黄河流水鸣溅溅。',p:'dàn wén huáng hé liú shuǐ míng jiān jiān'},{t:'旦辞黄河去，',p:'dàn cí huáng hé qù'},{t:'暮至黑山头，',p:'mù zhì hēi shān tóu'},{t:'不闻爷娘唤女声，',p:'bù wén yé niáng huàn nǚ shēng'},{t:'但闻燕山胡骑鸣啾啾。',p:'dàn wén yān shān hú jì míng jiū jiū'},{t:'万里赴戎机，',p:'wàn lǐ fù róng jī'},{t:'关山度若飞。',p:'guān shān dù ruò fēi'},{t:'朔气传金柝，',p:'shuò qì chuán jīn tuò'},{t:'寒光照铁衣。',p:'hán guāng zhào tiě yī'},{t:'将军百战死，',p:'jiāng jūn bǎi zhàn sǐ'},{t:'壮士十年归。',p:'zhuàng shì shí nián guī'},{t:'归来见天子，',p:'guī lái jiàn tiān zi'},{t:'天子坐明堂。',p:'tiān zi zuò míng táng'},{t:'策勋十二转，',p:'cè xūn shí èr zhuǎn'},{t:'赏赐百千强。',p:'shǎng cì bǎi qiān qiáng'},{t:'可汗问所欲，',p:'kè hán wèn suǒ yù'},{t:'木兰不用尚书郎，',p:'mù lán bù yòng shàng shū láng'},{t:'愿驰千里足，',p:'yuàn chí qiān lǐ zú'},{t:'送儿还故乡。',p:'sòng ér hái gù xiāng'},{t:'爷娘闻女来，',p:'yé niáng wén nǚ lái'},{t:'出郭相扶将；',p:'chū guō xiāng fú jiāng'},{t:'阿姊闻妹来，',p:'ā zǐ wén mèi lái'},{t:'当户理红妆；',p:'dāng hù lǐ hóng zhuāng'},{t:'小弟闻姊来，',p:'xiǎo dì wén zǐ lái'},{t:'磨刀霍霍向猪羊。',p:'mó dāo huò huò xiàng zhū yáng'},{t:'开我东阁门，',p:'kāi wǒ dōng gé mén'},{t:'坐我西阁床，',p:'zuò wǒ xī gé chuáng'},{t:'脱我战时袍，',p:'tuō wǒ zhàn shí páo'},{t:'著我旧时裳。',p:'zhuó wǒ jiù shí cháng'},{t:'当窗理云鬓，',p:'dāng chuāng lǐ yún bìn'},{t:'对镜帖花黄。',p:'duì jìng tiē huā huáng'},{t:'出门看火伴，',p:'chū mén kàn huǒ bàn'},{t:'火伴皆惊忙：',p:'huǒ bàn jiē jīng máng'},{t:'同行十二年，',p:'tóng háng shí èr nián'},{t:'不知木兰是女郎。',p:'bù zhī mù lán shì nǚ láng'},{t:'雄兔脚扑朔，',p:'xióng tù jiǎo pū shuò'},{t:'雌兔眼迷离；',p:'cí tù yǎn mí lí'},{t:'双兔傍地走，',p:'shuāng tù bàng dì zǒu'},{t:'安能辨我是雄雌？',p:'ān néng biàn wǒ shì xióng cí'}],
-   trans:'北朝民歌，叙木兰代父从军、征战十年、辞官还乡，歌颂其勇敢、孝心与不慕名利。',emo:'爱国',style:'叙事',place:'黄河·黑山',placeModern:'今华北一带',createdYear:'南北朝',
-   history:[{y:'南北朝',t:'木兰诗·南北朝代',hi:true}],related:[]},
-  {id:'dengyouzhou',title:'登幽州台歌',grade:7,volume:'七年级下册',dyn:'唐',poet:'chenziang',
-   lines:[{t:'前不见古人，',p:'qián bú jiàn gǔ rén'},{t:'后不见来者。',p:'hòu bú jiàn lái zhě'},{t:'念天地之悠悠，',p:'niàn tiān dì zhī yōu yōu'},{t:'独怆然而涕下！',p:'dú chuàng rán ér tì xià'}],
-   trans:'登台远望，前不见古人、后不见来者，抒发生不逢时、怀才不遇的苍凉。',emo:'忧国',style:'抒情',place:'幽州台',placeModern:'今北京',createdYear:'约696年',
-   history:[{y:'约696年',t:'登幽州台歌·唐代',hi:true}],related:[]},
-  {id:'wangyue',title:'望岳',grade:7,volume:'七年级下册',dyn:'唐',poet:'dufu',
-   lines:[{t:'岱宗夫如何？',p:'dài zōng fū rú hé'},{t:'齐鲁青未了。',p:'qí lǔ qīng wèi liǎo'},{t:'造化钟神秀，',p:'zào huà zhōng shén xiù'},{t:'阴阳割昏晓。',p:'yīn yáng gē hūn xiǎo'},{t:'荡胸生曾云，',p:'dàng xiōng shēng céng yún'},{t:'决眦入归鸟。',p:'jué zì rù guī niǎo'},{t:'会当凌绝顶，',p:'huì dāng líng jué dǐng'},{t:'一览众山小。',p:'yī lǎn zhòng shān xiǎo'}],
-   trans:'远望泰山雄伟，"会当凌绝顶，一览众山小"抒发青年杜甫的壮志豪情。',emo:'壮志',style:'写景',place:'泰山',placeModern:'今山东泰安',createdYear:'约736年',
-   history:[{y:'约736年',t:'望岳·唐代',hi:true}],related:[]},
-  {id:'dengfeilai',title:'登飞来峰',grade:7,volume:'七年级下册',dyn:'宋',poet:'wanganshi',
-   lines:[{t:'飞来山上千寻塔，',p:'fēi lái shān shàng qiān xún tǎ'},{t:'闻说鸡鸣见日升。',p:'wén shuō jī míng jiàn rì shēng'},{t:'不畏浮云遮望眼，',p:'bù wèi fú yún zhē wàng yǎn'},{t:'自缘身在最高层。',p:'zì yuán shēn zài zuì gāo céng'}],
-   trans:'登高远眺，"不畏浮云遮望眼，自缘身在最高层"借景说理，抒发革新的远见。',emo:'壮志',style:'哲理',place:'飞来峰',placeModern:'今浙江杭州',createdYear:'1050年',
-   history:[{y:'1050年',t:'登飞来峰·宋代',hi:true}],related:[]},
-  {id:'youshanxicun',title:'游山西村',grade:7,volume:'七年级下册',dyn:'宋',poet:'luyou',
-   lines:[{t:'莫笑农家腊酒浑，',p:'mò xiào nóng jiā là jiǔ hún'},{t:'丰年留客足鸡豚。',p:'fēng nián liú kè zú jī tún'},{t:'山重水复疑无路，',p:'shān chóng shuǐ fù yí wú lù'},{t:'柳暗花明又一村。',p:'liǔ àn huā míng yòu yī cūn'},{t:'箫鼓追随春社近，',p:'xiāo gǔ zhuī suí chūn shè jìn'},{t:'衣冠简朴古风存。',p:'yī guān jiǎn piáo gǔ fēng cún'},{t:'从今若许闲乘月，',p:'cóng jīn ruò xǔ xián chéng yuè'},{t:'拄杖无时夜叩门。',p:'zhǔ zhàng wú shí yè kòu mén'}],
-   trans:'写农家待客与山村风光，"山重水复疑无路，柳暗花明又一村"含绝处逢生之理。',emo:'喜悦',style:'田园',place:'山阴',placeModern:'今浙江绍兴',createdYear:'1167年',
-   history:[{y:'1167年',t:'游山西村·宋代',hi:true}],related:[]},
-  {id:'zhuliguan',title:'竹里馆',grade:7,volume:'七年级下册',dyn:'唐',poet:'wangwei',
-   lines:[{t:'独坐幽篁里，',p:'dú zuò yōu huáng lǐ'},{t:'弹琴复长啸。',p:'tán qín fù cháng xiào'},{t:'深林人不知，',p:'shēn lín rén bù zhī'},{t:'明月来相照。',p:'míng yuè lái xiāng zhào'}],
-   trans:'独坐幽深竹林弹琴长啸，明月相伴，写隐居生活的清幽闲适。',emo:'闲适',style:'田园',place:'辋川',placeModern:'今陕西蓝田',createdYear:'唐代',
-   history:[{y:'唐代',t:'竹里馆·唐代',hi:true}],related:[]},
-  {id:'chunyeluocheng',title:'春夜洛城闻笛',grade:7,volume:'七年级下册',dyn:'唐',poet:'libai',
-   lines:[{t:'谁家玉笛暗飞声，',p:'shuí jiā yù dí àn fēi shēng'},{t:'散入春风满洛城。',p:'sàn rù chūn fēng mǎn luò chéng'},{t:'此夜曲中闻折柳，',p:'cǐ yè qǔ zhōng wén zhé liǔ'},{t:'何人不起故园情。',p:'hé rén bù qǐ gù yuán qíng'}],
-   trans:'春夜洛阳闻笛声《折杨柳》，触动满城游子的思乡之情。',emo:'思乡',style:'抒情',place:'洛阳',placeModern:'今河南洛阳',createdYear:'唐代',
-   history:[{y:'唐代',t:'春夜洛城闻笛·唐代',hi:true}],related:[]},
-
-  {id:'guancanghai',title:'观沧海',grade:7,volume:'七年级上册',dyn:'汉',poet:'caocao',
-   lines:[{t:'东临碣石，',p:'dōng lín jié shí'},{t:'以观沧海。',p:'yǐ guān cāng hǎi'},{t:'水何澹澹，',p:'shuǐ hé dàn dàn'},{t:'山岛竦峙。',p:'shān dǎo sǒng zhì'},{t:'树木丛生，',p:'shù mù cóng shēng'},{t:'百草丰茂。',p:'bǎi cǎo fēng mào'},{t:'秋风萧瑟，',p:'qiū fēng xiāo sè'},{t:'洪波涌起。',p:'hóng bō yǒng qǐ'},{t:'日月之行，',p:'rì yuè zhī xíng'},{t:'若出其中；',p:'ruò chū qí zhōng'},{t:'星汉灿烂，',p:'xīng hàn càn làn'},{t:'若出其里。',p:'ruò chū qí lǐ'},{t:'幸甚至哉，',p:'xìng shèn zhì zāi'},{t:'歌以咏志。',p:'gē yǐ yǒng zhì'}],
-   trans:'登碣石山观沧海，写大海吞吐日月星辰的壮阔，抒发一统天下的博大胸怀。',emo:'豁达',style:'写景',place:'碣石山',placeModern:'今河北昌黎',createdYear:'约207年',
-   history:[{y:'约207年',t:'观沧海·汉代',hi:true}],related:[]},
-  {id:'cibeigushan',title:'次北固山下',grade:7,volume:'七年级上册',dyn:'唐',poet:'wangwan',
-   lines:[{t:'客路青山外，',p:'kè lù qīng shān wài'},{t:'行舟绿水前。',p:'xíng zhōu lǜ shuǐ qián'},{t:'潮平两岸阔，',p:'cháo píng liǎng àn kuò'},{t:'风正一帆悬。',p:'fēng zhèng yī fān xuán'},{t:'海日生残夜，',p:'hǎi rì shēng cán yè'},{t:'江春入旧年。',p:'jiāng chūn rù jiù nián'},{t:'乡书何处达？',p:'xiāng shū hé chù dá'},{t:'归雁洛阳边。',p:'guī yàn luò yáng biān'}],
-   trans:'舟行北固山下，潮平岸阔、海日生残夜，旅途所见中寄托思乡之情。',emo:'思乡',style:'写景',place:'北固山',placeModern:'今江苏镇江',createdYear:'唐代',
-   history:[{y:'唐代',t:'次北固山下·唐代',hi:true}],related:[]},
-  {id:'tianjingsha',title:'天净沙·秋思',grade:7,volume:'七年级上册',dyn:'元',poet:'maozhiyuan',
-   lines:[{t:'枯藤老树昏鸦，',p:'kū téng lǎo shù hūn yā'},{t:'小桥流水人家，',p:'xiǎo qiáo liú shuǐ rén jiā'},{t:'古道西风瘦马。',p:'gǔ dào xī fēng shòu mǎ'},{t:'夕阳西下，',p:'xī yáng xī xià'},{t:'断肠人在天涯。',p:'duàn cháng rén zài tiān yá'}],
-   trans:'枯藤老树、小桥流水、古道西风连成秋郊夕照图，道尽天涯游子的孤寂愁思。',emo:'思乡',style:'写景',place:'古道',placeModern:'今北方道中',createdYear:'元代',
-   history:[{y:'元代',t:'天净沙·秋思·元代',hi:true}],related:[]},
-  {id:'wenwangchangling',title:'闻王昌龄左迁龙标遥有此寄',grade:7,volume:'七年级上册',dyn:'唐',poet:'libai',
-   lines:[{t:'杨花落尽子规啼，',p:'yáng huā luò jǐn zi guī tí'},{t:'闻道龙标过五溪。',p:'wén dào lóng biāo guò wǔ xī'},{t:'我寄愁心与明月，',p:'wǒ jì chóu xīn yǔ míng yuè'},{t:'随君直到夜郎西。',p:'suí jūn zhí dào yè láng xī'}],
-   trans:'听闻好友王昌龄被贬龙标，李白以明月寄情，遥托相思与慰藉。',emo:'友情',style:'抒情',place:'扬州一带',placeModern:'今江苏扬州一带',createdYear:'唐代',
-   history:[{y:'唐代',t:'闻王昌龄左迁龙标遥有此寄·唐代',hi:true}],related:[]},
-  {id:'yeyujibei',title:'夜雨寄北',grade:7,volume:'七年级上册',dyn:'唐',poet:'lishangyin',
-   lines:[{t:'君问归期未有期，',p:'jūn wèn guī qī wèi yǒu qī'},{t:'巴山夜雨涨秋池。',p:'bā shān yè yǔ zhǎng qiū chí'},{t:'何当共剪西窗烛，',p:'hé dāng gòng jiǎn xī chuāng zhú'},{t:'却话巴山夜雨时。',p:'què huà bā shān yè yǔ shí'}],
-   trans:'身在巴山夜雨中思念北方亲人，遥想他日重逢剪烛夜话，于愁中见温情。',emo:'思乡',style:'抒情',place:'巴山',placeModern:'今四川东部',createdYear:'唐代',
-   history:[{y:'唐代',t:'夜雨寄北·唐代',hi:true}],related:[]},
-  {id:'qiuci',title:'秋词',grade:7,volume:'七年级上册',dyn:'唐',poet:'liuyuxi',
-   lines:[{t:'自古逢秋悲寂寥，',p:'zì gǔ féng qiū bēi jì liáo'},{t:'我言秋日胜春朝。',p:'wǒ yán qiū rì shèng chūn cháo'},{t:'晴空一鹤排云上，',p:'qíng kōng yī hè pái yún shàng'},{t:'便引诗情到碧霄。',p:'biàn yǐn shī qíng dào bì xiāo'}],
-   trans:'一反悲秋传统，盛赞秋日晴空一鹤排云而上，抒发昂扬乐观的豪情。',emo:'豁达',style:'抒情',place:'朗州',placeModern:'今湖南常德',createdYear:'唐代',
-   history:[{y:'唐代',t:'秋词·唐代',hi:true}],related:[]},
 
   {id:'jiangnan',title:'江南',grade:1,volume:'一年级上册',dyn:'汉',poet:'hanyuefu',
    lines:[{t:'江南可采莲，',p:'jiāng nán kě cǎi lián，'},{t:'莲叶何田田。',p:'lián yè hé tián tián。'},{t:'鱼戏莲叶间。',p:'yú xì lián yè jiān。'},{t:'鱼戏莲叶东，',p:'yú xì lián yè dōng，'},{t:'鱼戏莲叶西，',p:'yú xì lián yè xī，'},{t:'鱼戏莲叶南，',p:'yú xì lián yè nán，'},{t:'鱼戏莲叶北。',p:'yú xì lián yè běi。'}],
@@ -1804,10 +1393,10 @@ function starStr(n){return '★'.repeat(n)+'☆'.repeat(3-n);}
 /* ══════════════════════════════════════════
    年级入口
    ══════════════════════════════════════════ */
-const GRADE_CN=['','一','二','三','四','五','六','七','八','九'];
+const GRADE_CN=['','一','二','三','四','五','六'];
 function renderGradeList(){
   const box=document.getElementById('grade-list');let h='';
-  for(let g=1;g<=9;g++){
+  for(let g=1;g<=6;g++){
     const ps=POEMS.filter(p=>p.grade===g);
     if(!ps.length)continue;
     const locked=ST.grade&&g>ST.grade;
@@ -1901,28 +1490,29 @@ function fillDetail(p){
   const poet=POETS[p.poet];
   const teacher=ST.role==='teacher',parent=ST.role==='parent';
   let H='';
-  // 0 原文（注释 + 意象，均可缺省）
-  H+='<div class="dpanel">';
-  if(p.anno&&p.anno.length)H+='<div class="sec"><h3><span class="bar"></span>字词注释</h3><div class="annos">'+p.anno.map(a=>'<span class="anno"><b>'+a.w+'</b>'+a.m+'</span>').join('')+'</div></div>';
-  if(p.imagery&&p.imagery.length)H+='<div class="sec"><h3><span class="bar"></span>诗中意象</h3><div class="imagery">'+p.imagery.map(im=>'<span class="imk">'+im+'</span>').join('')+'</div></div>';
-  if(!(p.anno&&p.anno.length)&&!(p.imagery&&p.imagery.length))H+='<div class="sec"><p style="color:var(--ink3)">原文与拼音见上方。</p></div>';
-  H+='</div>';
+  // 0 原文（hero已显示，这里放注释概览）
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>字词注释</h3><div class="annos">'+
+     p.anno.map(a=>'<span class="anno"><b>'+a.w+'</b>'+a.m+'</span>').join('')+'</div></div>'+
+     '<div class="sec"><h3><span class="bar"></span>诗中意象</h3><div class="imagery">'+
+     p.imagery.map(im=>'<span class="imk">'+im+'</span>').join('')+'</div></div></div>';
   // 1 诗意
-  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>白话译文</h3><p>'+(p.trans||'（译文待补充）')+'</p>'+
-     (p.transT?(teacher?'<div class="teacher-box on"><b>教师赏析：</b>'+p.transT+'</div>':'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">展开深度赏析 ▾</button><div class="teacher-box">'+p.transT+'</div>'):'')+
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>白话译文</h3><p>'+p.trans+'</p>'+
+     (teacher?'<div class="teacher-box on"><b>教师赏析：</b>'+p.transT+'</div>':
+       '<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">展开深度赏析 ▾</button><div class="teacher-box">'+p.transT+'</div>')+
      (parent?'<div class="parent-tip on"><span>💡</span><span>陪读建议：可以问问孩子——"诗里你最喜欢哪一句？为什么？"引导他用自己的话说说画面。</span></div>':'')+
      '</div>'+
-     '<div class="sec"><h3><span class="bar"></span>情感主题</h3><p>这首诗的情感是 <b style="color:var(--teal)">'+(p.emo||'—')+'</b>，风格为 <b style="color:var(--teal)">'+(p.style||'—')+'</b>。</p></div></div>';
+     '<div class="sec"><h3><span class="bar"></span>情感主题</h3><p>这首诗的情感是 <b style="color:var(--teal)">'+p.emo+'</b>，风格为 <b style="color:var(--teal)">'+p.style+'</b>。</p></div></div>';
   // 2 诗人
   H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>诗人故事 · '+poet.name+'</h3>'+
      '<p style="color:var(--ink2);font-size:14px;margin-bottom:8px">'+poet.dyn+'代 · '+poet.years+'</p>'+
-     '<p>'+(p.story||poet.intro||'')+'</p>'+
-     (p.storyT?(teacher?'<div class="teacher-box on"><b>延伸：</b>'+p.storyT+'</div>':'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">了解更多 ▾</button><div class="teacher-box">'+p.storyT+'</div>'):'')+
+     '<p>'+p.story+'</p>'+
+     (teacher?'<div class="teacher-box on"><b>延伸：</b>'+p.storyT+'</div>':
+       '<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">了解更多 ▾</button><div class="teacher-box">'+p.storyT+'</div>')+
      '</div>'+
      '<div class="sec"><h3><span class="bar"></span>诗人简介</h3><p>'+poet.intro+'</p></div></div>';
   // 3 历史
-  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>历史背景 · '+(p.createdYear||'')+'</h3>'+
-     ((p.history&&p.history.length)?'<div class="minihist">'+p.history.map(e=>'<div class="mh-item'+(e.hi?' hi':'')+'"><span class="mdot"></span><div class="my">'+e.y+'</div><div class="mt">'+e.t+'</div></div>').join('')+'</div>':'<p style="color:var(--ink3)">'+poet.dyn+'代 · '+poet.years+'</p>')+
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>历史背景 · '+p.createdYear+'</h3><div class="minihist">'+
+     p.history.map(e=>'<div class="mh-item'+(e.hi?' hi':'')+'"><span class="mdot"></span><div class="my">'+e.y+'</div><div class="mt">'+e.t+'</div></div>').join('')+
      '</div></div></div>';
   // 4 地图
   H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>创作地点</h3>'+
@@ -1948,24 +1538,10 @@ function backFromDetail(){showView(prevView||'cards');}
 /* ══════════════════════════════════════════
    练习（选择 / 情感 / 连线）
    ══════════════════════════════════════════ */
-const EMO_EMOJI={'思乡':'🌙','喜悦':'😄','豁达':'🌄','友情':'🤝','感恩':'🙏','忧国':'😔','悯农':'🍚','送别':'⛵','爱国':'⚡','哲理':'🔭','母爱':'👩‍👦','离愁':'🍂','壮志':'🔥','闲适':'🍵','惜时':'⏳'};
-function _shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
-function _opts(correct,pool){const d=_shuf(pool.filter(x=>x!==correct)).slice(0,3);const o=_shuf([correct].concat(d));return{o:o,a:o.indexOf(correct)};}
-function autoQuiz(p){
-  const pn=POETS[p.poet].name,qa=[];
-  const a=_opts(pn,Object.values(POETS).map(x=>x.name));
-  qa.push({type:'choice',q:'《'+p.title+'》的作者是谁？',o:a.o,a:a.a,ex:'本诗作者是'+p.dyn+'代'+pn+'。'});
-  const dy=_opts(p.dyn,['唐','宋','元','明','清','汉','魏晋','南北朝']);
-  qa.push({type:'choice',q:'《'+p.title+'》是哪个朝代的作品？',o:dy.o.map(d=>d+'代'),a:dy.a,ex:'本诗为'+p.dyn+'代作品。'});
-  if(p.emo){const allE=Object.keys(EMO_EMOJI);const e=_opts(p.emo,allE);
-    qa.push({type:'emotion',q:'这首诗主要表达怎样的情感？',o:e.o.map(t=>({e:EMO_EMOJI[t]||'🌸',t:t})),a:e.a});}
-  return qa;
-}
 function buildQuiz(p){
   const box=document.getElementById('dp-quiz');
   let h='';
-  ST.quiz=(p.quiz&&p.quiz.length)?p.quiz:autoQuiz(p);
-  ST.quiz.forEach((q,qi)=>{
+  p.quiz.forEach((q,qi)=>{
     h+='<div class="quiz-q" id="q'+qi+'">';
     if(q.type==='choice'){
       h+='<span class="qtype">选择题</span><div class="qt">'+(qi+1)+'. '+q.q+'</div><div class="opts">'+
@@ -2030,7 +1606,7 @@ function drawMatchLine(qi,a,b){
 }
 function submitQuiz(){
   const p=ST.poem;let correct=0,gradable=0;
-  (ST.quiz||p.quiz).forEach((q,qi)=>{
+  p.quiz.forEach((q,qi)=>{
     const qel=document.getElementById('q'+qi);
     if(q.type==='choice'||q.type==='emotion'){
       gradable++;
@@ -2283,20 +1859,6 @@ const GEO={
  '今安徽池州一带':[117.49,30.66],'今陕西西安':[108.95,34.27],'今江浙一带':[120.16,30.27],
  '今河南开封':[114.31,34.80],'今湖北武汉':[114.30,30.59],'今江苏溧阳':[119.48,31.42],
  '今陕西蓝田':[109.32,34.16],'今镇江、杭州一带':[119.45,32.20],
- '今陕西商洛':[109.94,33.87], '今新疆一带':[87.62,43.82],
- '今山西河津':[110.71,35.60],
- '今四川峨眉':[103.49,29.60], '今湖南长沙':[112.94,28.23],
- '今河北一带':[114.50,38.50],
- '今浙江建德':[119.28,29.47],
- '今青海一带':[101.00,36.60],
- '今江西上饶':[117.97,28.45],
- '今甘肃武威':[102.64,37.93], '今安徽和县':[118.36,31.72], '今江南一带':[120.00,30.50],
- '今安徽芜湖':[118.38,31.33], '今湖南岳阳':[113.13,29.37], '今浙江衢州':[118.87,28.97],
- '今山东诸城':[119.41,35.99], '今甘肃天水':[105.72,34.58], '今陕西延安':[109.49,36.59], '今广东珠江口':[113.60,22.30], '今陕西潼关':[110.25,34.55],
- '今黄河流域':[114.00,35.50],
- '今甘肃居延一带':[100.80,41.90], '今湖北荆门':[112.20,30.92], '今湖北赤壁':[113.90,29.72],
- '今北京':[116.40,39.90], '今山东泰安':[117.13,36.19], '今河南洛阳':[112.45,34.62], '今华北一带':[114.50,38.00],
- '今河北昌黎':[119.16,39.73], '今江苏镇江':[119.45,32.19], '今北方道中':[114.0,35.5], '今四川东部':[107.5,31.2], '今湖南常德':[111.70,29.04],
  '今江苏苏州一带':[120.62,31.30],'今四川江油一带':[104.74,31.78],'今江西吉水':[115.13,27.21],
  '今内蒙古阴山一带':[111.74,40.84],'今湖北蕲春一带':[115.43,30.23],'今浙江一带':[120.20,30.30],
  '今浙江杭州':[120.15,30.27],'今江苏南京':[118.78,32.06],
@@ -2844,9 +2406,9 @@ function buildPrintSheet(p){
     '<h1 style="text-align:center;font-size:26px;margin-bottom:4px">《'+p.title+'》学习单</h1>'+
     '<p style="text-align:center;color:#555;margin-bottom:16px">'+p.dyn+'代 · '+POETS[p.poet].name+' · '+p.volume+'　　姓名：________　班级：________</p>'+
     '<div class="sec"><h3>一、诗词原文</h3><p style="font-size:18px;line-height:2.4">'+p.lines.map(l=>l.t).join('<br>')+'</p></div>'+
-    ((p.anno&&p.anno.length)?'<div class="sec"><h3>二、字词注释</h3><p>'+p.anno.map(a=>a.w+'：'+a.m).join('；　')+'</p></div>':'')+
+    '<div class="sec"><h3>二、字词注释</h3><p>'+p.anno.map(a=>a.w+'：'+a.m).join('；　')+'</p></div>'+
     '<div class="sec"><h3>三、想一想</h3>'+
-    ((p.quiz&&p.quiz.length)?p.quiz:autoQuiz(p)).filter(q=>q.type==='choice').map((q,i)=>'<p>'+(i+1)+'. '+q.q+'<br>'+q.o.map((o,oi)=>'　（'+String.fromCharCode(65+oi)+'）'+o).join('')+'</p>').join('')+
+    p.quiz.filter(q=>q.type==='choice').map((q,i)=>'<p>'+(i+1)+'. '+q.q+'<br>'+q.o.map((o,oi)=>'　（'+String.fromCharCode(65+oi)+'）'+o).join('')+'</p>').join('')+
     '<p>· 这首诗表达了诗人怎样的情感？请写下来：________________________________</p>'+
     '<p>· 用自己的话说说诗的意思：____________________________________________</p>'+
     '</div></div>';
