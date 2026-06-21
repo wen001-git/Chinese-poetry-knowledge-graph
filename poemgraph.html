@@ -366,6 +366,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .scene-ic{display:flex;gap:5px;flex:0 0 auto;width:175px}
 .scene-tx{font-family:var(--serif);font-size:18px}
 .scene-none{color:var(--ink3);width:32px;text-align:center}
+.ln-scene{display:inline-flex;gap:3px;vertical-align:middle;margin-left:12px;opacity:.78}
+.ln-scene svg{flex:0 0 auto}
 .anno.lz b{font-size:18px}
 .anno{background:var(--paper3);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px}
 .anno b{color:var(--teal);font-family:var(--serif);font-size:16px;margin-right:6px}
@@ -1846,6 +1848,13 @@ function sceneIconsFor(text){
   for(const s in SCENE_SYN){ if(text.indexOf(s)>=0)set.add(SCENE_SYN[s]); }
   return [...set].slice(0,5).map(k=>_scIcon(ICONS[k]));
 }
+function lineScene(text){
+  const set=new Set();
+  for(const k in ICONS){ if(text.indexOf(k)>=0)set.add(k); }
+  for(const s in SCENE_SYN){ if(text.indexOf(s)>=0)set.add(SCENE_SYN[s]); }
+  const a=[...set].slice(0,4); if(!a.length)return '';
+  return '<span class="ln-scene">'+a.map(k=>'<svg viewBox="0 0 40 40" width="22" height="22">'+ICONS[k]+'</svg>').join('')+'</span>';
+}
 function poemSceneSVG(p){
   let H='<div class="sec"><h3><span class="bar"></span>诗境图 · 一句一画</h3>'+
     '<p style="color:var(--ink3);font-size:13px;margin-bottom:8px">用水墨小图把诗句里的景物画出来，边读边在脑海里想象这幅画面。</p>';
@@ -2005,7 +2014,7 @@ function renderCards(keepFilter){
 /* ══════════════════════════════════════════
    详情页
    ══════════════════════════════════════════ */
-const D_TABS=[['原文','verse'],['诗画','scene'],['诗意','mean'],['诗人','poet'],['历史','hist'],['地图','map'],['图谱','graph'],['练习','quiz'],['相关','rel']];
+const D_TABS=[['原文','verse'],['诗意','mean'],['诗人','poet'],['历史','hist'],['地图','map'],['图谱','graph'],['练习','quiz'],['相关','rel']];
 function openDetail(id){
   const p=POEMS.find(x=>x.id===id);if(!p)return;
   ST.poem=p;ST.tab=0;ST.qa={};
@@ -2013,7 +2022,7 @@ function openDetail(id){
   // hero
   document.getElementById('d-meta').innerHTML='<span class="dyn">'+p.dyn+'代</span> · '+POETS[p.poet].name+' · '+p.volume;
   document.getElementById('d-title').textContent=p.title;
-  document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'">'+rubyLine(l)+'</span>').join('');
+  document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'">'+rubyLine(l)+lineScene(l.t)+'</span>').join('');
   reciteStop();
   recApplyLangAvail();
   // tabs
@@ -2049,8 +2058,6 @@ function fillDetail(p){
   if(typeof LIANZI!=='undefined'&&LIANZI[p.id])H+='<div class="sec"><h3><span class="bar" style="background:var(--ochre)"></span>炼字赏析 · 品一个字</h3><div class="annos">'+LIANZI[p.id].map(z=>'<span class="anno lz"><b>'+z.w+'</b>'+z.m+'</span>').join('')+'</div></div>';
   if(!(p.anno&&p.anno.length)&&!(p.imagery&&p.imagery.length))H+='<div class="sec"><p style="color:var(--ink3)">原文与拼音见上方。</p></div>';
   H+='</div>';
-  // 诗画
-  H+='<div class="dpanel">'+poemSceneSVG(p)+'</div>';
   // 1 诗意
   H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>白话译文</h3><p>'+(p.trans||'（译文待补充）')+'</p>'+
      (p.transT?(teacher?'<div class="teacher-box on"><b>教师赏析：</b>'+p.transT+'</div>':'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">展开深度赏析 ▾</button><div class="teacher-box">'+p.transT+'</div>'):'')+
