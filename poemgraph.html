@@ -2322,19 +2322,71 @@ function layoutTree(){
   Object.values(dyns).forEach(n=>n.r=14);
   gNodes.forEach(n=>{ if(!['poem','poet','dynasty'].includes(n.type)){n.x=cx;n.y=cy;} });
 }
-function gOnNodeTap(n,x,y){
-  if(n.type==='poem'){openDetail(n.ref.id);return;}
-  if(n.type==='poet'){const k=n.ref?n.ref.poet:n.id.slice(5);
-    setGraphFocus((gFocus&&gFocus.t==='poet'&&gFocus.k===k)?null:{t:'poet',k:k}); return;}
-  if(n.type==='dynasty'){const k=n.label.replace(/代$/,'');
-    setGraphFocus((gFocus&&gFocus.t==='dyn'&&gFocus.k===k)?null:{t:'dyn',k:k}); return;}
-  showGPop(n,x,y);
+function gOnNodeTap(n,x,y){ showGPop(n,x,y); }
+/* ── 图数据库式：双击节点展开它的 1-hop 邻居（累积到画布），再双击折叠 ── */
+function nodeNeighbors(n){
+  const out=[];
+  if(n.type==='poem'){const p=n.ref;
+    out.push({id:'poet_'+p.poet,type:'poet',label:POETS[p.poet].name,ref:{poet:p.poet}});
+    out.push({id:'dyn_'+p.dyn,type:'dynasty',label:p.dyn+'代'});
+    if(p.placeModern)out.push({id:'pl_'+p.placeModern,type:'place',label:p.placeModern});
+    if(p.emo)out.push({id:'mo_'+p.emo,type:'mood',label:p.emo});
+    if(p.style)out.push({id:'st_'+p.style,type:'style',label:p.style});
+    (p.imagery||[]).forEach(im=>out.push({id:'im_'+im,type:'imagery',label:im}));
+    (p.history||[]).filter(e=>e.hi).forEach(e=>out.push({id:'ev_'+e.t,type:'event',label:e.t.length>7?e.t.slice(0,6)+'…':e.t}));
+  }else{
+    relatedPoemsFor(n).forEach(p=>out.push({id:'p_'+p.id,type:'poem',label:p.title,ref:p}));
+  }
+  return out;
+}
+const EXPAND_CAP=12;
+function expandNode(n){
+  document.getElementById('gpop').style.display='none';
+  if(n._expanded){ collapseNode(n); return; }
+  const nb=nodeNeighbors(n);
+  const sc=Math.max(0.5,Math.min(1,Math.sqrt(130/(gNodes.length+nb.length))));
+  let added=0;
+  for(const x of nb){
+    if(added>=EXPAND_CAP)break;
+    let g=gNodes.find(m=>m.id===x.id);
+    if(!g){
+      const a=Math.random()*Math.PI*2, d=60+Math.random()*30;
+      const r=x.type==='poet'?poetBaseR(x.ref.poet)*sc:(x.type==='poem'?18:13)*sc;
+      g={id:x.id,type:x.type,label:x.label,ref:x.ref,x:n.x+Math.cos(a)*d,y:n.y+Math.sin(a)*d,
+         vx:0,vy:0,z:(Math.random()-0.5)*200,r:r};
+      if(x.type==='poet')g.top=poetIsTop(x.ref.poet);
+      gNodes.push(g); added++;
+    }
+    if(!gEdges.some(e=>(e[0]===n.id&&e[1]===x.id)||(e[0]===x.id&&e[1]===n.id)))gEdges.push([n.id,x.id]);
+  }
+  n._expanded=true;
+  flashGBar(nb.length>EXPAND_CAP?('已展开 '+EXPAND_CAP+'/'+nb.length+' 个（数量较多，已节制）'):('展开了「'+n.label+'」的 '+added+' 个关联'));
+  gAlpha=1; if(gLayout!=='force')layoutStatic(); if(!gAnim)startGraph();
+}
+function collapseNode(n){
+  const nbIds=gEdges.filter(e=>e[0]===n.id||e[1]===n.id).map(e=>e[0]===n.id?e[1]:e[0]);
+  const rm=new Set();
+  nbIds.forEach(id=>{const deg=gEdges.filter(e=>e[0]===id||e[1]===id).length;
+    const node=gNodes.find(g=>g.id===id);
+    if(deg===1&&node&&!node._seed)rm.add(id);});
+  gNodes=gNodes.filter(g=>!rm.has(g.id));
+  gEdges=gEdges.filter(e=>!rm.has(e[0])&&!rm.has(e[1]));
+  n._expanded=false;
+  flashGBar('收起了「'+n.label+'」展开的关联');
+  gAlpha=1; if(gLayout!=='force')layoutStatic();
+}
+let _gbarTimer=null;
+function flashGBar(msg){const fb=document.getElementById('g-focus-bar');if(!fb)return;
+  fb.dataset.flash='1';
+  fb.innerHTML='<button class="dchip" onclick="renderGraph()">🔄 重置为总览</button>'+
+    '<span style="font-size:13px;color:var(--teal);align-self:center">✨ '+msg+'</span>';
+  clearTimeout(_gbarTimer);_gbarTimer=setTimeout(()=>{fb.dataset.flash='';updateFocusBar();},2600);
 }
 function setGraphFocus(f){ gFocus=f; document.getElementById('gpop').style.display='none'; renderGraph(); }
 function updateFocusBar(){ const fb=document.getElementById('g-focus-bar'); if(!fb)return;
-  if(gFocus){ fb.innerHTML='<button class="dchip on" onclick="setGraphFocus(null)">← 返回总览</button>'+
-    '<span style="font-size:13px;color:var(--ink2);align-self:center">正在看：<b>'+(gFocus.t==='poet'?POETS[gFocus.k].name+' 的诗作':gFocus.k+'代的诗人')+'</b>（点空白或返回）</span>'; }
-  else { fb.innerHTML='<span style="font-size:13px;color:var(--ink3);align-self:center">👆 总览：点「诗人」展开TA的诗作，点「朝代」看该代诗人</span>'; } }
+  if(fb.dataset.flash==='1')return;
+  fb.innerHTML='<button class="dchip" onclick="renderGraph()">🔄 重置为总览</button>'+
+    '<span style="font-size:13px;color:var(--ink3);align-self:center">单击节点看信息 · <b>双击节点展开它的关联</b>（再双击可收起）· 顺藤摸瓜探索</span>'; }
 function setGLayout(m){ gLayout=m; document.querySelectorAll('.dchip.lay').forEach(b=>b.classList.toggle('on',b.id==='lay-'+m)); if(ST.is3D)toggle3D(); renderGraph(); }
 function renderGraph(){
   if(ST.view!=='graph')return;
@@ -2342,6 +2394,7 @@ function renderGraph(){
   gCanvas=document.getElementById('gcanvas');gCtx=gCanvas.getContext('2d');
   sizeCanvas(gCanvas);
   buildGraph();
+  gNodes.forEach(n=>n._seed=true);
   gAlpha=1; if(gLayout!=='force')layoutStatic();
   document.getElementById('gpop').style.display='none';
   bindGraphEvents();
@@ -2443,8 +2496,14 @@ function bindGraphEvents(){
   window.addEventListener('mouseup',()=>{gDrag=null;});
   cv.addEventListener('click',e=>{const{x,y}=pos(e);const n=graphHit(x,y);
     if(n)gOnNodeTap(n,x,y);else document.getElementById('gpop').style.display='none';});
-  // touch
-  cv.addEventListener('touchstart',e=>{const{x,y}=pos(e);const n=graphHit(x,y);if(n){if(!ST.is3D)gDrag=n;gOnNodeTap(n,x,y);}},{passive:true});
+  cv.addEventListener('dblclick',e=>{e.preventDefault();const{x,y}=pos(e);const n=graphHit(x,y);if(n)expandNode(n);});
+  // touch（含双击检测：320ms 内点同一节点 = 展开/折叠）
+  let _lastTap=0,_lastTapN=null;
+  cv.addEventListener('touchstart',e=>{const{x,y}=pos(e);const n=graphHit(x,y);if(n){if(!ST.is3D)gDrag=n;
+    const now=Date.now();
+    if(now-_lastTap<320&&_lastTapN===n){expandNode(n);_lastTap=0;_lastTapN=null;}
+    else{gOnNodeTap(n,x,y);_lastTap=now;_lastTapN=n;}
+  }},{passive:true});
   cv.addEventListener('touchmove',e=>{if(gDrag&&!ST.is3D){const{x,y}=pos(e);gDrag.x=x;gDrag.y=y;gDrag.vx=0;gDrag.vy=0;}},{passive:true});
   cv.addEventListener('touchend',()=>{gDrag=null;});
 }
