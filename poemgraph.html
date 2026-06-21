@@ -321,8 +321,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   font-size:14px;transition:.16s}
 .d-recite:hover{filter:brightness(1.1)}
 .d-recite.on{background:var(--ochre)}
-.d-recite-tag{font-size:12px;color:var(--ink2)}
-.d-recite-tag b{color:var(--ochre);font-family:var(--serif);font-size:14px}
+.rec-lang{display:inline-flex;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.rec-lang button{padding:5px 13px;font-size:12px;color:var(--ink2);background:var(--paper);transition:.15s}
+.rec-lang button.on{background:var(--teal);color:#fff}
+.rec-lang button.disabled,.rec-lang button:disabled{opacity:.4;cursor:not-allowed}
 /* 古琴背景音控件 */
 .amb-wrap{position:relative}
 .amb-pop{position:absolute;right:0;top:calc(100% + 8px);width:236px;background:var(--paper);
@@ -508,12 +510,15 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   <h1 class="serif">选择年级</h1>
   <div class="sub" style="margin-bottom:30px">挑选你所在的年级，开启诗词之旅</div>
   <div class="grade-grid">
-    <button class="grade-btn" onclick="pickGrade(1)">一年级<small>启蒙 · 4首</small></button>
-    <button class="grade-btn" onclick="pickGrade(2)">二年级<small>识趣 · 累计9首</small></button>
-    <button class="grade-btn" onclick="pickGrade(3)">三年级<small>渐进 · 累计14首</small></button>
-    <button class="grade-btn" onclick="pickGrade(4)">四年级<small>明理 · 累计17首</small></button>
-    <button class="grade-btn" onclick="pickGrade(5)">五年级<small>感怀 · 累计19首</small></button>
-    <button class="grade-btn" onclick="pickGrade(6)">六年级<small>致远 · 全部20首</small></button>
+    <button class="grade-btn" onclick="pickGrade(1)">一年级<small>小学·启蒙</small></button>
+    <button class="grade-btn" onclick="pickGrade(2)">二年级<small>小学·识趣</small></button>
+    <button class="grade-btn" onclick="pickGrade(3)">三年级<small>小学·渐进</small></button>
+    <button class="grade-btn" onclick="pickGrade(4)">四年级<small>小学·明理</small></button>
+    <button class="grade-btn" onclick="pickGrade(5)">五年级<small>小学·感怀</small></button>
+    <button class="grade-btn" onclick="pickGrade(6)">六年级<small>小学·致远</small></button>
+    <button class="grade-btn" onclick="pickGrade(7)">七年级<small>初中·启程</small></button>
+    <button class="grade-btn" onclick="pickGrade(8)">八年级<small>初中·渐深</small></button>
+    <button class="grade-btn" onclick="pickGrade(9)">九年级<small>初中·全部</small></button>
   </div>
   <button class="back-link" onclick="document.getElementById('role-overlay').style.display='flex';this.parentElement.style.display='none'">← 重新选择身份</button>
 </div>
@@ -642,7 +647,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       <div class="d-verse serif" id="d-verse"></div>
       <div class="d-recite-row">
         <button class="d-recite" id="d-recite" onclick="reciteToggle()">🔊 朗读</button>
-        <span class="d-recite-tag" id="d-recite-tag"></span>
+        <div class="rec-lang" id="rec-lang">
+          <button data-lang="mandarin" class="on" onclick="setRecLang('mandarin')">普通话</button>
+          <button data-lang="cantonese" onclick="setRecLang('cantonese')">粤语</button>
+        </div>
       </div>
     </div>
     <div class="dtabs" id="dtabs"></div>
@@ -691,6 +699,20 @@ const POETS={
   sushi:{name:'苏轼',dyn:'宋',years:'1037–1101',av:'轼',intro:'字子瞻，号东坡居士，宋代文学巨匠，诗词文书画俱绝，豪放旷达。',born:[255,320]},
   dufu:{name:'杜甫',dyn:'唐',years:'712–770',av:'甫',intro:'字子美，唐代现实主义大诗人，人称"诗圣"，其诗为"诗史"，沉郁顿挫。',born:[340,250],route:[[340,250],[255,320]]},
   gongzizhen:{name:'龚自珍',dyn:'清',years:'1792–1841',av:'龚',intro:'清代思想家、诗人，《己亥杂诗》共315首，呼唤变革、振奋人心。',born:[510,335]},
+fanzhongyan:{name:'范仲淹',dyn:'宋',years:'989–1052',av:'范',intro:'北宋政治家、文学家，戍边名臣，先天下之忧而忧，词风苍凉悲壮。',born:[420,260]},
+wentianxiang:{name:'文天祥',dyn:'宋',years:'1236–1283',av:'文',intro:'南宋末抗元名臣、民族英雄，《过零丁洋》气节凛然、忠贞不屈。',born:[470,320]},
+zhangyanghao:{name:'张养浩',dyn:'元',years:'1270–1329',av:'张',intro:'元代散曲家，关注民生，《山坡羊·潼关怀古》沉郁悲悯、警策深刻。',born:[420,250]},
+shijing:{name:'《诗经》',dyn:'先秦',years:'西周至春秋',av:'诗',intro:'我国最早的诗歌总集，收诗305篇，分风雅颂，开现实主义之源，质朴真挚。',born:[420,260]},
+wangbo:{name:'王勃',dyn:'唐',years:'650–676',av:'勃',intro:'初唐四杰之首，才华横溢，《滕王阁序》《送杜少府》传诵千古。',born:[340,250]},
+cuihao:{name:'崔颢',dyn:'唐',years:'约704–754',av:'颢',intro:'盛唐诗人，《黄鹤楼》被誉为唐人七律第一，气象苍茫、情韵悠长。',born:[420,250]},
+taoyuanming:{name:'陶渊明',dyn:'晋',years:'约365–427',av:'陶',intro:'东晋诗人，田园诗派开创者，归隐躬耕，诗风冲淡自然、超然物外。',born:[460,300]},
+chenziang:{name:'陈子昂',dyn:'唐',years:'661–702',av:'陈',intro:'初唐诗人，倡导诗歌革新，《登幽州台歌》苍凉悲慨、感人至深。',born:[340,250]},
+luyou:{name:'陆游',dyn:'宋',years:'1125–1210',av:'陆',intro:'南宋爱国诗人，存诗近万首，诗风雄浑悲壮、忧国忧民。',born:[460,300]},
+caocao:{name:'曹操',dyn:'汉',years:'155–220',av:'操',intro:'东汉末政治家、军事家、诗人，建安文学代表，诗风慷慨悲凉、气魄雄浑。',born:[420,250]},
+wangwan:{name:'王湾',dyn:'唐',years:'生卒不详',av:'湾',intro:'唐代诗人，《次北固山下》写江南行旅，意境开阔。',born:[470,300]},
+maozhiyuan:{name:'马致远',dyn:'元',years:'约1250–1321',av:'马',intro:'元代戏曲家、散曲家，元曲四大家之一，《天净沙·秋思》被誉为秋思之祖。',born:[420,250]},
+lishangyin:{name:'李商隐',dyn:'唐',years:'约813–858',av:'商',intro:'晚唐诗人，与杜牧并称小李杜，诗风深情绵邈、辞采华美。',born:[340,250]},
+liuyuxi:{name:'刘禹锡',dyn:'唐',years:'772–842',av:'禹',intro:'唐代诗人，有诗豪之称，诗风刚健爽朗、昂扬乐观。',born:[420,250]},
   hanyuefu:{name:'汉乐府',dyn:'汉',years:'两汉',av:'乐',intro:'汉代乐府机关采集的民间歌辞，语言清新质朴，多写劳动与生活，《江南》为其名篇。',born:[470,300]},
   liqiao:{name:'李峤',dyn:'唐',years:'645–714',av:'峤',intro:'初唐诗人，曾任宰相，《风》以谜语笔法咏风，灵巧生动。',born:[340,250]},
   wuming:{name:'佚名',dyn:'—',years:'作者不详',av:'佚',intro:'作者不详的古诗，多为流传久远的童蒙名篇。',born:[340,250]},
@@ -1055,6 +1077,131 @@ const POEMS=[
      {type:'match',q:'把词语和意思连起来',pairs:[['九州','中国'],['恃','依靠'],['不拘一格','不限一种方式']]}
    ],tags:['爱国','变革','励志']},
 
+  {id:'xinglunan',title:'行路难·其一',grade:9,volume:'九年级上册',dyn:'唐',poet:'libai',
+   lines:[{t:'金樽清酒斗十千，',p:'jīn zūn qīng jiǔ dòu shí qiān'},{t:'玉盘珍羞直万钱。',p:'yù pán zhēn xiū zhí wàn qián'},{t:'停杯投箸不能食，',p:'tíng bēi tóu zhù bù néng shí'},{t:'拔剑四顾心茫然。',p:'bá jiàn sì gù xīn máng rán'},{t:'欲渡黄河冰塞川，',p:'yù dù huáng hé bīng sè chuān'},{t:'将登太行雪满山。',p:'jiāng dēng tài háng xuě mǎn shān'},{t:'闲来垂钓碧溪上，',p:'xián lái chuí diào bì xī shàng'},{t:'忽复乘舟梦日边。',p:'hū fù chéng zhōu mèng rì biān'},{t:'行路难，行路难，',p:'xíng lù nán xíng lù nán'},{t:'多歧路，今安在？',p:'duō qí lù jīn ān zài'},{t:'长风破浪会有时，',p:'cháng fēng pò làng huì yǒu shí'},{t:'直挂云帆济沧海。',p:'zhí guà yún fān jì cāng hǎi'}],
+   trans:'面对人生道路的艰难，李白几度迷惘后高呼"长风破浪会有时，直挂云帆济沧海"，自信豪迈。',emo:'壮志',style:'抒情',place:'长安',placeModern:'今陕西西安',createdYear:'约744年',
+   history:[{y:'约744年',t:'行路难·其一·唐',hi:true}],related:[]},
+  {id:'shuidiaogetou',title:'水调歌头·明月几时有',grade:9,volume:'九年级上册',dyn:'宋',poet:'sushi',
+   lines:[{t:'明月几时有？',p:'míng yuè jǐ shí yǒu'},{t:'把酒问青天。',p:'bǎ jiǔ wèn qīng tiān'},{t:'不知天上宫阙，',p:'bù zhī tiān shàng gōng què'},{t:'今夕是何年。',p:'jīn xī shì hé nián'},{t:'我欲乘风归去，',p:'wǒ yù chéng fēng guī qù'},{t:'又恐琼楼玉宇，',p:'yòu kǒng qióng lóu yù yǔ'},{t:'高处不胜寒。',p:'gāo chù bù shèng hán'},{t:'起舞弄清影，',p:'qǐ wǔ nòng qīng yǐng'},{t:'何似在人间。',p:'hé shì zài rén jiān'},{t:'转朱阁，低绮户，照无眠。',p:'zhuǎn zhū gé dī qǐ hù zhào wú mián'},{t:'不应有恨，',p:'bù yīng yǒu hèn'},{t:'何事长向别时圆？',p:'hé shì zhǎng xiàng bié shí yuán'},{t:'人有悲欢离合，',p:'rén yǒu bēi huān lí hé'},{t:'月有阴晴圆缺，',p:'yuè yǒu yīn qíng yuán quē'},{t:'此事古难全。',p:'cǐ shì gǔ nán quán'},{t:'但愿人长久，',p:'dàn yuàn rén cháng jiǔ'},{t:'千里共婵娟。',p:'qiān lǐ gòng chán juān'}],
+   trans:'中秋醉后怀念弟弟，由问月、思亲到旷达释怀，"但愿人长久，千里共婵娟"成千古绝唱。',emo:'豁达',style:'抒情',place:'密州',placeModern:'今山东诸城',createdYear:'1076年',
+   history:[{y:'1076年',t:'水调歌头·明月几时有·宋',hi:true}],related:[]},
+  {id:'yueyeyi',title:'月夜忆舍弟',grade:9,volume:'九年级上册',dyn:'唐',poet:'dufu',
+   lines:[{t:'戍鼓断人行，',p:'shù gǔ duàn rén xíng'},{t:'边秋一雁声。',p:'biān qiū yī yàn shēng'},{t:'露从今夜白，',p:'lù cóng jīn yè bái'},{t:'月是故乡明。',p:'yuè shì gù xiāng míng'},{t:'有弟皆分散，',p:'yǒu dì jiē fēn sàn'},{t:'无家问死生。',p:'wú jiā wèn sǐ shēng'},{t:'寄书长不达，',p:'jì shū zhǎng bù dá'},{t:'况乃未休兵。',p:'kuàng nǎi wèi xiū bīng'}],
+   trans:'战乱中思念离散的兄弟，"露从今夜白，月是故乡明"道尽乱世思亲之痛。',emo:'思乡',style:'抒情',place:'秦州',placeModern:'今甘肃天水',createdYear:'759年',
+   history:[{y:'759年',t:'月夜忆舍弟·唐',hi:true}],related:[]},
+  {id:'yujiaao',title:'渔家傲·秋思',grade:9,volume:'九年级下册',dyn:'宋',poet:'fanzhongyan',
+   lines:[{t:'塞下秋来风景异，',p:'sāi xià qiū lái fēng jǐng yì'},{t:'衡阳雁去无留意。',p:'héng yáng yàn qù wú liú yì'},{t:'四面边声连角起，',p:'sì miàn biān shēng lián jiǎo qǐ'},{t:'千嶂里，长烟落日孤城闭。',p:'qiān zhàng lǐ zhǎng yān luò rì gū chéng bì'},{t:'浊酒一杯家万里，',p:'zhuó jiǔ yī bēi jiā wàn lǐ'},{t:'燕然未勒归无计。',p:'yān rán wèi lēi guī wú jì'},{t:'羌管悠悠霜满地，',p:'qiāng guǎn yōu yōu shuāng mǎn dì'},{t:'人不寐，将军白发征夫泪。',p:'rén bú mèi jiāng jūn bái fà zhēng fū lèi'}],
+   trans:'戍边将士久戍思归、功业未成，"浊酒一杯家万里"写尽边关苍凉与报国之志。',emo:'忧国',style:'边塞',place:'边塞',placeModern:'今陕西延安',createdYear:'1040年',
+   history:[{y:'1040年',t:'渔家傲·秋思·宋',hi:true}],related:[]},
+  {id:'jiangchengzi',title:'江城子·密州出猎',grade:9,volume:'九年级下册',dyn:'宋',poet:'sushi',
+   lines:[{t:'老夫聊发少年狂，',p:'lǎo fū liáo fā shào nián kuáng'},{t:'左牵黄，右擎苍，',p:'zuǒ qiān huáng yòu qíng cāng'},{t:'锦帽貂裘，千骑卷平冈。',p:'jǐn mào diāo qiú qiān qí juǎn píng gāng'},{t:'为报倾城随太守，',p:'wèi bào qīng chéng suí tài shǒu'},{t:'亲射虎，看孙郎。',p:'qīn shè hǔ kàn sūn láng'},{t:'酒酣胸胆尚开张，',p:'jiǔ hān xiōng dǎn shàng kāi zhāng'},{t:'鬓微霜，又何妨！',p:'bìn wēi shuāng yòu hé fáng'},{t:'持节云中，何日遣冯唐？',p:'chí jié yún zhōng hé rì qiǎn féng táng'},{t:'会挽雕弓如满月，',p:'huì wǎn diāo gōng rú mǎn yuè'},{t:'西北望，射天狼。',p:'xī běi wàng shè tiān láng'}],
+   trans:'出猎抒怀，"会挽雕弓如满月，西北望，射天狼"豪情勃发，渴望为国杀敌建功。',emo:'壮志',style:'豪放',place:'密州',placeModern:'今山东诸城',createdYear:'1075年',
+   history:[{y:'1075年',t:'江城子·密州出猎·宋',hi:true}],related:[]},
+  {id:'guolingding',title:'过零丁洋',grade:9,volume:'九年级下册',dyn:'宋',poet:'wentianxiang',
+   lines:[{t:'辛苦遭逢起一经，',p:'xīn kǔ zāo féng qǐ yī jīng'},{t:'干戈寥落四周星。',p:'gān gē liáo luò sì zhōu xīng'},{t:'山河破碎风飘絮，',p:'shān hé pò suì fēng piāo xù'},{t:'身世浮沉雨打萍。',p:'shēn shì fú chén yǔ dǎ píng'},{t:'惶恐滩头说惶恐，',p:'huáng kǒng tān tóu shuō huáng kǒng'},{t:'零丁洋里叹零丁。',p:'líng dīng yáng lǐ tàn líng dīng'},{t:'人生自古谁无死？',p:'rén shēng zì gǔ shéi wú sǐ'},{t:'留取丹心照汗青。',p:'liú qǔ dān xīn zhào hàn qīng'}],
+   trans:'被俘过零丁洋，回顾身世家国，以"人生自古谁无死？留取丹心照汗青"明志，气节千古。',emo:'爱国',style:'抒情',place:'零丁洋',placeModern:'今广东珠江口',createdYear:'1279年',
+   history:[{y:'1279年',t:'过零丁洋·宋',hi:true}],related:[]},
+  {id:'shanpoyang',title:'山坡羊·潼关怀古',grade:9,volume:'九年级下册',dyn:'元',poet:'zhangyanghao',
+   lines:[{t:'峰峦如聚，',p:'fēng luán rú jù'},{t:'波涛如怒，',p:'bō tāo rú nù'},{t:'山河表里潼关路。',p:'shān hé biǎo lǐ tóng guān lù'},{t:'望西都，意踌躇。',p:'wàng xī dōu yì chóu chú'},{t:'伤心秦汉经行处，',p:'shāng xīn qín hàn jīng xíng chù'},{t:'宫阙万间都做了土。',p:'gōng què wàn jiān dōu zuò le tǔ'},{t:'兴，百姓苦；',p:'xīng bǎi xìng kǔ'},{t:'亡，百姓苦。',p:'wáng bǎi xìng kǔ'}],
+   trans:'凭吊潼关，目睹历代兴亡，"兴，百姓苦；亡，百姓苦"道尽悲悯民生的深沉感慨。',emo:'忧国',style:'咏史',place:'潼关',placeModern:'今陕西潼关',createdYear:'约1329年',
+   history:[{y:'约1329年',t:'山坡羊·潼关怀古·元',hi:true}],related:[]},
+
+  {id:'guanju',title:'关雎',grade:8,volume:'八年级下册',dyn:'先秦',poet:'shijing',
+   lines:[{t:'关关雎鸠，',p:'guān guān jū jiū'},{t:'在河之洲。',p:'zài hé zhī zhōu'},{t:'窈窕淑女，',p:'yǎo tiǎo shū nǚ'},{t:'君子好逑。',p:'jūn zǐ hǎo qiú'},{t:'参差荇菜，',p:'cēn cī xìng cài'},{t:'左右流之。',p:'zuǒ yòu liú zhī'},{t:'窈窕淑女，',p:'yǎo tiǎo shū nǚ'},{t:'寤寐求之。',p:'wù mèi qiú zhī'},{t:'求之不得，',p:'qiú zhī bù dé'},{t:'寤寐思服。',p:'wù mèi sī fú'},{t:'悠哉悠哉，',p:'yōu zāi yōu zāi'},{t:'辗转反侧。',p:'zhǎn zhuǎn fǎn cè'},{t:'参差荇菜，',p:'cēn cī xìng cài'},{t:'左右采之。',p:'zuǒ yòu cǎi zhī'},{t:'窈窕淑女，',p:'yǎo tiǎo shū nǚ'},{t:'琴瑟友之。',p:'qín sè yǒu zhī'},{t:'参差荇菜，',p:'cēn cī xìng cài'},{t:'左右芼之。',p:'zuǒ yòu mào zhī'},{t:'窈窕淑女，',p:'yǎo tiǎo shū nǚ'},{t:'钟鼓乐之。',p:'zhōng gǔ lè zhī'}],
+   trans:'《诗经》开篇，写君子对窈窕淑女的爱慕与追求，是最早的爱情诗，温柔敦厚。',emo:'喜悦',style:'抒情',place:'黄河之滨',placeModern:'今黄河流域',createdYear:'先秦',
+   history:[{y:'先秦',t:'关雎·先秦',hi:true}],related:[]},
+  {id:'jianjia',title:'蒹葭',grade:8,volume:'八年级下册',dyn:'先秦',poet:'shijing',
+   lines:[{t:'蒹葭苍苍，',p:'jiān jiā cāng cāng'},{t:'白露为霜。',p:'bái lù wèi shuāng'},{t:'所谓伊人，',p:'suǒ wèi yī rén'},{t:'在水一方。',p:'zài shuǐ yī fāng'},{t:'溯洄从之，',p:'sù huí cóng zhī'},{t:'道阻且长。',p:'dào zǔ qiě zhǎng'},{t:'溯游从之，',p:'sù yóu cóng zhī'},{t:'宛在水中央。',p:'wǎn zài shuǐ zhōng yāng'},{t:'蒹葭萋萋，',p:'jiān jiā qī qī'},{t:'白露未晞。',p:'bái lù wèi xī'},{t:'所谓伊人，',p:'suǒ wèi yī rén'},{t:'在水之湄。',p:'zài shuǐ zhī méi'},{t:'溯洄从之，',p:'sù huí cóng zhī'},{t:'道阻且跻。',p:'dào zǔ qiě jī'},{t:'溯游从之，',p:'sù yóu cóng zhī'},{t:'宛在水中坻。',p:'wǎn zài shuǐ zhōng chí'}],
+   trans:'《诗经·秦风》，以秋水苍苍、伊人宛在写可望难即的追寻，意境朦胧悠远。',emo:'思乡',style:'抒情',place:'水滨',placeModern:'今黄河流域',createdYear:'先秦',
+   history:[{y:'先秦',t:'蒹葭·先秦',hi:true}],related:[]},
+  {id:'songdushaofu',title:'送杜少府之任蜀州',grade:8,volume:'八年级下册',dyn:'唐',poet:'wangbo',
+   lines:[{t:'城阙辅三秦，',p:'chéng què fǔ sān qín'},{t:'风烟望五津。',p:'fēng yān wàng wǔ jīn'},{t:'与君离别意，',p:'yǔ jūn lí bié yì'},{t:'同是宦游人。',p:'tóng shì huàn yóu rén'},{t:'海内存知己，',p:'hǎi nèi cún zhī jǐ'},{t:'天涯若比邻。',p:'tiān yá ruò bǐ lín'},{t:'无为在歧路，',p:'wú wéi zài qí lù'},{t:'儿女共沾巾。',p:'ér nǚ gòng zhān jīn'}],
+   trans:'送友赴蜀，"海内存知己，天涯若比邻"一扫离别哀伤，胸襟开阔、情谊豪迈。',emo:'友情',style:'抒情',place:'长安',placeModern:'今陕西西安',createdYear:'唐代',
+   history:[{y:'唐代',t:'送杜少府之任蜀州·唐',hi:true}],related:[]},
+  {id:'maowu',title:'茅屋为秋风所破歌',grade:8,volume:'八年级下册',dyn:'唐',poet:'dufu',
+   lines:[{t:'八月秋高风怒号，',p:'bā yuè qiū gāo fēng nù háo'},{t:'卷我屋上三重茅。',p:'juǎn wǒ wū shàng sān chóng máo'},{t:'茅飞渡江洒江郊，',p:'máo fēi dù jiāng sǎ jiāng jiāo'},{t:'高者挂罥长林梢，',p:'gāo zhě guà juàn zhǎng lín shāo'},{t:'下者飘转沉塘坳。',p:'xià zhě piāo zhuǎn chén táng ào'},{t:'南村群童欺我老无力，',p:'nán cūn qún tóng qī wǒ lǎo wú lì'},{t:'忍能对面为盗贼。',p:'rěn néng duì miàn wèi dào zéi'},{t:'公然抱茅入竹去，',p:'gōng rán bào máo rù zhú qù'},{t:'唇焦口燥呼不得，',p:'chún jiāo kǒu zào hū bù dé'},{t:'归来倚杖自叹息。',p:'guī lái yǐ zhàng zì tàn xī'},{t:'俄顷风定云墨色，',p:'é qǐng fēng dìng yún mò sè'},{t:'秋天漠漠向昏黑。',p:'qiū tiān mò mò xiàng hūn hēi'},{t:'布衾多年冷似铁，',p:'bù qīn duō nián lěng shì tiě'},{t:'娇儿恶卧踏里裂。',p:'jiāo ér è wò tà lǐ liè'},{t:'床头屋漏无干处，',p:'chuáng tóu wū lòu wú gān chù'},{t:'雨脚如麻未断绝。',p:'yǔ jiǎo rú má wèi duàn jué'},{t:'自经丧乱少睡眠，',p:'zì jīng sāng luàn shǎo shuì mián'},{t:'长夜沾湿何由彻！',p:'cháng yè zhān shī hé yóu chè'},{t:'安得广厦千万间，',p:'ān dé guǎng shà qiān wàn jiān'},{t:'大庇天下寒士俱欢颜，',p:'dà bì tiān xià hán shì jù huān yán'},{t:'风雨不动安如山！',p:'fēng yǔ bù dòng ān rú shān'},{t:'呜呼！何时眼前突兀见此屋，',p:'wū hū hé shí yǎn qián tū wù xiàn cǐ wū'},{t:'吾庐独破受冻死亦足！',p:'wú lú dú pò shòu dòng sǐ yì zú'}],
+   trans:'秋风破屋、长夜沾湿，杜甫推己及人，发出"安得广厦千万间，大庇天下寒士俱欢颜"的济世呼号。',emo:'忧国',style:'抒情',place:'成都草堂',placeModern:'今四川成都',createdYear:'761年',
+   history:[{y:'761年',t:'茅屋为秋风所破歌·唐',hi:true}],related:[]},
+
+  {id:'huanghelou',title:'黄鹤楼',grade:8,volume:'八年级上册',dyn:'唐',poet:'cuihao',
+   lines:[{t:'昔人已乘黄鹤去，',p:'xī rén yǐ chéng huáng hè qù'},{t:'此地空余黄鹤楼。',p:'cǐ dì kòng yú huáng hè lóu'},{t:'黄鹤一去不复返，',p:'huáng hè yī qù bù fù fǎn'},{t:'白云千载空悠悠。',p:'bái yún qiān zǎi kōng yōu yōu'},{t:'晴川历历汉阳树，',p:'qíng chuān lì lì hàn yáng shù'},{t:'芳草萋萋鹦鹉洲。',p:'fāng cǎo qī qī yīng wǔ zhōu'},{t:'日暮乡关何处是？',p:'rì mù xiāng guān hé chù shì'},{t:'烟波江上使人愁。',p:'yān bō jiāng shàng shǐ rén chóu'}],
+   trans:'登黄鹤楼怀古思乡，"日暮乡关何处是，烟波江上使人愁"为千古登临名篇。',emo:'思乡',style:'抒情',place:'黄鹤楼',placeModern:'今湖北武汉',createdYear:'唐代',
+   history:[{y:'唐代',t:'黄鹤楼·唐代',hi:true}],related:[]},
+  {id:'shizhisaishang',title:'使至塞上',grade:8,volume:'八年级上册',dyn:'唐',poet:'wangwei',
+   lines:[{t:'单车欲问边，',p:'dān chē yù wèn biān'},{t:'属国过居延。',p:'shǔ guó guò jū yán'},{t:'征蓬出汉塞，',p:'zhēng péng chū hàn sāi'},{t:'归雁入胡天。',p:'guī yàn rù hú tiān'},{t:'大漠孤烟直，',p:'dà mò gū yān zhí'},{t:'长河落日圆。',p:'cháng hé luò rì yuán'},{t:'萧关逢候骑，',p:'xiāo guān féng hòu qí'},{t:'都护在燕然。',p:'dū hù zài yān rán'}],
+   trans:'奉命出使边塞，"大漠孤烟直，长河落日圆"以雄浑笔法写尽塞外壮丽。',emo:'豁达',style:'边塞',place:'塞上',placeModern:'今甘肃居延一带',createdYear:'737年',
+   history:[{y:'737年',t:'使至塞上·唐代',hi:true}],related:[]},
+  {id:'dujingmen',title:'渡荆门送别',grade:8,volume:'八年级上册',dyn:'唐',poet:'libai',
+   lines:[{t:'渡远荆门外，',p:'dù yuǎn jīng mén wài'},{t:'来从楚国游。',p:'lái cóng chǔ guó yóu'},{t:'山随平野尽，',p:'shān suí píng yě jǐn'},{t:'江入大荒流。',p:'jiāng rù dà huāng liú'},{t:'月下飞天镜，',p:'yuè xià fēi tiān jìng'},{t:'云生结海楼。',p:'yún shēng jié hǎi lóu'},{t:'仍怜故乡水，',p:'réng lián gù xiāng shuǐ'},{t:'万里送行舟。',p:'wàn lǐ sòng xíng zhōu'}],
+   trans:'出蜀远游，"山随平野尽，江入大荒流"写开阔江景，结以故乡水万里相送之情。',emo:'思乡',style:'写景',place:'荆门',placeModern:'今湖北荆门',createdYear:'725年',
+   history:[{y:'725年',t:'渡荆门送别·唐代',hi:true}],related:[]},
+  {id:'qiantanghu',title:'钱塘湖春行',grade:8,volume:'八年级上册',dyn:'唐',poet:'baijuyi',
+   lines:[{t:'孤山寺北贾亭西，',p:'gū shān sì běi jiǎ tíng xī'},{t:'水面初平云脚低。',p:'shuǐ miàn chū píng yún jiǎo dī'},{t:'几处早莺争暖树，',p:'jǐ chù zǎo yīng zhēng nuǎn shù'},{t:'谁家新燕啄春泥。',p:'shuí jiā xīn yàn zhuó chūn ní'},{t:'乱花渐欲迷人眼，',p:'luàn huā jiàn yù mí rén yǎn'},{t:'浅草才能没马蹄。',p:'qiǎn cǎo cái néng mò mǎ tí'},{t:'最爱湖东行不足，',p:'zuì ài hú dōng xíng bù zú'},{t:'绿杨阴里白沙堤。',p:'lǜ yáng yīn lǐ bái shā dī'}],
+   trans:'早春漫步西湖，乱花浅草、莺燕争春，写尽西湖早春的勃勃生机。',emo:'喜悦',style:'写景',place:'钱塘湖',placeModern:'今浙江杭州',createdYear:'约822年',
+   history:[{y:'约822年',t:'钱塘湖春行·唐代',hi:true}],related:[]},
+  {id:'yinjiu',title:'饮酒·其五',grade:8,volume:'八年级上册',dyn:'晋',poet:'taoyuanming',
+   lines:[{t:'结庐在人境，',p:'jié lú zài rén jìng'},{t:'而无车马喧。',p:'ér wú chē mǎ xuān'},{t:'问君何能尔？',p:'wèn jūn hé néng ěr'},{t:'心远地自偏。',p:'xīn yuǎn dì zì piān'},{t:'采菊东篱下，',p:'cǎi jú dōng lí xià'},{t:'悠然见南山。',p:'yōu rán jiàn nán shān'},{t:'山气日夕佳，',p:'shān qì rì xī jiā'},{t:'飞鸟相与还。',p:'fēi niǎo xiāng yǔ hái'},{t:'此中有真意，',p:'cǐ zhōng yǒu zhēn yì'},{t:'欲辨已忘言。',p:'yù biàn yǐ wàng yán'}],
+   trans:'归隐田园，"采菊东篱下，悠然见南山"写超脱尘世、物我两忘的恬淡。',emo:'闲适',style:'田园',place:'田园',placeModern:'今江西九江',createdYear:'约417年',
+   history:[{y:'约417年',t:'饮酒·其五·晋代',hi:true}],related:[]},
+  {id:'chibi',title:'赤壁',grade:8,volume:'八年级上册',dyn:'唐',poet:'dumu',
+   lines:[{t:'折戟沉沙铁未销，',p:'zhé jǐ chén shā tiě wèi xiāo'},{t:'自将磨洗认前朝。',p:'zì jiāng mó xǐ rèn qián cháo'},{t:'东风不与周郎便，',p:'dōng fēng bù yǔ zhōu láng biàn'},{t:'铜雀春深锁二乔。',p:'tóng què chūn shēn suǒ èr qiáo'}],
+   trans:'借折戟咏赤壁之战，"东风不与周郎便，铜雀春深锁二乔"以小见大议论历史。',emo:'哲理',style:'咏史',place:'赤壁',placeModern:'今湖北赤壁',createdYear:'唐代',
+   history:[{y:'唐代',t:'赤壁·唐代',hi:true}],related:[]},
+
+  {id:'mulan',title:'木兰诗',grade:7,volume:'七年级下册',dyn:'南北朝',poet:'beichaofolk',
+   lines:[{t:'唧唧复唧唧，',p:'jī jī fù jī jī'},{t:'木兰当户织。',p:'mù lán dāng hù zhī'},{t:'不闻机杼声，',p:'bù wén jī zhù shēng'},{t:'惟闻女叹息。',p:'wéi wén nǚ tàn xī'},{t:'问女何所思，',p:'wèn nǚ hé suǒ sī'},{t:'问女何所忆。',p:'wèn nǚ hé suǒ yì'},{t:'女亦无所思，',p:'nǚ yì wú suǒ sī'},{t:'女亦无所忆。',p:'nǚ yì wú suǒ yì'},{t:'昨夜见军帖，',p:'zuó yè jiàn jūn tiě'},{t:'可汗大点兵，',p:'kè hán dà diǎn bīng'},{t:'军书十二卷，',p:'jūn shū shí èr juǎn'},{t:'卷卷有爷名。',p:'juàn juàn yǒu yé míng'},{t:'阿爷无大儿，',p:'ā yé wú dà ér'},{t:'木兰无长兄，',p:'mù lán wú zhǎng xiōng'},{t:'愿为市鞍马，',p:'yuàn wèi shì ān mǎ'},{t:'从此替爷征。',p:'cóng cǐ tì yé zhēng'},{t:'万里赴戎机，',p:'wàn lǐ fù róng jī'},{t:'关山度若飞。',p:'guān shān dù ruò fēi'},{t:'朔气传金柝，',p:'shuò qì chuán jīn tuò'},{t:'寒光照铁衣。',p:'hán guāng zhào tiě yī'},{t:'将军百战死，',p:'jiāng jūn bǎi zhàn sǐ'},{t:'壮士十年归。',p:'zhuàng shì shí nián guī'},{t:'爷娘闻女来，',p:'yé niáng wén nǚ lái'},{t:'出郭相扶将；',p:'chū guō xiāng fú jiāng'},{t:'脱我战时袍，',p:'tuō wǒ zhàn shí páo'},{t:'著我旧时裳。',p:'zhuó wǒ jiù shí cháng'},{t:'当窗理云鬓，',p:'dāng chuāng lǐ yún bìn'},{t:'对镜帖花黄。',p:'duì jìng tiē huā huáng'},{t:'双兔傍地走，',p:'shuāng tù bàng dì zǒu'},{t:'安能辨我是雄雌？',p:'ān néng biàn wǒ shì xióng cí'}],
+   trans:'北朝民歌，叙木兰代父从军、征战十年、辞官还乡，歌颂其勇敢、孝心与不慕名利。',emo:'爱国',style:'叙事',place:'黄河·黑山',placeModern:'今华北一带',createdYear:'南北朝',
+   history:[{y:'南北朝',t:'木兰诗·南北朝代',hi:true}],related:[]},
+  {id:'dengyouzhou',title:'登幽州台歌',grade:7,volume:'七年级下册',dyn:'唐',poet:'chenziang',
+   lines:[{t:'前不见古人，',p:'qián bú jiàn gǔ rén'},{t:'后不见来者。',p:'hòu bú jiàn lái zhě'},{t:'念天地之悠悠，',p:'niàn tiān dì zhī yōu yōu'},{t:'独怆然而涕下！',p:'dú chuàng rán ér tì xià'}],
+   trans:'登台远望，前不见古人、后不见来者，抒发生不逢时、怀才不遇的苍凉。',emo:'忧国',style:'抒情',place:'幽州台',placeModern:'今北京',createdYear:'约696年',
+   history:[{y:'约696年',t:'登幽州台歌·唐代',hi:true}],related:[]},
+  {id:'wangyue',title:'望岳',grade:7,volume:'七年级下册',dyn:'唐',poet:'dufu',
+   lines:[{t:'岱宗夫如何？',p:'dài zōng fū rú hé'},{t:'齐鲁青未了。',p:'qí lǔ qīng wèi liǎo'},{t:'造化钟神秀，',p:'zào huà zhōng shén xiù'},{t:'阴阳割昏晓。',p:'yīn yáng gē hūn xiǎo'},{t:'荡胸生曾云，',p:'dàng xiōng shēng céng yún'},{t:'决眦入归鸟。',p:'jué zì rù guī niǎo'},{t:'会当凌绝顶，',p:'huì dāng líng jué dǐng'},{t:'一览众山小。',p:'yī lǎn zhòng shān xiǎo'}],
+   trans:'远望泰山雄伟，"会当凌绝顶，一览众山小"抒发青年杜甫的壮志豪情。',emo:'壮志',style:'写景',place:'泰山',placeModern:'今山东泰安',createdYear:'约736年',
+   history:[{y:'约736年',t:'望岳·唐代',hi:true}],related:[]},
+  {id:'dengfeilai',title:'登飞来峰',grade:7,volume:'七年级下册',dyn:'宋',poet:'wanganshi',
+   lines:[{t:'飞来山上千寻塔，',p:'fēi lái shān shàng qiān xún tǎ'},{t:'闻说鸡鸣见日升。',p:'wén shuō jī míng jiàn rì shēng'},{t:'不畏浮云遮望眼，',p:'bù wèi fú yún zhē wàng yǎn'},{t:'自缘身在最高层。',p:'zì yuán shēn zài zuì gāo céng'}],
+   trans:'登高远眺，"不畏浮云遮望眼，自缘身在最高层"借景说理，抒发革新的远见。',emo:'壮志',style:'哲理',place:'飞来峰',placeModern:'今浙江杭州',createdYear:'1050年',
+   history:[{y:'1050年',t:'登飞来峰·宋代',hi:true}],related:[]},
+  {id:'youshanxicun',title:'游山西村',grade:7,volume:'七年级下册',dyn:'宋',poet:'luyou',
+   lines:[{t:'莫笑农家腊酒浑，',p:'mò xiào nóng jiā là jiǔ hún'},{t:'丰年留客足鸡豚。',p:'fēng nián liú kè zú jī tún'},{t:'山重水复疑无路，',p:'shān chóng shuǐ fù yí wú lù'},{t:'柳暗花明又一村。',p:'liǔ àn huā míng yòu yī cūn'},{t:'箫鼓追随春社近，',p:'xiāo gǔ zhuī suí chūn shè jìn'},{t:'衣冠简朴古风存。',p:'yī guān jiǎn piáo gǔ fēng cún'},{t:'从今若许闲乘月，',p:'cóng jīn ruò xǔ xián chéng yuè'},{t:'拄杖无时夜叩门。',p:'zhǔ zhàng wú shí yè kòu mén'}],
+   trans:'写农家待客与山村风光，"山重水复疑无路，柳暗花明又一村"含绝处逢生之理。',emo:'喜悦',style:'田园',place:'山阴',placeModern:'今浙江绍兴',createdYear:'1167年',
+   history:[{y:'1167年',t:'游山西村·宋代',hi:true}],related:[]},
+  {id:'zhuliguan',title:'竹里馆',grade:7,volume:'七年级下册',dyn:'唐',poet:'wangwei',
+   lines:[{t:'独坐幽篁里，',p:'dú zuò yōu huáng lǐ'},{t:'弹琴复长啸。',p:'tán qín fù cháng xiào'},{t:'深林人不知，',p:'shēn lín rén bù zhī'},{t:'明月来相照。',p:'míng yuè lái xiāng zhào'}],
+   trans:'独坐幽深竹林弹琴长啸，明月相伴，写隐居生活的清幽闲适。',emo:'闲适',style:'田园',place:'辋川',placeModern:'今陕西蓝田',createdYear:'唐代',
+   history:[{y:'唐代',t:'竹里馆·唐代',hi:true}],related:[]},
+  {id:'chunyeluocheng',title:'春夜洛城闻笛',grade:7,volume:'七年级下册',dyn:'唐',poet:'libai',
+   lines:[{t:'谁家玉笛暗飞声，',p:'shuí jiā yù dí àn fēi shēng'},{t:'散入春风满洛城。',p:'sàn rù chūn fēng mǎn luò chéng'},{t:'此夜曲中闻折柳，',p:'cǐ yè qǔ zhōng wén zhé liǔ'},{t:'何人不起故园情。',p:'hé rén bù qǐ gù yuán qíng'}],
+   trans:'春夜洛阳闻笛声《折杨柳》，触动满城游子的思乡之情。',emo:'思乡',style:'抒情',place:'洛阳',placeModern:'今河南洛阳',createdYear:'唐代',
+   history:[{y:'唐代',t:'春夜洛城闻笛·唐代',hi:true}],related:[]},
+
+  {id:'guancanghai',title:'观沧海',grade:7,volume:'七年级上册',dyn:'汉',poet:'caocao',
+   lines:[{t:'东临碣石，',p:'dōng lín jié shí'},{t:'以观沧海。',p:'yǐ guān cāng hǎi'},{t:'水何澹澹，',p:'shuǐ hé dàn dàn'},{t:'山岛竦峙。',p:'shān dǎo sǒng zhì'},{t:'树木丛生，',p:'shù mù cóng shēng'},{t:'百草丰茂。',p:'bǎi cǎo fēng mào'},{t:'秋风萧瑟，',p:'qiū fēng xiāo sè'},{t:'洪波涌起。',p:'hóng bō yǒng qǐ'},{t:'日月之行，',p:'rì yuè zhī xíng'},{t:'若出其中；',p:'ruò chū qí zhōng'},{t:'星汉灿烂，',p:'xīng hàn càn làn'},{t:'若出其里。',p:'ruò chū qí lǐ'},{t:'幸甚至哉，',p:'xìng shèn zhì zāi'},{t:'歌以咏志。',p:'gē yǐ yǒng zhì'}],
+   trans:'登碣石山观沧海，写大海吞吐日月星辰的壮阔，抒发一统天下的博大胸怀。',emo:'豁达',style:'写景',place:'碣石山',placeModern:'今河北昌黎',createdYear:'约207年',
+   history:[{y:'约207年',t:'观沧海·汉代',hi:true}],related:[]},
+  {id:'cibeigushan',title:'次北固山下',grade:7,volume:'七年级上册',dyn:'唐',poet:'wangwan',
+   lines:[{t:'客路青山外，',p:'kè lù qīng shān wài'},{t:'行舟绿水前。',p:'xíng zhōu lǜ shuǐ qián'},{t:'潮平两岸阔，',p:'cháo píng liǎng àn kuò'},{t:'风正一帆悬。',p:'fēng zhèng yī fān xuán'},{t:'海日生残夜，',p:'hǎi rì shēng cán yè'},{t:'江春入旧年。',p:'jiāng chūn rù jiù nián'},{t:'乡书何处达？',p:'xiāng shū hé chù dá'},{t:'归雁洛阳边。',p:'guī yàn luò yáng biān'}],
+   trans:'舟行北固山下，潮平岸阔、海日生残夜，旅途所见中寄托思乡之情。',emo:'思乡',style:'写景',place:'北固山',placeModern:'今江苏镇江',createdYear:'唐代',
+   history:[{y:'唐代',t:'次北固山下·唐代',hi:true}],related:[]},
+  {id:'tianjingsha',title:'天净沙·秋思',grade:7,volume:'七年级上册',dyn:'元',poet:'maozhiyuan',
+   lines:[{t:'枯藤老树昏鸦，',p:'kū téng lǎo shù hūn yā'},{t:'小桥流水人家，',p:'xiǎo qiáo liú shuǐ rén jiā'},{t:'古道西风瘦马。',p:'gǔ dào xī fēng shòu mǎ'},{t:'夕阳西下，',p:'xī yáng xī xià'},{t:'断肠人在天涯。',p:'duàn cháng rén zài tiān yá'}],
+   trans:'枯藤老树、小桥流水、古道西风连成秋郊夕照图，道尽天涯游子的孤寂愁思。',emo:'思乡',style:'写景',place:'古道',placeModern:'今北方道中',createdYear:'元代',
+   history:[{y:'元代',t:'天净沙·秋思·元代',hi:true}],related:[]},
+  {id:'wenwangchangling',title:'闻王昌龄左迁龙标遥有此寄',grade:7,volume:'七年级上册',dyn:'唐',poet:'libai',
+   lines:[{t:'杨花落尽子规啼，',p:'yáng huā luò jǐn zi guī tí'},{t:'闻道龙标过五溪。',p:'wén dào lóng biāo guò wǔ xī'},{t:'我寄愁心与明月，',p:'wǒ jì chóu xīn yǔ míng yuè'},{t:'随君直到夜郎西。',p:'suí jūn zhí dào yè láng xī'}],
+   trans:'听闻好友王昌龄被贬龙标，李白以明月寄情，遥托相思与慰藉。',emo:'友情',style:'抒情',place:'扬州一带',placeModern:'今江苏扬州一带',createdYear:'唐代',
+   history:[{y:'唐代',t:'闻王昌龄左迁龙标遥有此寄·唐代',hi:true}],related:[]},
+  {id:'yeyujibei',title:'夜雨寄北',grade:7,volume:'七年级上册',dyn:'唐',poet:'lishangyin',
+   lines:[{t:'君问归期未有期，',p:'jūn wèn guī qī wèi yǒu qī'},{t:'巴山夜雨涨秋池。',p:'bā shān yè yǔ zhǎng qiū chí'},{t:'何当共剪西窗烛，',p:'hé dāng gòng jiǎn xī chuāng zhú'},{t:'却话巴山夜雨时。',p:'què huà bā shān yè yǔ shí'}],
+   trans:'身在巴山夜雨中思念北方亲人，遥想他日重逢剪烛夜话，于愁中见温情。',emo:'思乡',style:'抒情',place:'巴山',placeModern:'今四川东部',createdYear:'唐代',
+   history:[{y:'唐代',t:'夜雨寄北·唐代',hi:true}],related:[]},
+  {id:'qiuci',title:'秋词',grade:7,volume:'七年级上册',dyn:'唐',poet:'liuyuxi',
+   lines:[{t:'自古逢秋悲寂寥，',p:'zì gǔ féng qiū bēi jì liáo'},{t:'我言秋日胜春朝。',p:'wǒ yán qiū rì shèng chūn cháo'},{t:'晴空一鹤排云上，',p:'qíng kōng yī hè pái yún shàng'},{t:'便引诗情到碧霄。',p:'biàn yǐn shī qíng dào bì xiāo'}],
+   trans:'一反悲秋传统，盛赞秋日晴空一鹤排云而上，抒发昂扬乐观的豪情。',emo:'豁达',style:'抒情',place:'朗州',placeModern:'今湖南常德',createdYear:'唐代',
+   history:[{y:'唐代',t:'秋词·唐代',hi:true}],related:[]},
+
   {id:'jiangnan',title:'江南',grade:1,volume:'一年级上册',dyn:'汉',poet:'hanyuefu',
    lines:[{t:'江南可采莲，',p:'jiāng nán kě cǎi lián，'},{t:'莲叶何田田。',p:'lián yè hé tián tián。'},{t:'鱼戏莲叶间。',p:'yú xì lián yè jiān。'},{t:'鱼戏莲叶东，',p:'yú xì lián yè dōng，'},{t:'鱼戏莲叶西，',p:'yú xì lián yè xī，'},{t:'鱼戏莲叶南，',p:'yú xì lián yè nán，'},{t:'鱼戏莲叶北。',p:'yú xì lián yè běi。'}],
    anno:[{w:'田田',m:'莲叶茂盛相连的样子'},{w:'戏',m:'嬉戏、游动'}],
@@ -1388,10 +1535,10 @@ function starStr(n){return '★'.repeat(n)+'☆'.repeat(3-n);}
 /* ══════════════════════════════════════════
    年级入口
    ══════════════════════════════════════════ */
-const GRADE_CN=['','一','二','三','四','五','六'];
+const GRADE_CN=['','一','二','三','四','五','六','七','八','九'];
 function renderGradeList(){
   const box=document.getElementById('grade-list');let h='';
-  for(let g=1;g<=6;g++){
+  for(let g=1;g<=9;g++){
     const ps=POEMS.filter(p=>p.grade===g);
     if(!ps.length)continue;
     const locked=ST.grade&&g>ST.grade;
@@ -1458,8 +1605,7 @@ function openDetail(id){
   document.getElementById('d-title').textContent=p.title;
   document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'">'+rubyLine(l)+'</span>').join('');
   reciteStop();
-  const _pv=(typeof POET_VOICE!=='undefined'&&POET_VOICE[p.poet])||{desc:'端正诵读'};
-  const _tag=document.getElementById('d-recite-tag'); if(_tag)_tag.innerHTML='诗人音色 · <b>'+POETS[p.poet].name+'·'+_pv.desc+'</b>';
+  recApplyLangAvail();
   // tabs
   document.getElementById('dtabs').innerHTML=D_TABS.map((t,i)=>
     '<button class="dtab'+(i===0?' on':'')+'" onclick="dTab('+i+')">'+t[0]+'</button>').join('');
@@ -1486,29 +1632,28 @@ function fillDetail(p){
   const poet=POETS[p.poet];
   const teacher=ST.role==='teacher',parent=ST.role==='parent';
   let H='';
-  // 0 原文（hero已显示，这里放注释概览）
-  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>字词注释</h3><div class="annos">'+
-     p.anno.map(a=>'<span class="anno"><b>'+a.w+'</b>'+a.m+'</span>').join('')+'</div></div>'+
-     '<div class="sec"><h3><span class="bar"></span>诗中意象</h3><div class="imagery">'+
-     p.imagery.map(im=>'<span class="imk">'+im+'</span>').join('')+'</div></div></div>';
+  // 0 原文（注释 + 意象，均可缺省）
+  H+='<div class="dpanel">';
+  if(p.anno&&p.anno.length)H+='<div class="sec"><h3><span class="bar"></span>字词注释</h3><div class="annos">'+p.anno.map(a=>'<span class="anno"><b>'+a.w+'</b>'+a.m+'</span>').join('')+'</div></div>';
+  if(p.imagery&&p.imagery.length)H+='<div class="sec"><h3><span class="bar"></span>诗中意象</h3><div class="imagery">'+p.imagery.map(im=>'<span class="imk">'+im+'</span>').join('')+'</div></div>';
+  if(!(p.anno&&p.anno.length)&&!(p.imagery&&p.imagery.length))H+='<div class="sec"><p style="color:var(--ink3)">原文与拼音见上方。</p></div>';
+  H+='</div>';
   // 1 诗意
-  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>白话译文</h3><p>'+p.trans+'</p>'+
-     (teacher?'<div class="teacher-box on"><b>教师赏析：</b>'+p.transT+'</div>':
-       '<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">展开深度赏析 ▾</button><div class="teacher-box">'+p.transT+'</div>')+
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>白话译文</h3><p>'+(p.trans||'（译文待补充）')+'</p>'+
+     (p.transT?(teacher?'<div class="teacher-box on"><b>教师赏析：</b>'+p.transT+'</div>':'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">展开深度赏析 ▾</button><div class="teacher-box">'+p.transT+'</div>'):'')+
      (parent?'<div class="parent-tip on"><span>💡</span><span>陪读建议：可以问问孩子——"诗里你最喜欢哪一句？为什么？"引导他用自己的话说说画面。</span></div>':'')+
      '</div>'+
-     '<div class="sec"><h3><span class="bar"></span>情感主题</h3><p>这首诗的情感是 <b style="color:var(--teal)">'+p.emo+'</b>，风格为 <b style="color:var(--teal)">'+p.style+'</b>。</p></div></div>';
+     '<div class="sec"><h3><span class="bar"></span>情感主题</h3><p>这首诗的情感是 <b style="color:var(--teal)">'+(p.emo||'—')+'</b>，风格为 <b style="color:var(--teal)">'+(p.style||'—')+'</b>。</p></div></div>';
   // 2 诗人
   H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>诗人故事 · '+poet.name+'</h3>'+
      '<p style="color:var(--ink2);font-size:14px;margin-bottom:8px">'+poet.dyn+'代 · '+poet.years+'</p>'+
-     '<p>'+p.story+'</p>'+
-     (teacher?'<div class="teacher-box on"><b>延伸：</b>'+p.storyT+'</div>':
-       '<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">了解更多 ▾</button><div class="teacher-box">'+p.storyT+'</div>')+
+     '<p>'+(p.story||poet.intro||'')+'</p>'+
+     (p.storyT?(teacher?'<div class="teacher-box on"><b>延伸：</b>'+p.storyT+'</div>':'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">了解更多 ▾</button><div class="teacher-box">'+p.storyT+'</div>'):'')+
      '</div>'+
      '<div class="sec"><h3><span class="bar"></span>诗人简介</h3><p>'+poet.intro+'</p></div></div>';
   // 3 历史
-  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>历史背景 · '+p.createdYear+'</h3><div class="minihist">'+
-     p.history.map(e=>'<div class="mh-item'+(e.hi?' hi':'')+'"><span class="mdot"></span><div class="my">'+e.y+'</div><div class="mt">'+e.t+'</div></div>').join('')+
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>历史背景 · '+(p.createdYear||'')+'</h3>'+
+     ((p.history&&p.history.length)?'<div class="minihist">'+p.history.map(e=>'<div class="mh-item'+(e.hi?' hi':'')+'"><span class="mdot"></span><div class="my">'+e.y+'</div><div class="mt">'+e.t+'</div></div>').join('')+'</div>':'<p style="color:var(--ink3)">'+poet.dyn+'代 · '+poet.years+'</p>')+
      '</div></div></div>';
   // 4 地图
   H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>创作地点</h3>'+
@@ -1534,10 +1679,24 @@ function backFromDetail(){showView(prevView||'cards');}
 /* ══════════════════════════════════════════
    练习（选择 / 情感 / 连线）
    ══════════════════════════════════════════ */
+const EMO_EMOJI={'思乡':'🌙','喜悦':'😄','豁达':'🌄','友情':'🤝','感恩':'🙏','忧国':'😔','悯农':'🍚','送别':'⛵','爱国':'⚡','哲理':'🔭','母爱':'👩‍👦','离愁':'🍂','壮志':'🔥','闲适':'🍵','惜时':'⏳'};
+function _shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function _opts(correct,pool){const d=_shuf(pool.filter(x=>x!==correct)).slice(0,3);const o=_shuf([correct].concat(d));return{o:o,a:o.indexOf(correct)};}
+function autoQuiz(p){
+  const pn=POETS[p.poet].name,qa=[];
+  const a=_opts(pn,Object.values(POETS).map(x=>x.name));
+  qa.push({type:'choice',q:'《'+p.title+'》的作者是谁？',o:a.o,a:a.a,ex:'本诗作者是'+p.dyn+'代'+pn+'。'});
+  const dy=_opts(p.dyn,['唐','宋','元','明','清','汉','魏晋','南北朝']);
+  qa.push({type:'choice',q:'《'+p.title+'》是哪个朝代的作品？',o:dy.o.map(d=>d+'代'),a:dy.a,ex:'本诗为'+p.dyn+'代作品。'});
+  if(p.emo){const allE=Object.keys(EMO_EMOJI);const e=_opts(p.emo,allE);
+    qa.push({type:'emotion',q:'这首诗主要表达怎样的情感？',o:e.o.map(t=>({e:EMO_EMOJI[t]||'🌸',t:t})),a:e.a});}
+  return qa;
+}
 function buildQuiz(p){
   const box=document.getElementById('dp-quiz');
   let h='';
-  p.quiz.forEach((q,qi)=>{
+  ST.quiz=(p.quiz&&p.quiz.length)?p.quiz:autoQuiz(p);
+  ST.quiz.forEach((q,qi)=>{
     h+='<div class="quiz-q" id="q'+qi+'">';
     if(q.type==='choice'){
       h+='<span class="qtype">选择题</span><div class="qt">'+(qi+1)+'. '+q.q+'</div><div class="opts">'+
@@ -1602,7 +1761,7 @@ function drawMatchLine(qi,a,b){
 }
 function submitQuiz(){
   const p=ST.poem;let correct=0,gradable=0;
-  p.quiz.forEach((q,qi)=>{
+  (ST.quiz||p.quiz).forEach((q,qi)=>{
     const qel=document.getElementById('q'+qi);
     if(q.type==='choice'||q.type==='emotion'){
       gradable++;
@@ -1855,6 +2014,11 @@ const GEO={
  '今安徽池州一带':[117.49,30.66],'今陕西西安':[108.95,34.27],'今江浙一带':[120.16,30.27],
  '今河南开封':[114.31,34.80],'今湖北武汉':[114.30,30.59],'今江苏溧阳':[119.48,31.42],
  '今陕西蓝田':[109.32,34.16],'今镇江、杭州一带':[119.45,32.20],
+ '今山东诸城':[119.41,35.99], '今甘肃天水':[105.72,34.58], '今陕西延安':[109.49,36.59], '今广东珠江口':[113.60,22.30], '今陕西潼关':[110.25,34.55],
+ '今黄河流域':[114.00,35.50],
+ '今甘肃居延一带':[100.80,41.90], '今湖北荆门':[112.20,30.92], '今湖北赤壁':[113.90,29.72],
+ '今北京':[116.40,39.90], '今山东泰安':[117.13,36.19], '今河南洛阳':[112.45,34.62], '今华北一带':[114.50,38.00],
+ '今河北昌黎':[119.16,39.73], '今江苏镇江':[119.45,32.19], '今北方道中':[114.0,35.5], '今四川东部':[107.5,31.2], '今湖南常德':[111.70,29.04],
  '今江苏苏州一带':[120.62,31.30],'今四川江油一带':[104.74,31.78],'今江西吉水':[115.13,27.21],
  '今内蒙古阴山一带':[111.74,40.84],'今湖北蕲春一带':[115.43,30.23],'今浙江一带':[120.20,30.30],
  '今浙江杭州':[120.15,30.27],'今江苏南京':[118.78,32.06],
@@ -2402,9 +2566,9 @@ function buildPrintSheet(p){
     '<h1 style="text-align:center;font-size:26px;margin-bottom:4px">《'+p.title+'》学习单</h1>'+
     '<p style="text-align:center;color:#555;margin-bottom:16px">'+p.dyn+'代 · '+POETS[p.poet].name+' · '+p.volume+'　　姓名：________　班级：________</p>'+
     '<div class="sec"><h3>一、诗词原文</h3><p style="font-size:18px;line-height:2.4">'+p.lines.map(l=>l.t).join('<br>')+'</p></div>'+
-    '<div class="sec"><h3>二、字词注释</h3><p>'+p.anno.map(a=>a.w+'：'+a.m).join('；　')+'</p></div>'+
+    ((p.anno&&p.anno.length)?'<div class="sec"><h3>二、字词注释</h3><p>'+p.anno.map(a=>a.w+'：'+a.m).join('；　')+'</p></div>':'')+
     '<div class="sec"><h3>三、想一想</h3>'+
-    p.quiz.filter(q=>q.type==='choice').map((q,i)=>'<p>'+(i+1)+'. '+q.q+'<br>'+q.o.map((o,oi)=>'　（'+String.fromCharCode(65+oi)+'）'+o).join('')+'</p>').join('')+
+    ((p.quiz&&p.quiz.length)?p.quiz:autoQuiz(p)).filter(q=>q.type==='choice').map((q,i)=>'<p>'+(i+1)+'. '+q.q+'<br>'+q.o.map((o,oi)=>'　（'+String.fromCharCode(65+oi)+'）'+o).join('')+'</p>').join('')+
     '<p>· 这首诗表达了诗人怎样的情感？请写下来：________________________________</p>'+
     '<p>· 用自己的话说说诗的意思：____________________________________________</p>'+
     '</div></div>';
@@ -2422,70 +2586,58 @@ window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(
 /* ══════════════════════════════════════════
    F · 朗读（Web Speech API，零字节离线）+ 逐句高亮
    ══════════════════════════════════════════ */
-var recVoice=null,recReciting=false,recQueue=[],recIdx=0,recPersona=null; /* var：避免 boot 期 showView→reciteStop 的 TDZ */
-/* 诗人音色人设（方案 A）：按性格映射音高/语速 + 语音池，零字节、一人一声 */
-const POET_VOICE={
-  libai:{rate:1.0,pitch:1.12,pool:'clear',desc:'豪放飘逸'},
-  dufu:{rate:0.78,pitch:0.82,pool:'low',desc:'沉郁顿挫'},
-  wangwei:{rate:0.84,pitch:0.96,pool:'clear',desc:'清雅禅意'},
-  luobinwang:{rate:0.98,pitch:1.24,pool:'clear',desc:'童稚灵慧'},
-  menghaoran:{rate:0.88,pitch:1.02,pool:'clear',desc:'清淡自然'},
-  wangzhihuan:{rate:0.9,pitch:0.9,pool:'low',desc:'苍劲开阔'},
-  lishen:{rate:0.84,pitch:0.92,pool:'clear',desc:'恳切悯农'},
-  hezhizhang:{rate:0.74,pitch:0.84,pool:'elder',desc:'苍老温厚'},
-  dumu:{rate:0.94,pitch:1.06,pool:'clear',desc:'俊爽清丽'},
-  yeshaowen:{rate:0.9,pitch:1.05,pool:'clear',desc:'清新淡远'},
-  wanganshi:{rate:0.86,pitch:0.88,pool:'low',desc:'劲健刚正'},
-  sushi:{rate:0.96,pitch:1.0,pool:'clear',desc:'旷达洒脱'},
-  gongzizhen:{rate:0.92,pitch:0.94,pool:'low',desc:'激越求变'},
-  hanyuefu:{rate:0.92,pitch:1.08,pool:'clear',desc:'采莲清扬'},
-  liqiao:{rate:0.9,pitch:1.06,pool:'clear',desc:'咏物灵巧'},
-  wuming:{rate:0.86,pitch:1.0,pool:'clear',desc:'素朴端正'},
-  beichaofolk:{rate:0.82,pitch:0.86,pool:'low',desc:'苍茫豪迈'},
-  baijuyi:{rate:0.86,pitch:0.98,pool:'clear',desc:'平易亲切'},
-  yangwanli:{rate:0.95,pitch:1.1,pool:'clear',desc:'活泼清新'},
-  jiadao:{rate:0.8,pitch:0.92,pool:'low',desc:'清峭苦吟'},
-  tangyin:{rate:0.96,pitch:1.04,pool:'low',desc:'洒脱不羁'},
-  gaoding:{rate:0.88,pitch:1.0,pool:'clear',desc:'乡野闲适'}
-};
-function zhVoicePools(){
-  if(!('speechSynthesis' in window))return {clear:[],low:[],elder:[],any:[]};
-  const vs=speechSynthesis.getVoices().filter(v=>/^zh/i.test(v.lang));
-  const local=vs.filter(v=>v.localService); const base=local.length?local:vs;
-  const has=(v,arr)=>arr.some(n=>(v.name||'').includes(n));
-  const clearNames=['婷婷','Tingting','Ting-Ting','美嘉','Meijia','善怡','语舒','Yu-shu','Sinji'];
-  const elderNames=['Grandpa','Grandma','Lao','老','爷'];
-  const maleNames=['Eddy','Reed','Rocko','Rishi','Grandpa','男','Ren','Han'];
-  const clear=base.filter(v=>has(v,clearNames));
-  const elder=base.filter(v=>has(v,elderNames));
-  const low=base.filter(v=>has(v,maleNames));
-  return {clear:clear.length?clear:base, low:low.length?low:(clear.length?clear:base),
-          elder:elder.length?elder:(low.length?low:base), any:base};
+var recVoice=null,recReciting=false,recQueue=[],recIdx=0; /* var：避免 boot 期 showView→reciteStop 的 TDZ */
+var recLang=(localStorage.getItem('pg_reclang')==='cantonese')?'cantonese':'mandarin'; /* 默认普通话 */
+/* 趣味/颤音音色，诵读不用 */
+const REC_NOVELTY=/Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Bells|Bubbles|Jester|Trinoids|Wobble|Boing|Bahh|Albert|Zarvox|Whisper|Organ/i;
+/* 通用选音：以语言代码为锚（不写死某系统专有名字），离线(localService)优先，
+   再在离线音里挑各平台公认标准音；最后才退到网络音。跨 Mac/iPad/Android/Windows 自适应。 */
+function _pickByLang(filterRe, goodNames){
+  const vs=speechSynthesis.getVoices(); if(!vs.length)return null;
+  let cand=vs.filter(v=>filterRe.test(v.lang)||filterRe.test(v.name||''));
+  if(!cand.length)return null;
+  const local=cand.filter(v=>v.localService!==false);          // 离线优先（undefined 视为本地）
+  const localClean=local.filter(v=>!REC_NOVELTY.test(v.name||''));
+  const pool=localClean.length?localClean:(local.length?local:cand);
+  for(const nm of goodNames){const m=pool.find(v=>(v.name||'').includes(nm));if(m)return m;}
+  return pool[0]||cand[0];
 }
-function reciteVoiceFor(poetId){
-  const pv=POET_VOICE[poetId]||{rate:0.85,pitch:1.0,pool:'clear',desc:'端正诵读'};
-  const pools=zhVoicePools(); const pool=pools[pv.pool]&&pools[pv.pool].length?pools[pv.pool]:pools.any;
-  let h=0; for(const c of poetId)h=(h*31+c.charCodeAt(0))>>>0; /* 同一诗人稳定取同一把声音 */
-  const voice=pool.length?pool[h%pool.length]:pickZhVoice();
-  return {voice:voice, rate:pv.rate, pitch:pv.pitch, desc:pv.desc};
+function pickMandarinVoice(){
+  // zh-CN / 普通话（Apple:语舒/婷婷；MS:Huihui/Yaoyao；Android:Google 中文）
+  return _pickByLang(/^(zh[-_]?CN|cmn)/i,
+    ['语舒','晓晓','Xiaoxiao','婷婷','Tingting','Ting-Ting','Yaoyao','瑶瑶','慧慧','Huihui','Kangkang','Li-Mu'])
+   || _pickByLang(/^zh(?!.*(HK|yue))/i, []); // 兜底：任意非粤语中文
 }
-function pickZhVoice(){
-  if(!('speechSynthesis' in window))return null;
-  const vs=speechSynthesis.getVoices();
-  if(!vs.length)return null;
-  const zh=vs.filter(v=>/^zh/i.test(v.lang));
-  if(!zh.length)return null;
-  /* 优先高质量标准普通话语音（避开 Eddy/Rocko 等趣味音色） */
-  const prefer=['婷婷','Tingting','Ting-Ting','美嘉','Meijia','善怡','语舒','Yu-shu','Sinji','普通话','Mandarin','Google'];
-  for(const nm of prefer){const m=zh.find(v=>(v.name||'').includes(nm));if(m)return m;}
-  return zh.find(v=>v.localService&&/zh[-_]?CN|Hans/i.test(v.lang))||zh.find(v=>v.localService)||zh[0];
+function pickCantoneseVoice(){
+  // zh-HK / 粤语（Apple:善怡；MS:Tracy/Danny；Android:Google 粤語）
+  return _pickByLang(/^(zh[-_]?HK|yue|粤|cantonese)/i,
+    ['善怡','Sinji','Sin-ji','美玲','Mei-Ling','Tracy','Danny']);
 }
-if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=()=>{recVoice=pickZhVoice();};}
+function recVoicePick(){return recLang==='cantonese'?(pickCantoneseVoice()||pickMandarinVoice()):pickMandarinVoice();}
+function recLangAvailable(){return {mandarin:!!pickMandarinVoice(), cantonese:!!pickCantoneseVoice()};}
+/* 跨设备保护：本机无粤语语音时置灰"粤语"并提示，并把已存的粤语偏好回退普通话 */
+function recApplyLangAvail(){
+  const hasCanton=!!pickCantoneseVoice();
+  if(recLang==='cantonese'&&!hasCanton){recLang='mandarin';try{localStorage.setItem('pg_reclang','mandarin');}catch(e){}}
+  const cb=document.querySelector('#rec-lang button[data-lang="cantonese"]');
+  if(cb){cb.disabled=!hasCanton;cb.classList.toggle('disabled',!hasCanton);
+    cb.title=hasCanton?'粤语朗读':'本设备未安装粤语语音，无法粤语朗读';}
+  document.querySelectorAll('#rec-lang button').forEach(b=>b.classList.toggle('on',b.dataset.lang===recLang));
+}
+function setRecLang(l){
+  if(l==='cantonese'&&!pickCantoneseVoice()){recApplyLangAvail();return;} /* 无粤语音色，忽略切换 */
+  recLang=(l==='cantonese')?'cantonese':'mandarin';
+  try{localStorage.setItem('pg_reclang',recLang);}catch(e){}
+  document.querySelectorAll('#rec-lang button').forEach(b=>b.classList.toggle('on',b.dataset.lang===recLang));
+  if(recReciting){reciteStop();reciteStart();}
+}
+if('speechSynthesis' in window){const _prev=speechSynthesis.onvoiceschanged;speechSynthesis.onvoiceschanged=function(){recApplyLangAvail();};}
 function reciteToggle(){ recReciting?reciteStop():reciteStart(); }
 function reciteStart(){
   if(!('speechSynthesis' in window)){alert('当前浏览器不支持语音朗读');return;}
   const p=ST.poem; if(!p)return;
-  recPersona=reciteVoiceFor(p.poet);
+  recVoice=recVoicePick();
+  if(recLang==='cantonese'&&!pickCantoneseVoice()){/* 无粤语音色时回退并提示 */ }
   speechSynthesis.cancel();
   recReciting=true; recIdx=0;
   recQueue=p.lines.map(l=>l.t);
@@ -2496,12 +2648,11 @@ function reciteLine(){
   if(!recReciting||recIdx>=recQueue.length){reciteStop();return;}
   document.querySelectorAll('#d-verse .ln').forEach(el=>el.classList.toggle('reciting',+el.dataset.li===recIdx));
   const u=new SpeechSynthesisUtterance(recQueue[recIdx].replace(/[，。？！、；：]/g,'，'));
-  u.lang='zh-CN';
-  const per=recPersona||{voice:pickZhVoice(),rate:0.82,pitch:1.0};
-  if(per.voice)u.voice=per.voice;
-  u.rate=per.rate; u.pitch=per.pitch;
-  u.onend=()=>{ if(!recReciting)return; recIdx++; setTimeout(reciteLine,360); };
-  u.onerror=()=>{ if(recReciting){recIdx++;setTimeout(reciteLine,360);} };
+  u.lang=(recLang==='cantonese')?'zh-HK':'zh-CN';
+  if(recVoice)u.voice=recVoice;
+  u.rate=0.84; u.pitch=1.0; /* 统一、自然、放慢的诵读节奏 */
+  u.onend=()=>{ if(!recReciting)return; recIdx++; setTimeout(reciteLine,380); };
+  u.onerror=()=>{ if(recReciting){recIdx++;setTimeout(reciteLine,380);} };
   speechSynthesis.speak(u);
 }
 function reciteStop(){

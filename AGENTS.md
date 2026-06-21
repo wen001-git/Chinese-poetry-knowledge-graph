@@ -15,20 +15,21 @@
 - **里程碑测试规则（强制）**：每完成一项就做一次全面测试——断网可用、五入口与详情页正常、控制台无报错、iPad/桌面响应式、水墨配色无红色主色。通过后才算完成。
 
 ## 硬约束（不可违反）
-- 单文件、完全离线、无 CDN、目标 ≤3MB（当前约 632KB，含内嵌真实古琴音频）
+- 单文件、完全离线、无 CDN、目标 ≤3MB（当前约 661KB，含内嵌真实古琴音频）
 - 视觉：宣纸白 `#f7f5f0` 底 / 浓墨 `#1c1c1e` 字 / 墨青 `#2d5a6b` 强调；**禁止红色作主色或大面积色**
 - 诗词内容与**统编版**小学语文课本对齐
 - 用户进度/偏好存 `localStorage`（键 `pg_v1`），无账号系统
 
 ## 当前状态（截至 2026-06-20，v1.0+）
 已完成：
-- 34 首诗完整数据（统编版1–6年级课内古诗；一、二年级已按教材补齐）；五大入口（年级/卡片墙/知识图谱/地图/时间轴）+ 闯关；三角色（学生/家长/教师）可切换；探索/学习模式
+- 64 首诗（小学34 + 初中30核心，含《木兰诗》《关雎》《蒹葭》《水调歌头》《过零丁洋》等；年级已扩至 7-9 初中）；五大入口（年级/卡片墙/知识图谱/地图/时间轴）+ 闯关；三角色（学生/家长/教师）可切换；探索/学习模式
+- **批量扩充流水线**（/tmp 临时脚本思路）：用 pypinyin 自动生成逐字拼音（按标点切分对齐），多音字用每首 FIX 列表订正（如 著→zhuó/裳→cháng/参差→cēn cī/燕然→yān rán/冰塞川→sè）；新诗只需 正文+元数据+短译文，**测验由 `autoQuiz(p)` 自动生成**（作者/朝代/情感），详情页对缺省字段已健壮化。grade 7/8/9=初一/二/三。
 - 详情页 8 区块（原文拼音ruby/注释/白话双版/情感意象/诗人/局部时间轴/单诗地图/练习/相关）
 - 三类互动练习（选择/情感/连线）+ 得星进度；5 维搜索；教师打印学习单
 - 知识图谱 2D 力导向 + 伪 3D；时间轴防重叠分层
 - **诗词地图**（对标参考"诗词图卷"）：A1 缩放平移 / A2 真实晕渲地形(内嵌栅格染宣纸色)+山脉名 / A3 地形⇄素雅 / A4 古⇄今地名 / B1 名胜分类图标(山水楼关岳) / B2 足迹编号①②③ / 地点 hover 高亮 + 点空白关闭 tip
 - **地图按诗人展开 + 清晰度**：顶部「诗人：全部 + 22 位」横滑选择行(`map-poets`)，选中某诗人→左侧列表只看其诗 + 顶部诗人简介头(印章/姓名/朝代生卒/入选数/×关闭)、地图标记只留其诗作地、有足迹则画。**清晰度**：标记/地名/足迹/名胜/山脉名缩放时反向缩放(`.zm` data-br / `.zt` data-bfs，`applyMarkScale` 在 `applyZoom` 调用)保持恒定屏幕尺寸不糊不重叠，描边用 `vector-effect=non-scaling-stroke`；滚轮缩放需 ⌘/Ctrl。
-- **氛围·朗读与古琴（F）**：① 朗读——详情页「🔊 朗读」用 Web Speech API（`speechSynthesis`，零字节离线），**诗人音色人设**：每位诗人按性格映射音高/语速 + 语音池（`POET_VOICE`），李白豪放明亮、杜甫沉郁低沉(男声)、王维清雅、贺知章苍老(Grandpa音)、骆宾王童稚高音…一人一声且稳定；逐句诵读 + 当前句高亮跟读，详情页显示「诗人音色·X·性格」标签，离开详情自动停。② 古琴背景音——导航「🎵 古琴」面板：默认零字节程序合成（Karplus-Strong 五声音阶 + 卷积混响），可调音量；「高音质」开关（**默认开**）播放内嵌真实古琴 `GUQIN_CLIP`＝《阳关三叠》(演奏 CharlieHuang，CC BY-SA 3.0，Wikimedia，已裁 24s 单声道循环 mp3，base64≈313KB)，面板内显示署名；留空时回退程序合成。
+- **氛围·朗读与古琴（F）**：① 朗读——详情页「🔊 朗读」用 Web Speech API（`speechSynthesis`，零字节离线），**统一好听的标准诵读 + 普通话/粤语语种切换**（默认普通话 `语舒`→zh-CN，粤语 `善怡`→zh-HK；`recLang` 存 localStorage `pg_reclang`），统一 rate 0.84/pitch 1.0、逐句诵读 + 句间停顿 + 当前句高亮跟读，离开详情自动停。〔已废弃"诗人音色人设"：混了 zh-CN/HK/TW 不同语种致李白成粤语女声、贺知章颤音、孟浩然女声，用户反馈撤回。〕② 古琴背景音——导航「🎵 古琴」面板：默认零字节程序合成（Karplus-Strong 五声音阶 + 卷积混响），可调音量；「高音质」开关（**默认开**）播放内嵌真实古琴 `GUQIN_CLIP`＝《阳关三叠》(演奏 CharlieHuang，CC BY-SA 3.0，Wikimedia，已裁 24s 单声道循环 mp3，base64≈313KB)，面板内显示署名；留空时回退程序合成。
 - **诗作列表联动（E）**：诗词地图左侧列表面板（与地图两栏，≤900px 堆叠）。E1 列表随年份游标过滤"截至 N 年·已问世 M 首"（播放时实时增长）/ E2 tab 全部·只看诗作·只看大事（大事=EVENTS）/ E3 `FAME` 传播度标注 + "仅代表作⇄全部"滑块（fame 阈值过滤）/ E4 点列表项→地图定位（缩放平移到该地+脉冲高亮+必要时推进年份点亮）、"读›"按钮→详情。
 - **时间轴驱动·时空联动（D，参考图灵魂功能）**：诗词地图底部年份游标。D1 播放/暂停 + 1×/2×/4× 调速 + 可拖动手柄 / D2 年份推进时地图按 `poemYear` 逐步"点亮"该年前的诗作地（未到则淡出 .07），并实时计数"已问世 N/M 首" / D3 选中足迹诗人时游标上标注生/卒（如李白 生701·卒762） / D4 朝代渐变色带 + 分期标签（初/盛/中/晚唐·宋·元·明·清），随朝代筛选自动重定范围。播放用 setInterval（抗后台节流）、dt 钳制防跳。
 - **诗人长廊（C）**：第六入口"✍ 诗人"。C1 诗人选择器(13 位诗人 chip，按朝代+生年排序，横滑、active 自动居中) / C2 诗人面板(印章头像+姓名+朝代生卒+简介+诗作数/足迹地数统计+代表诗作卡片(点击进详情、显示已得星)+足迹/诗作地 mini-map) / C3 足迹路线(李白/杜甫/王维有 ROUTES 者面板内画编号虚线，并"🗺 在大地图看足迹"联动 setMapPoet+showView('map')；无足迹者回退"诗作地点")
@@ -39,6 +40,11 @@
 - [x] **E** 诗作列表联动 / 多维筛选 ✅ 已完成并测试（2026-06-20）
 - [x] **F** 朗读（Web Speech 逐句高亮）+ 古琴背景音（程序合成）✅ 已完成并测试（2026-06-20）
   - [x] 已内嵌真实古琴《阳关三叠》(CharlieHuang, CC BY-SA 3.0, Wikimedia)，裁 24s 单声道循环 mp3，高音质默认开、面板署名 ✅（2026-06-20）
+- [进行中] **内容扩充：覆盖小学+初中全部教材古诗（用户目标，分批进行）**
+  - [x] 初中核心 30 首（含《木兰诗》）已加，年级扩至 7-9 ✅（2026-06-21）
+  - [ ] 初中其余篇目（人教版 7-9 课内+课外诵读，如 峨眉山月歌/江南逢李龟年/卖炭翁/白雪歌/酬乐天/无题/南乡子/破阵子已加破阵子? 未加 等）
+  - [ ] 小学三~六年级课内古诗补全（目前 3-6 年级仅有代表作，统编尚有多首未录）
+  - 用上方「批量扩充流水线」继续：每批 6-8 首、独立小脚本（避免输出过大触发内容过滤）、注入后 reload 验证(总数/拼音0错位/geo/poet/console)、commit
 
 ## 文件地图
 - `poemgraph.html` — 全部代码与数据（改动主要在这里）
@@ -53,7 +59,7 @@
 - **滚轮缩放需按 ⌘/Ctrl**（`bindMapZoom` 的 wheel 处理：无修饰键直接 return 让页面正常滚动，避免小屏卡在地图无法下滚；触控板捏合带 ctrlKey 仍可缩放）——勿改回"无条件 preventDefault 缩放"。+/- 按钮与左下角提示 `#map-zoom-hint`。
 - 知识图谱「诗词」维度为核心 hub，**故意锁定常显**（`togDim` 对 `poem` 提前 return，chip 加 `.locked`+🔒+tooltip）——非 bug，勿放开。
 - 诗词数据结构：`POEMS[]`（含 lines/anno/trans/transT/emo/imagery/place/placeModern/placeXY?/story/storyT/history/related/quiz），`POETS{}`（name/dyn/years/av/intro/born[投影xy]/route?），`EVENTS[]`。
-- 氛围（F）：朗读模块 `POET_VOICE`(诗人→{rate,pitch,pool,desc})/`zhVoicePools`(本地 zh 音分 clear/low/elder 池)/`reciteVoiceFor`(按 poetId 稳定取声)/`reciteStart→reciteLine`(逐句 utterance 链用 `recPersona` 的 rate/pitch/voice + `.ln.reciting` 高亮)/`reciteStop`(showView 非 detail 时调用)；`openDetail` 设 `#d-recite-tag`；**状态用 `var` 声明**避免 boot 期 showView→reciteStop 的 TDZ。古琴模块 `ambInit`(AudioContext+卷积混响)/`ksBuffer`(Karplus-Strong 缓存)/`ambPluck`/`ambTick`(随机五声音阶调度)/`ambStart/Stop/Toggle/SetVol/SetHifi`；`GUQIN_CLIP` 空串=回退程序合成；面板 `#amb-pop`。
+- 氛围（F）：朗读模块 `recLang`(mandarin/cantonese，存 `pg_reclang`)/**通用选音** `_pickByLang`(filterRe,goodNames)：以语言代码(zh-CN/zh-HK)为锚、**离线 localService 优先**、避开 `REC_NOVELTY` 趣味音、再挑各平台标准名(Apple 语舒/婷婷·MS Huihui/Yaoyao·Android Google·zh-HK 善怡/Tracy)，跨 Mac/iPad/Android/Windows 自适应，网络音仅末位兜底/`pickMandarinVoice`/`pickCantoneseVoice`/`recVoicePick`/`setRecLang`(切语种+重读)/`reciteStart→reciteLine`(统一 rate 0.84·pitch 1.0，utterance.lang 按语种 zh-CN/zh-HK，逐句链 + `.ln.reciting` 高亮)/`reciteStop`(showView 非 detail 时调用)；语种切换 UI `#rec-lang`（`openDetail` 调 `recApplyLangAvail` 同步 active）；**跨设备保护** `recApplyLangAvail`：无 zh-HK 语音时置灰"粤语"按钮+提示+把已存粤语偏好回退普通话（`setRecLang`/`voiceschanged` 也调用）——应对 Windows 默认无粤语、安卓需下载粤语包的情况。**状态用 `var` 声明**避免 boot 期 TDZ。〔本机语种实况：zh-CN 标准音=语舒/婷婷；zh-HK 粤语仅善怡；zh-TW=美嘉；Eddy/Grandpa 等为趣味音勿用。〕古琴模块 `ambInit`(AudioContext+卷积混响)/`ksBuffer`(Karplus-Strong 缓存)/`ambPluck`/`ambTick`(随机五声音阶调度)/`ambStart/Stop/Toggle/SetVol/SetHifi`；`GUQIN_CLIP` 空串=回退程序合成；面板 `#amb-pop`。
 - 诗作列表（E）：地图视图两栏 `.map-layout`（左 `#map-list` / 右 `.map-main`）。状态 `mapTab`('all'|'poem'|'event')/`mapFame`(0–100滑块)；`FAME{}`+`poemFame()`；`curMapPoems`(按 dyn+fame 过滤)/`renderMapList`(诗+EVENTS 混排，`rebuildMapTime` 调用)/`applyListYear`(按 `tlYear` 显隐+计数，`applyMapYear` 每帧调用)/`setMapTab`/`setMapFame`/`locatePoem`(缩放平移+`pulseAt` SMIL 脉冲)。
 - 时间轴驱动（D）：`createdYear` 模糊串经 `poemYear(p)` 解析为数字年（世纪/朝代分期/年号兜底；时间轴 xOf 与地图共用）。地图 `.tl-mark[data-yr]` 标记诗作地，`buildMapSVG` 末尾缓存 `tlNodes` 并 `applyMapYear(tlYear)`；游标状态 `tlYear/tlMin/tlMax/tlPlaying/tlSpeed`，`refreshMapTime`(按 `mapVisiblePoems` 定范围)/`renderTimeScrubber`(色带 `TL_ERAS/TL_ERA_COL` + 生卒 ticks)/`tlPlay`(setInterval)/`tlSetYear`/`tlSetSpeed`。地图所有 setMap* 走 `rebuildMapTime()`；离开视图 `showView` 调 `tlPause()`。
 - 诗人长廊：视图 `v-poets`，入口 tab `t-poets`，`showView` 分支 `renderPoets()`。核心函数 `renderPoetPicker/selectPoet(全局 poetSel)/renderPoetPanel/poetMapSVG/gotoMapPoet`；排序 `poetKeysSorted()`(DYN_ORDER+poetBirth)。足迹复用地图层 `PROVPATH/reliefImg('landclipp')/riversSVG/ROUTES`。CSS 类 `.poet-picker/.poet-chip/.poet-seal/.poet-hero/.poet-stats/.poet-sec`。
@@ -67,6 +73,10 @@
 
 | 日期 | 变更内容 |
 |------|---------|
+| 2026-06-21 | 内容扩充·初中(目标覆盖全部小学+初中)：34→64首，新增初中核心30首(含《木兰诗》《关雎》《蒹葭》《水调歌头》《江城子·密州出猎》《过零丁洋》《山坡羊·潼关怀古》等)。基础改造：年级扩至7-9、详情/打印对缺省字段健壮化、新增 autoQuiz 自动测验、pypinyin 批量拼音流水线+多音字订正(著→zhuó/裳→cháng/参差→cēn cī/燕然→yān rán/冰塞川→sè)。新增16位诗人。测试：64首拼音0错位、全有geo/poet、控制台0报错、661KB。分批进行中(初中其余+小学中高年级待续) |
+| 2026-06-21 | 朗读通用选音（用户要求跨 Mac/iPad/Android/Windows）：重写 `pickMandarin/CantoneseVoice` 为 `_pickByLang`——以语言代码为锚、离线 localService 优先、避趣味音、再挑各平台标准名，网络音仅兜底。模拟测试：Windows→Huihui(离线)、Android→Google 中文、iPad→语舒、Windows 默认无粤语→正确置灰、仅网络音→Google 普通话兜底，控制台 0 报错 |
+| 2026-06-21 | 朗读跨设备保护：检测本机有无 zh-HK 粤语语音（本机仅善怡，Windows 默认无、安卓需下载包），无则置灰"粤语"+提示+回退普通话（`recApplyLangAvail`，`openDetail`/`setRecLang`/`voiceschanged` 调用）。另确认朗读早已全量统一（`recVoicePick` 不依赖诗人，34 首均同音色）。测试：有粤语→可用、模拟无粤语→置灰+回退、控制台 0 报错 |
+| 2026-06-21 | 朗读改版·撤诗人音色+加语种切换（用户反馈：人设把 zh-CN/HK/TW 混用致李白粤语女声、贺知章颤音、孟浩然女声）：删 `POET_VOICE`/人设逻辑，恢复统一标准诵读（rate 0.84/pitch 1.0+句间停顿）；新增普通话/粤语切换（默认普通话语舒 zh-CN、粤语善怡 zh-HK，存 `pg_reclang`），详情页「普通话｜粤语」按钮。Claude Preview 测试：普通话→语舒/zh-CN、粤语→善怡/zh-HK、贺知章不再颤音、默认普通话、切换持久化、控制台 0 报错 |
 | 2026-06-21 | 地图按诗人展开 + 清晰度（用户确认需求）：①诗词地图新增「诗人」横滑选择行(全部+22位)，选谁→左侧列表只看其诗+诗人简介头、地图标记只留其诗作地、有足迹则画；`renderMapPoets`/`curMapPoems`+`buildMapSVG` 加 mapPoet 过滤/`renderMapList` 加诗人头。②免费提清晰度：标记/地名/足迹/名胜/山脉名缩放时反向缩放(`.zm/.zt`+`applyMarkScale`)保持恒定屏幕尺寸、不再放大变粗变糊重叠，描边 non-scaling-stroke。Claude Preview 测试：23 chip、李白→6首+简介头、杜甫→足迹+2首、标记 r 5→1.25(@4×)/字 17→5.67(@3×) 全反向缩放、65 元素@5× 校验通过、控制台 0 报错 |
 | 2026-06-20 | 朗读升级·诗人音色人设（用户确认需求，承接另一账号的 34 首+古琴版）：唐人无真实录音→改为按性格定制"音色"，`POET_VOICE` 映射音高/语速+语音池(clear/low/elder)，**覆盖全部 22 位诗人一人一声且稳定**（李白明亮豪放/杜甫低沉/王维清雅/贺知章 Grandpa 苍老/骆宾王童稚/北朝民歌苍茫/白居易平易/杨万里活泼…），详情页显示音色标签。Claude Preview 测试：22 诗人均有人设(无落默认)、各 rate·pitch·voice 区分、敕勒歌→苍茫、回乡偶书→苍老男声 speaking+高亮、古琴 base64 完好、控制台 0 报错 |
 | 2026-06-20 | 内容扩充(一二年级,据统编版教材PDF核对)：20→34首。新增一上《江南》《画》《古朗月行》《风》、一下《池上》《小池》《寻隐者不遇》《画鸡》、二上《敕勒歌》《夜宿山寺》、二下《村居》《咏柳》《晓出净慈寺送林子方》《梅花》；订正《望庐山瀑布》→二上、二下《绝句》→"迟日江山丽"。新增9位诗人+8个地点经纬度。修复拼音逐字对齐(rubyLine按标点切分)、知识图谱属性/历史事件节点可点列相关诗。测试：34首拼音0错位、全有geo、控制台0报错、632KB |
