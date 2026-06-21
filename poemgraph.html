@@ -195,6 +195,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 /* 地图·诗人横滑选择（A） */
 .map-poets{display:flex;gap:7px;align-items:center;overflow-x:auto;padding:2px 2px 10px;margin-bottom:8px;scrollbar-width:thin}
 .map-poets .mp-lab{flex:0 0 auto;font-size:12px;color:var(--ink3)}
+.map-poets .mp-search{flex:0 0 auto;width:110px;border:1px solid var(--border);border-radius:16px;padding:4px 11px;font-size:12px;background:var(--paper);outline:none;color:var(--ink)}
+.map-poets .mp-search:focus{border-color:var(--teal);width:140px}
 .mpchip{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:18px;
   border:1px solid var(--border);background:var(--paper2);font-size:13px;color:var(--ink);white-space:nowrap;transition:.16s}
 .mpchip:hover{border-color:var(--teal)}
@@ -2507,15 +2509,32 @@ function landmarksSVG(){ if(!mapLandmark)return '';
       '<text class="zt" data-bfs="11" x="'+(p[0]+11).toFixed(1)+'" y="'+(p[1]+3.5).toFixed(1)+'" font-size="11" fill="'+col+'" font-family="serif" opacity=".82" style="pointer-events:none">'+L.n+'</text>';
   }).join('');}
 function renderMap(){renderMapControls();renderMapPoets();rebuildMapTime();}
+var mapPoetQ='';
+function mapPoetKeys(){
+  let ps=visiblePoems(); if(mapDyn!=='all')ps=ps.filter(p=>p.dyn===mapDyn);
+  const set=new Set(ps.map(p=>p.poet));
+  return poetKeysSorted().filter(k=>set.has(k));
+}
 function renderMapPoets(){
   const el=document.getElementById('map-poets'); if(!el)return;
+  const keys=mapPoetKeys();
   let h='<span class="mp-lab">诗人：</span>';
-  h+='<button class="mpchip'+(mapPoet===null?' on':'')+'" onclick="setMapPoet(null)">全部</button>';
-  poetKeysSorted().forEach(k=>{const po=POETS[k];
-    h+='<button class="mpchip'+(mapPoet===k?' on':'')+'" onclick="setMapPoet(\''+k+'\')" title="'+po.dyn+'代 · '+po.years+'">'+
+  h+='<input id="mp-search" class="mp-search" placeholder="🔍找诗人" value="'+mapPoetQ.replace(/["<>]/g,'')+'" oninput="filterMapPoets(this.value)">';
+  h+='<button class="mpchip'+(mapPoet===null?' on':'')+'" data-nm="全部" onclick="setMapPoet(null)">全部</button>';
+  keys.forEach(k=>{const po=POETS[k];
+    h+='<button class="mpchip'+(mapPoet===k?' on':'')+'" data-nm="'+po.name+'" onclick="setMapPoet(\''+k+'\')" title="'+po.dyn+'代 · '+po.years+'">'+
        '<span class="mpav">'+po.av+'</span>'+po.name+(ROUTES[k]?'<span class="mpfoot">足迹</span>':'')+'</button>';});
   el.innerHTML=h;
+  if(mapPoetQ)filterMapPoets(mapPoetQ);
   const on=el.querySelector('.mpchip.on'); if(on)el.scrollLeft=on.offsetLeft-el.clientWidth/2+on.clientWidth/2;
+}
+function filterMapPoets(q){
+  mapPoetQ=q||''; const qq=mapPoetQ.trim();
+  let shown=0;
+  document.querySelectorAll('#map-poets .mpchip').forEach(c=>{
+    if(c.dataset.nm==='全部'){c.style.display='';return;}
+    const ok=!qq||c.dataset.nm.indexOf(qq)>=0; c.style.display=ok?'':'none'; if(ok)shown++;
+  });
 }
 function rebuildMapTime(){refreshMapTime();renderMapList();buildMapSVG();renderTimeScrubber();}
 
@@ -2672,7 +2691,7 @@ function renderMapControls(){
   h+='<button class="dchip'+(mapLandmark?' on':'')+'" style="margin-left:10px" onclick="setMapLandmark(!mapLandmark)">⛰ 名胜</button>';
   document.getElementById('map-controls').innerHTML=h;
 }
-function setMapDyn(d){mapDyn=d;renderMapControls();rebuildMapTime();}
+function setMapDyn(d){mapDyn=d; if(mapPoet&&mapPoetKeys().indexOf(mapPoet)<0)mapPoet=null; renderMapControls();renderMapPoets();rebuildMapTime();}
 function setMapPoet(k){mapPoet=k;renderMapPoets();rebuildMapTime();}
 function setMapTerrain(v){mapTerrain=v;renderMapControls();rebuildMapTime();}
 function setMapName(v){mapName=v;renderMapControls();rebuildMapTime();}
