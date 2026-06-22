@@ -2929,11 +2929,13 @@ function buildMapSVG(){
     emit(pl,lx,ly,Math.abs(ly-(pl.xy[1]-1))>5,!right);});
   let route='';
   if(mapPoet&&ROUTES[mapPoet]){ const r=ROUTES[mapPoet];
-    route='<polyline points="'+r.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="none" stroke="#5a4a8a" stroke-width="2.4" stroke-dasharray="8,6" vector-effect="non-scaling-stroke" opacity=".82" stroke-linejoin="round"/>';
-    r.forEach(function(p,i){var x=p[0].toFixed(1),y=p[1].toFixed(1);
-      route+='<circle class="zm" data-br="8.5" cx="'+x+'" cy="'+y+'" r="8.5" fill="#5a4a8a" stroke="#f7f5f0" stroke-width="1.4" vector-effect="non-scaling-stroke"/>'+
+    var _pts=r.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+    // 流动虚线（蚂蚁线）：dashoffset 递减 → 虚线由起点流向终点，用动效表达方向，无需文字
+    route='<polyline points="'+_pts+'" fill="none" stroke="#5a4a8a" stroke-width="2.8" stroke-dasharray="10,9" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".88" stroke-linejoin="round">'+
+            '<animate attributeName="stroke-dashoffset" from="38" to="0" dur="0.9s" repeatCount="indefinite"/></polyline>';
+    r.forEach(function(p,i){var x=p[0].toFixed(1),y=p[1].toFixed(1);var first=(i===0),last=(i===r.length-1);
+      route+='<circle class="zm" data-br="'+(first?9.5:8.5)+'" cx="'+x+'" cy="'+y+'" r="'+(first?9.5:8.5)+'" fill="'+(first?'#3f7a52':last?'#a0603a':'#5a4a8a')+'" stroke="#f7f5f0" stroke-width="1.4" vector-effect="non-scaling-stroke"/>'+
              '<text class="zt" data-bfs="11" x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#f7f5f0" style="pointer-events:none">'+(i+1)+'</text>';});
-    const s=r[0]; route+='<text class="zt" data-bfs="13" x="'+(s[0]-12).toFixed(1)+'" y="'+(s[1]+26).toFixed(1)+'" font-size="13" fill="#5a4a8a" font-family="serif" font-weight="700">'+POETS[mapPoet].name+'·足迹（①→②顺序）</text>';
   }
   let regions=''; REGIONS.forEach(function(rg){const xy=proj(rg[1],rg[2]); regions+='<text class="zt" data-bfs="17" x="'+xy[0].toFixed(1)+'" y="'+xy[1].toFixed(1)+'" text-anchor="middle" font-size="17" fill="#9a8050" opacity=".45" font-style="italic" font-family="serif" style="pointer-events:none">'+rg[0]+'</text>';});
   const rl1=proj(112.5,33.5), rl2=proj(118.5,32.6);
