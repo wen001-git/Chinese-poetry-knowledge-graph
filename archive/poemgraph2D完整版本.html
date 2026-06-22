@@ -2943,13 +2943,6 @@ function buildMapSVG(){
     ?('<path d="'+PROVPATH+'" fill="#ddd0a6"/>'+reliefImg('landclip')+'<path d="'+PROVPATH+'" fill="none" stroke="#9a8050" stroke-width=".7" stroke-linejoin="round"/>')
     :('<path d="'+PROVPATH+'" fill="#e7ddb6" stroke="#a98f5e" stroke-width=".7" stroke-linejoin="round"/>');
   const rangeL=mapTerrain?rangeLabelsSVG():'';
-  // 陆块厚度：轮廓向下错位叠层 → 土黄岩层"侧壁"，营造立体沙盘块（倾斜后成悬浮玉版）
-  let extrude='';
-  (function(){const N=15,L=[156,138,96],D=[60,49,30];
-    for(let i=N;i>=1;i--){const t=(i-1)/(N-1);
-      const c=L.map((v,j)=>Math.round(v+(D[j]-v)*t));
-      extrude+='<path d="'+PROVPATH+'" fill="rgb('+c[0]+','+c[1]+','+c[2]+')" transform="translate('+(i*1.0).toFixed(1)+','+(i*2.6).toFixed(1)+')"/>';}
-  })();
   const svg='<svg id="mapsvg" viewBox="0 0 '+VW+' '+VH+'" xmlns="http://www.w3.org/2000/svg">'+
     '<defs><clipPath id="landclip"><path d="'+PROVPATH+'"/></clipPath>'+
       '<radialGradient id="beadG" cx="38%" cy="30%" r="78%"><stop offset="0%" stop-color="#6b7b8c"/><stop offset="50%" stop-color="#2d3a4a"/><stop offset="100%" stop-color="#141d27"/></radialGradient>'+
@@ -2959,9 +2952,7 @@ function buildMapSVG(){
     '</defs>'+
     '<rect x="0" y="0" width="'+VW+'" height="'+VH+'" fill="url(#skyG)"/>'+
     '<g id="mapZoomG">'+
-    '<path d="'+PROVPATH+'" fill="#1f170d" opacity=".28" filter="url(#landsh)" transform="translate(20,52)"/>'+
-    extrude+
-    '<path d="'+PROVPATH+'" fill="none" stroke="#3a2f1c" stroke-width="1.1" stroke-linejoin="round" opacity=".5" transform="translate('+(15*1.0)+','+(15*2.6)+')"/>'+
+    '<path d="'+PROVPATH+'" fill="#2a2114" opacity=".22" filter="url(#landsh)" transform="translate(7,12)"/>'+
     terrainLayer+
     riversSVG(2.0,1.6,.55)+regions+rangeL+rlabels+landmarksSVG()+dots+route+labels+
     '</g>'+
