@@ -1,7 +1,8 @@
 # AGENTS.md — 接手须知（任何 AI 工具先读本文件 · SSOT）
 
 > **接手只读本文件**的「当前状态 + 下一步 TODO」即可继续。
-> - 实现细节按需读 `docs/IMPL_NOTES.md`（改某模块前才读对应段）；完整变更历史看 `git log`；产品/设计 `docs/PROJECT_PLAN.md`/`docs/DESIGN.md`（仅里程碑/确需时读）。
+> - **要改代码？先看 `docs/IMPL_NOTES.md` 顶部「锚点地图」**(函数/数据→行号)，据此 `Read offset/limit` 跳读那 20~40 行——**严禁宽读/宽 grep 那个 818KB 单文件**(整读≈42万 token，是接手耗 token 的唯一大头；grep 务必 `… | cut -c1-100`)。
+> - 实现细节按需读 `docs/IMPL_NOTES.md` 对应段；完整变更历史看 `git log --oneline`；产品/设计 `docs/PROJECT_PLAN.md`/`docs/DESIGN.md`（仅里程碑/确需时读）。
 > - **省 token（详见 `CLAUDE.md`「接手省 token 协议」）**：不预读 PROJECT_PLAN/DESIGN、不全量扫码、不 dump 大 diff（用 `--stat`/窄 grep）、只读需要的行段。
 > - 完成改动：**日常只更新本文件**「当前状态/TODO」；里程碑才更 PROJECT_PLAN/DESIGN。状态写仓库文件（跨账号可读），不依赖工具私有记忆。
 
@@ -27,8 +28,9 @@
 - **诗人长廊(C)**：选择器+面板(生平/足迹/代表作)
 
 ## 下一步 TODO（从这里继续）
-- [ ] **【未提交】另一账号最后一批已完成改动待 commit**：2D浮雕山脉(删3D沙盘)/历史大事男声朗读/标注4选1/marker命中圈/地图诗人行排序。已验证可跑、控制台0报错。
+- [ ] **【未提交】本账号最新一批改动待 commit**（已验证可跑、控制台0报错）：①UI/UX评审5项适龄性修复（引导态隐藏顶栏`body[data-guide=1]`；`.vtab`/`.dtab`/`.d-recite`撑到44px触控；学生角色地图密集筛选默认收起`mapMoreOpen`+「🔧更多」，家长/教师全显；图谱提示去术语→👆图形）；②**诗词朗读跨平台稳健**：`_ttsKeep`保活(被暂停自动resume)、cancel后延时120ms再speak(避Android失效)、`reciteLine`若recVoice空再取一次(Win/Android语音异步加载)。
 - [x] 历史大事讲故事"拖音"已修（清晰优先：`pickNarratorVoice` 只认清晰男声 Kangkang/云希，**排除 Apple 角色音 Reed/Eddy**，Apple 无则退清晰语舒）✅
+- [ ] 诗词朗读音色：Apple 设备男声皆带拖音→目前用清晰女声(语舒)；如需男声需内嵌预渲染音频(评估过~1MB/9事件，体积可接受但未做)
 - [ ] 双击展开为"封顶12克制版"，用户原想"纯自由展开(无上限)"——可改
 - [ ] `related` 相关推荐字段多为空（autoQuiz/详情已健壮，可后补）
 

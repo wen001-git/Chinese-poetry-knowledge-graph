@@ -58,13 +58,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .back-link{margin-top:26px;color:var(--ink3);font-size:13px;background:none;text-decoration:underline}
 
 /* ══════════ 顶栏 ══════════ */
+body[data-guide="1"] #nav{display:none}
 #nav{position:sticky;top:0;z-index:100;background:rgba(247,245,240,.9);backdrop-filter:blur(10px);
   border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;
   padding:10px 18px;flex-wrap:wrap}
 .brand{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:.12em;cursor:pointer;white-space:nowrap}
 .brand .dot{color:var(--ochre)}
 .vtabs{display:flex;gap:4px;flex-wrap:wrap}
-.vtab{padding:7px 13px;border-radius:20px;font-size:14px;color:var(--ink2);transition:.18s;white-space:nowrap}
+.vtab{padding:7px 14px;border-radius:20px;font-size:15px;color:var(--ink2);transition:.18s;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
 .vtab:hover{background:var(--paper2)}
 .vtab.on{background:var(--teal);color:#fff}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -322,8 +323,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .d-verse .ln{display:block;transition:.25s;border-radius:6px;padding:0 6px;margin:0 -6px}
 .d-verse .ln.reciting{background:var(--teal-l);color:var(--teal)}
 .d-recite-row{margin-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.d-recite{padding:8px 18px;border-radius:20px;background:var(--teal);color:#fff;
-  font-size:14px;transition:.16s}
+.d-recite{padding:10px 20px;border-radius:22px;background:var(--teal);color:#fff;
+  font-size:15px;transition:.16s;min-height:44px;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box}
 .d-recite:hover{filter:brightness(1.1)}
 .d-recite.on{background:var(--ochre)}
 .rec-lang{display:inline-flex;border:1px solid var(--border);border-radius:16px;overflow:hidden}
@@ -344,7 +345,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .amb-hifi input{accent-color:var(--teal)}
 .amb-note{font-size:11px;color:var(--ink3);line-height:1.5}
 .dtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:2px}
-.dtab{padding:9px 15px;font-size:14px;color:var(--ink2);border-radius:10px 10px 0 0;transition:.16s;white-space:nowrap}
+.dtab{padding:10px 15px;font-size:15px;color:var(--ink2);border-radius:10px 10px 0 0;transition:.16s;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
 .dtab:hover{background:var(--paper2)}
 .dtab.on{background:var(--teal);color:#fff}
 .dpanel{display:none}
@@ -495,7 +496,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 /* ══════════ 响应式 ══════════ */
 @media(max-width:680px){
   #main{padding:18px 12px 90px}
-  .vtabs .vtab{padding:6px 10px;font-size:13px}
+  .vtabs .vtab{padding:6px 11px;font-size:14px}
   .brand{font-size:19px}
   #gcanvas{height:440px}
   .match-wrap{gap:16px}
@@ -1906,28 +1907,31 @@ const roleOv=document.getElementById('role-overlay');
 const gradeOv=document.getElementById('grade-overlay');
 function boot(){
   if(ST.role&&ST.grade){
+    document.body.dataset.guide='';
     roleOv.style.display='none';gradeOv.style.display='none';
     applyRole();updateChips();setMode(ST.mode,true);showView(ST.view);
   }else if(ST.role){
+    document.body.dataset.guide='1';
     roleOv.style.display='none';gradeOv.style.display='flex';
   }else{
+    document.body.dataset.guide='1';
     roleOv.style.display='flex';
   }
 }
 
 /* ── 角色 ── */
 function pickRole(r){ST.role=r;lsSave();roleOv.style.display='none';
-  if(ST.grade){gradeOv.style.display='none';applyRole();updateChips();setMode(ST.mode,true);showView(ST.view||'cards');}
-  else gradeOv.style.display='flex';}
-function openRolePick(){roleOv.style.display='flex';}
+  if(ST.grade){document.body.dataset.guide='';gradeOv.style.display='none';applyRole();updateChips();setMode(ST.mode,true);showView(ST.view||'cards');}
+  else {document.body.dataset.guide='1';gradeOv.style.display='flex';}}
+function openRolePick(){document.body.dataset.guide='1';roleOv.style.display='flex';}
 function applyRole(){
   document.body.dataset.role=ST.role;
   // 学习模式下默认进入闯关；探索模式自由
 }
 /* ── 年级 ── */
-function pickGrade(g){ST.grade=g;lsSave();gradeOv.style.display='none';
+function pickGrade(g){ST.grade=g;lsSave();document.body.dataset.guide='';gradeOv.style.display='none';
   applyRole();updateChips();setMode(ST.mode,true);showView('grade');}
-function openGradePick(){gradeOv.style.display='flex';}
+function openGradePick(){document.body.dataset.guide='1';gradeOv.style.display='flex';}
 function updateChips(){
   const ri=ROLE_INFO[ST.role]||ROLE_INFO.student;
   const rc=document.getElementById('role-chip');
@@ -2229,7 +2233,7 @@ let gNodes=[],gEdges=[],gAnim=null,gCanvas,gCtx,gDrag=null,gAngle=0,gLayout='for
 function renderGControls(){
   const el=document.getElementById('gcontrols');
   if(!(gFocus&&gFocus.t==='poet')){
-    el.innerHTML='<span style="font-size:12px;color:var(--ink3)">关系维度：进入某位诗人后，可在此筛选 地点 / 情感 / 意象 / 风格 / 历史事件</span>';
+    el.innerHTML='<span style="font-size:12px;color:var(--ink3)">👆 先点一位诗人，就能看 TA 的诗散落在 地点 · 情感 · 意象 里</span>';
     return;
   }
   const order=['poem','poet','dynasty','place','mood','imagery','style','event'];
@@ -2400,9 +2404,9 @@ function setGraphFocus(f){ gFocus=f; document.getElementById('gpop').style.displ
 function updateFocusBar(){ const fb=document.getElementById('g-focus-bar'); if(!fb)return;
   if(fb.dataset.flash==='1')return;
   if(gFocus){ fb.innerHTML='<button class="dchip on" onclick="setGraphFocus(null)">← 返回总览</button>'+
-    '<span style="font-size:13px;color:var(--ink2);align-self:center">正在看：<b>'+(gFocus.t==='poet'?POETS[gFocus.k].name+' 的诗作':gFocus.k+'代的诗人')+'</b> · 双击节点展开关联 · 单击诗作进详情</span>'; }
+    '<span style="font-size:13px;color:var(--ink2);align-self:center">正在看：<b>'+(gFocus.t==='poet'?POETS[gFocus.k].name+' 的诗作':gFocus.k+'代的诗人')+'</b> · 👆👆 双击圆点展开 · 👆 点诗看详情</span>'; }
   else { fb.innerHTML='<button class="dchip" onclick="renderGraph()">🔄 重置</button>'+
-    '<span style="font-size:13px;color:var(--ink3);align-self:center"><b>单击</b>「诗人」进入TA的图谱 /「朝代」看该代诗人 · <b>双击</b>任意节点展开1-hop关联（再双击收起）</span>'; } }
+    '<span style="font-size:13px;color:var(--ink3);align-self:center">👆 点「诗人」或「朝代」看 TA 的诗 · 👆👆 双击任意圆点展开更多（再双击收起）</span>'; } }
 function setGLayout(m){ gLayout=m; document.querySelectorAll('.dchip.lay').forEach(b=>b.classList.toggle('on',b.id==='lay-'+m)); if(ST.is3D)toggle3D(); renderGraph(); }
 function renderGraph(){
   if(ST.view!=='graph')return;
@@ -2725,7 +2729,7 @@ function miniMapSVG(p){
     '<text x="'+(x+15)+'" y="'+(y-2)+'" font-size="22" fill="#2d3a4a" font-weight="700" font-family="serif">'+anc+'</text>'+
     '<text x="'+(x+15)+'" y="'+(y+20)+'" font-size="14" fill="#7a6030">'+p.placeModern+'</text></svg>';
 }
-let mapPoet=null,mapDyn='all',mapTerrain=true,mapLabel='ancient',mapTab='all',mapFame=100;
+let mapPoet=null,mapDyn='all',mapTerrain=true,mapLabel='ancient',mapTab='all',mapFame=100,mapMoreOpen=false;
 function ensureHoverLabel(){let el=document.getElementById('map-hover-label');
   if(!el){el=document.createElement('div');el.id='map-hover-label';el.className='map-hover-label';document.getElementById('mapwrap').appendChild(el);}return el;}
 function updateZoomHint(){const hint=document.getElementById('map-zoom-hint');if(hint)hint.textContent='⌘/Ctrl + 滚轮缩放 · 拖动平移';}
@@ -2764,6 +2768,8 @@ function mapPoetKeys(){
 }
 function renderMapPoets(){
   const el=document.getElementById('map-poets'); if(!el)return;
+  if(ST.role==='student'&&!mapMoreOpen){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='';
   const keys=mapPoetKeys();
   let h='<span class="mp-lab">诗人：</span>';
   h+='<input id="mp-search" class="mp-search" placeholder="🔍找诗人" value="'+mapPoetQ.replace(/["<>]/g,'')+'" oninput="filterMapPoets(this.value)">';
@@ -2931,16 +2937,22 @@ function renderMapControls(){
   const dyns=['all',...new Set(visiblePoems().map(p=>p.dyn))];
   let h='<span style="font-size:12px;color:var(--ink3)">朝代：</span>';
   dyns.forEach(d=>h+='<button class="dchip'+(mapDyn===d?' on':'')+'" onclick="setMapDyn(\''+d+'\')">'+(d==='all'?'全部':d+'代')+'</button>');
-  h+='<span style="font-size:12px;color:var(--ink3);margin-left:10px">底图：</span>';
-  h+='<button class="dchip'+(mapTerrain?' on':'')+'" onclick="setMapTerrain(true)">地形</button>';
-  h+='<button class="dchip'+(!mapTerrain?' on':'')+'" onclick="setMapTerrain(false)">素雅</button>';
-  h+='<span style="font-size:12px;color:var(--ink3);margin-left:10px">标注：</span>';
-  h+='<button class="dchip'+(mapLabel==='ancient'?' on':'')+'" onclick="setMapLabel(\'ancient\')">古地名</button>';
-  h+='<button class="dchip'+(mapLabel==='modern'?' on':'')+'" onclick="setMapLabel(\'modern\')">现代名</button>';
-  h+='<button class="dchip'+(mapLabel==='landmark'?' on':'')+'" onclick="setMapLabel(\'landmark\')">⛰ 名胜</button>';
-  h+='<button class="dchip'+(mapLabel==='none'?' on':'')+'" onclick="setMapLabel(\'none\')">无</button>';
+  let sec='<span style="font-size:12px;color:var(--ink3);margin-left:10px">底图：</span>';
+  sec+='<button class="dchip'+(mapTerrain?' on':'')+'" onclick="setMapTerrain(true)">地形</button>';
+  sec+='<button class="dchip'+(!mapTerrain?' on':'')+'" onclick="setMapTerrain(false)">素雅</button>';
+  sec+='<span style="font-size:12px;color:var(--ink3);margin-left:10px">标注：</span>';
+  sec+='<button class="dchip'+(mapLabel==='ancient'?' on':'')+'" onclick="setMapLabel(\'ancient\')">古地名</button>';
+  sec+='<button class="dchip'+(mapLabel==='modern'?' on':'')+'" onclick="setMapLabel(\'modern\')">现代名</button>';
+  sec+='<button class="dchip'+(mapLabel==='landmark'?' on':'')+'" onclick="setMapLabel(\'landmark\')">⛰ 名胜</button>';
+  sec+='<button class="dchip'+(mapLabel==='none'?' on':'')+'" onclick="setMapLabel(\'none\')">无</button>';
+  // 小学生默认收起密集筛选（底图/标注/诗人），只留朝代，降低信息过载；点「更多」展开
+  if(ST.role==='student'){
+    h+='<button class="dchip" style="margin-left:10px" onclick="toggleMapMore()">🔧 更多 '+(mapMoreOpen?'▲':'▼')+'</button>';
+    if(mapMoreOpen)h+=sec;
+  }else h+=sec;
   document.getElementById('map-controls').innerHTML=h;
 }
+function toggleMapMore(){mapMoreOpen=!mapMoreOpen;renderMapControls();renderMapPoets();}
 function setMapDyn(d){mapDyn=d; if(mapPoet&&mapPoetKeys().indexOf(mapPoet)<0)mapPoet=null; renderMapControls();renderMapPoets();rebuildMapTime();}
 function setMapPoet(k){mapPoet=k;renderMapPoets();rebuildMapTime();}
 function setMapTerrain(v){mapTerrain=v;renderMapControls();rebuildMapTime();}
@@ -3381,8 +3393,7 @@ function pickCantoneseVoice(){
 function recVoicePick(){return recLang==='cantonese'?(pickCantoneseVoice()||pickMandarinVoice()):pickMandarinVoice();}
 /* ── 历史大事 · 清晰男声朗读（跨平台：Windows/Mac/iPad/Android 通用）── */
 var evtSpeaking=false, evtQueue=[], evtIdx=0, evtVoice=null, _curEvtId=null;
-/* 各平台中文男声名（按优先级）：Win/Android 标准男声 → macOS 角色男声(Eddy/Reed/Rocko) */
-/* 清晰优先：只认真·清晰男声(Windows Kangkang/云希·Android真男声)，**不含 Apple 角色音 Reed/Rocko/Eddy/Li-Mu**(天生拖音/回声) */
+/* 清晰优先：只认真·清晰男声(Windows Kangkang/云希·Android真男声)，**不含 Apple 角色音 Reed/Rocko/Eddy/Li-Mu**(天生拖音/回声)；Apple 无清晰男声→退 pickMandarinVoice(语舒) */
 const NARRATOR_MALE=['Kangkang','康康','Yunxi','云希','Yunjian','云健','Yunyang','云扬','Yunye','云野','Yunfeng','云枫','Yunhao','云皓'];
 function pickNarratorVoice(){
   var vs=(('speechSynthesis' in window)?speechSynthesis.getVoices():[])||[];

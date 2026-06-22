@@ -2,6 +2,29 @@
 
 > 从 AGENTS.md 拆出来省 token。AGENTS 只留「当前状态/TODO」；改某子系统前来读这里对应段。
 
+## 锚点地图 · 函数/数据→行号（接手定位用，**别宽读/宽 grep 那个 818KB 单文件**）
+
+> 用法：要改哪个函数 → 直接 `Read poemgraph.html offset=该行 limit=20~40`，跳读那一段，**不整文件读、不碰数据区**。
+> 行号会随改动漂移，偏了就用这条**廉价刷新命令**重抓(截断长行防爆 token)：
+> `grep -nE '^function [a-zA-Z]|^const [A-Z]' poemgraph.html | cut -c1-46`
+> 看改动用 `git diff --stat`；grep 内容务必 `… | cut -c1-100`(单条诗数据行长达 231 字符)。
+
+**启动/路由/角色** boot 1908 · pickRole 1923 · applyRole 1927 · pickGrade 1932 · updateChips 1935 · setMode 1942 · showView 1953 · visiblePoems 1969
+**年级/卡片墙** renderGradeList 1977 · renderFilters 1999 · renderCards 2010
+**详情页(8区块)** openDetail 2037 · rubyLine 2053 · dTab 2063 · fillDetail 2069 · backFromDetail 2116
+**练习** autoQuiz 2124 · buildQuiz 2134 · pickChoice 2165 · pickMatch 2171 · submitQuiz 2201
+**知识图谱** renderGControls 2233 · togDim 2247 · poetBaseR 2250 · buildGraph 2258 · layoutRadial/Tree 2295/2305 · gOnNodeTap 2336 · nodeNeighbors 2345 · expandNode 2361 · collapseNode 2384 · setGraphFocus 2403 · updateFocusBar 2404 · renderGraph 2411 · tick 2434 · draw2D/3D 2452/2460 · drawNode 2478 · graphHit 2499 · bindGraphEvents 2505 · showGPop 2548 · toggle3D 2571 · renderMiniGraph 2578
+**地图·投影/绘图** proj 2608 · reliefImg 2616 · ridgePath 2630 · ridgeCrest 2639 · ridgesSVG 2648(2D浮雕山脉) · rangeLabelsSVG 2667 · placeName 2708 · riversSVG 2717 · miniMapSVG 2720 · landmarksSVG 2753 · buildMapSVG 2960(主渲染) · applyMarkScale 3047
+**地图·控件/交互** renderMap 2759 · mapPoetKeys 2761(拼音排序) · renderMapPoets 2769 · filterMapPoets 2784 · renderMapControls 2936(标注4选1+学生折叠) · toggleMapMore 2955 · setMapDyn/Poet/Terrain/Label 2956-2959 · 缩放 clampZoom/applyZoom/zoomAt 3055-3058 · bindMapZoom 3066 · ensureZoomCtrl 3079 · showMapPop 3095
+**时间轴/时空联动** rebuildMapTime 2792 · refreshMapTime 2800 · applyMapYear 2806 · renderTimeScrubber 2816 · tlPlay 2849 · renderMapList 2868 · openEvent 2895(事件卡+男声朗读) · closeEvent 2911 · locatePoem 2920 · poemYear 3113 · renderTimeline 3121
+**诗人长廊** poetKeysSorted 3159 · poetAvatarSVG 3171 · renderPoets 3195 · renderPoetPicker 3201 · selectPoet 3210 · renderPoetPanel 3215 · gotoMapPoet 3241 · poetMapSVG 3242
+**学习路径/搜索/打印** renderPath 3277 · initSearch 3300 · doSearch 3318 · buildPrintSheet 3341 · printSheet 3354
+**朗读/古琴(F)** pickMandarinVoice 3382 · pickCantoneseVoice 3388 · recVoicePick 3393 · pickNarratorVoice 3398(清晰男声,不含Apple角色音) · eventNarrate 3416 · evtNarrLine 3429 · setRecLang 3453 · _ttsKeep 3465(跨平台保活) · reciteStart 3473 · reciteLine 3486 · reciteStop 3498 · ambStart/Stop/Toggle 3547-3552 · ambPlayClip 3540
+
+**数据区(只在改"内容"时读，改代码勿碰)**：POETS 730 · EVENTS 802 · POEMS 814 · LIANZI 1809 · ICONS 1833 · ROLE_INFO 1885 · PROVPATH/RIVER/RELIEF 2609-2615 · RIDGES 2618 · RANGES_GEO 2666 · GEO 2668 · ROUTE_GEO 2696 · FAME 2737 · LANDMARKS 2742 · TL_ERAS 2797 · DYN_ORDER 3156 · GUQIN_CLIP 3511(内嵌音频,极大,勿读)
+
+**CSS 区块(行号见横幅 `/* ═══ X ═══ */`)**：设计系统 8 · 蒙层 37 · 顶栏 60 · 卡片墙 102 · 图谱/地图/时间轴通用 122 · 地图 261 · 时间轴 287 · 详情页 312 · 练习 399 · 学习路径 440 · 搜索 457 · 响应式 496 · 打印 509
+
 ## 地图（改地图前必看）
 - 投影 `proj(lon,lat)`+`PROJ`；省界 `PROVPATH`(阿里DataV)、长江黄河 `RIVER_YZ/RIVER_YH`(Natural Earth)、地形底图 `RELIEF`(Wikimedia edcp 等距圆柱)，均投影简化内联。
 - 诗词地点按真实经纬度 `GEO[placeModern]`→`GEOXY`；诗人足迹 `ROUTE_GEO`/`ROUTES`；山脉名 `RANGES_GEO`；名胜 `LANDMARKS`。
