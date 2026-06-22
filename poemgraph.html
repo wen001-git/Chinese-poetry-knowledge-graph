@@ -11,6 +11,7 @@
   --paper:#f7f5f0;--paper2:#efece4;--paper3:#e8e5dc;
   --teal:#2d5a6b;--teal-l:#e4ecef;
   --mountain:#7899a8;--bamboo:#5a8a6a;--ochre:#a0603a;
+  --cinnabar:#b23a2e;--cinnabar-l:#f7e8e4;--gold:#b8923f;
   --silk:#f0e8cc;--silk-line:#8a7040;
   --border:#d8d4c8;--border2:#c8c2b2;
   --shadow:0 2px 12px rgba(28,28,30,.08);
@@ -313,20 +314,30 @@ body[data-guide="1"] #nav{display:none}
 #v-detail{max-width:860px;margin:0 auto}
 .d-back{color:var(--ink2);font-size:14px;margin-bottom:16px;display:inline-flex;gap:6px;align-items:center}
 .d-back:hover{color:var(--teal)}
-.d-hero{background:var(--paper2);border:1px solid var(--border);border-radius:var(--r2);
-  padding:34px 32px;text-align:center;box-shadow:var(--shadow);margin-bottom:18px;position:relative;overflow:hidden}
-.d-hero .d-meta{font-size:14px;color:var(--ink2);margin-bottom:10px}
-.d-hero .d-meta .dyn{color:var(--ochre)}
-.d-hero h1{font-family:var(--serif);font-size:clamp(30px,6vw,46px);font-weight:700;letter-spacing:.1em;margin-bottom:18px}
+.d-hero{background:linear-gradient(158deg,#fbf8f1 0%,#f1ece0 100%);border:1px solid var(--border);border-radius:var(--r2);
+  padding:40px 32px 34px;text-align:center;box-shadow:var(--shadow);margin-bottom:18px;position:relative;overflow:hidden}
+.d-hero::after{content:'';position:absolute;left:0;top:0;width:100%;height:4px;background:linear-gradient(90deg,var(--cinnabar),var(--ochre) 55%,var(--teal))}
+.d-hero .d-seal{position:absolute;right:20px;top:18px;width:44px;height:44px;line-height:44px;text-align:center;
+  font-family:var(--serif);font-size:23px;color:#fff;background:var(--cinnabar);border-radius:9px;
+  box-shadow:0 3px 9px rgba(178,58,46,.35);transform:rotate(3deg);opacity:.92;user-select:none}
+.d-hero .d-meta{font-size:14px;color:var(--ink2);margin-bottom:14px}
+.d-hero .d-meta .dyn{color:var(--cinnabar);font-weight:700;border:1px solid var(--cinnabar);border-radius:12px;padding:1px 10px;margin-right:5px}
+.d-hero h1{font-family:var(--serif);font-size:clamp(32px,6vw,48px);font-weight:700;letter-spacing:.12em;margin-bottom:22px;
+  display:inline-block;padding-bottom:7px;background:linear-gradient(transparent 84%,rgba(178,58,46,.26) 0)}
 .d-verse{font-family:var(--serif);font-size:clamp(18px,3.4vw,24px);line-height:2.5}
 .d-verse ruby rt{font-size:.42em;color:var(--ink3);font-family:var(--sans);letter-spacing:0}
 .d-verse .ln{display:block;transition:.25s;border-radius:6px;padding:0 6px;margin:0 -6px}
 .d-verse .ln.reciting{background:var(--teal-l);color:var(--teal)}
+.d-verse .annoword{border-bottom:1.5px dashed rgba(178,58,46,.5);cursor:pointer;border-radius:3px;transition:background .15s}
+.d-verse .annoword:hover,.d-verse .annoword.act{background:var(--cinnabar-l)}
+.d-verse .annonum{font-size:.42em;vertical-align:super;color:var(--cinnabar);font-family:var(--sans);font-weight:700;margin:0 1px 0 2px;line-height:0}
+#anno-pop{position:fixed;z-index:170;max-width:min(330px,86vw);background:var(--paper);border:1px solid var(--border);border-left:4px solid var(--cinnabar);border-radius:10px;padding:9px 13px 9px 14px;font-family:var(--sans);font-size:14px;line-height:1.7;color:var(--ink);box-shadow:var(--shadow2);display:none}
+#anno-pop b{color:var(--cinnabar);font-family:var(--serif);font-size:16px;margin-right:5px}
 .d-recite-row{margin-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.d-recite{padding:10px 20px;border-radius:22px;background:var(--teal);color:#fff;
-  font-size:15px;transition:.16s;min-height:44px;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box}
-.d-recite:hover{filter:brightness(1.1)}
-.d-recite.on{background:var(--ochre)}
+.d-recite{padding:10px 22px;border-radius:22px;background:linear-gradient(135deg,var(--cinnabar),#9a3026);color:#fff;
+  font-size:15px;font-weight:600;transition:.16s;min-height:44px;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;box-shadow:0 3px 10px rgba(178,58,46,.28)}
+.d-recite:hover{filter:brightness(1.08)}
+.d-recite.on{background:linear-gradient(135deg,var(--ochre),#854d2e)}
 .rec-lang{display:inline-flex;border:1px solid var(--border);border-radius:16px;overflow:hidden}
 .rec-lang button{padding:5px 13px;font-size:12px;color:var(--ink2);background:var(--paper);transition:.15s}
 .rec-lang button.on{background:var(--teal);color:#fff}
@@ -517,6 +528,36 @@ body[data-guide="1"] #nav{display:none}
   .sec,.d-hero,.quiz-q{box-shadow:none;border:1px solid #999;break-inside:avoid}
 }
 #print-sheet{display:none}
+/* ══════ 主题·朱墨册页（可切换：body.theme-zhumo 时生效；token 重映射→全局染色） ══════ */
+body.theme-zhumo{
+  --paper:#f3ebdd; --paper2:#efe6d4; --paper3:#e8dcc6;
+  --teal:#c1352b; --teal-l:#f1ddd6;            /* 朱砂作全局强调色 → 导航/按钮/标签/竖条等用 var(--teal) 处自动变朱砂 */
+  --border:#dccfb6; --border2:#c8bca0;
+  --zhu:#c1352b; --qing:#2d5a6b; --leaf:#f7f0e2; --rule:#cdbb9c; --inkw:#2b2620;
+}
+/* —— 详情页·朱墨册页专属版式（仅主题下）—— */
+body.theme-zhumo #v-detail{ background:radial-gradient(120% 80% at 15% 0%, rgba(193,53,43,.05), transparent 46%), var(--paper); }
+body.theme-zhumo #v-detail .d-back{ color:var(--zhu); }
+body.theme-zhumo #v-detail .d-hero{ position:relative; background:var(--leaf); border:1px solid var(--rule);
+  border-radius:3px; box-shadow:0 12px 34px rgba(43,38,32,.12); padding:42px 46px 34px; overflow:hidden; }
+body.theme-zhumo #v-detail .d-hero::before{ content:""; position:absolute; inset:8px; border:1.5px solid var(--zhu);
+  opacity:.42; border-radius:1px; pointer-events:none; }
+body.theme-zhumo #v-detail .d-meta{ color:#7a6c59; letter-spacing:.05em; }
+body.theme-zhumo #v-detail .d-meta .dyn{ color:var(--zhu); font-weight:700; }
+body.theme-zhumo #v-detail #d-title{ font-family:"STSong","STZhongsong","SimSun",serif; color:#221d18;
+  font-size:clamp(36px,7.2vw,54px); letter-spacing:.16em; line-height:1.2; display:inline-block; margin-bottom:6px; }
+body.theme-zhumo #v-detail #d-title::after{ content:""; display:block; width:54px; height:3px; margin-top:12px;
+  background:linear-gradient(90deg,var(--zhu),rgba(193,53,43,0)); }
+body.theme-zhumo #v-detail .d-hero .d-verse{ color:var(--inkw); font-size:clamp(20px,3.7vw,26px); line-height:2.75; margin-top:14px; }
+body.theme-zhumo #v-detail .d-verse ruby rt{ color:#9a8a72; }
+body.theme-zhumo #v-detail .d-recite.on{ background:var(--qing); }
+body.theme-zhumo #v-detail .rec-lang{ border-color:var(--rule); }
+body.theme-zhumo #v-detail .dtabs .dtab{ position:relative; border-radius:0; }
+body.theme-zhumo #v-detail .dtabs .dtab.on{ background:transparent; color:var(--zhu); }
+body.theme-zhumo #v-detail .dtabs .dtab.on::after{ content:""; position:absolute; left:12px; right:12px; bottom:-1px; height:3px; background:var(--zhu); border-radius:2px; }
+body.theme-zhumo #v-detail .sec h3 .bar{ background:var(--zhu); }
+body.theme-zhumo #v-detail .anno b{ color:var(--zhu); }
+body.theme-zhumo #v-detail .imk{ color:var(--zhu); }
 </style>
 </head>
 <body>
@@ -575,6 +616,7 @@ body[data-guide="1"] #nav{display:none}
     <button class="chip" id="role-chip" onclick="openRolePick()"><span class="ic">🧒</span><span>学生</span></button>
     <button class="chip" id="grade-chip" onclick="openGradePick()">年级 ▼</button>
     <button class="chip" onclick="openSearch()"><span class="ic">🔍</span>搜索</button>
+    <button class="chip" id="theme-chip" onclick="toggleTheme()" title="切换视觉风格：朱墨册页 ⇄ 水墨"><span class="ic">🖌</span>朱墨</button>
     <div class="amb-wrap">
       <button class="chip" id="amb-chip" onclick="toggleAmbPanel()"><span class="ic">🎵</span><span>古琴</span></button>
       <div class="amb-pop" id="amb-pop">
@@ -679,6 +721,7 @@ body[data-guide="1"] #nav{display:none}
   <section class="view" id="v-detail">
     <button class="d-back" onclick="backFromDetail()">← 返回</button>
     <div class="d-hero">
+      <div class="d-seal">詩</div>
       <div class="d-meta" id="d-meta"></div>
       <h1 class="serif" id="d-title"></h1>
       <div class="d-verse serif" id="d-verse"></div>
@@ -1513,6 +1556,7 @@ const POEMS=[
 
   {id:'mulan',title:'木兰诗',grade:7,volume:'七年级下册',dyn:'南北朝',poet:'beichaofolk',
    lines:[{t:'唧唧复唧唧，',p:'jī jī fù jī jī'},{t:'木兰当户织。',p:'mù lán dāng hù zhī'},{t:'不闻机杼声，',p:'bù wén jī zhù shēng'},{t:'惟闻女叹息。',p:'wéi wén nǚ tàn xī'},{t:'问女何所思，',p:'wèn nǚ hé suǒ sī'},{t:'问女何所忆。',p:'wèn nǚ hé suǒ yì'},{t:'女亦无所思，',p:'nǚ yì wú suǒ sī'},{t:'女亦无所忆。',p:'nǚ yì wú suǒ yì'},{t:'昨夜见军帖，',p:'zuó yè jiàn jūn tiě'},{t:'可汗大点兵，',p:'kè hán dà diǎn bīng'},{t:'军书十二卷，',p:'jūn shū shí èr juǎn'},{t:'卷卷有爷名。',p:'juàn juàn yǒu yé míng'},{t:'阿爷无大儿，',p:'ā yé wú dà ér'},{t:'木兰无长兄，',p:'mù lán wú zhǎng xiōng'},{t:'愿为市鞍马，',p:'yuàn wèi shì ān mǎ'},{t:'从此替爷征。',p:'cóng cǐ tì yé zhēng'},{t:'东市买骏马，',p:'dōng shì mǎi jùn mǎ'},{t:'西市买鞍鞯，',p:'xī shì mǎi ān jiān'},{t:'南市买辔头，',p:'nán shì mǎi pèi tóu'},{t:'北市买长鞭。',p:'běi shì mǎi zhǎng biān'},{t:'旦辞爷娘去，',p:'dàn cí yé niáng qù'},{t:'暮宿黄河边，',p:'mù sù huáng hé biān'},{t:'不闻爷娘唤女声，',p:'bù wén yé niáng huàn nǚ shēng'},{t:'但闻黄河流水鸣溅溅。',p:'dàn wén huáng hé liú shuǐ míng jiān jiān'},{t:'旦辞黄河去，',p:'dàn cí huáng hé qù'},{t:'暮至黑山头，',p:'mù zhì hēi shān tóu'},{t:'不闻爷娘唤女声，',p:'bù wén yé niáng huàn nǚ shēng'},{t:'但闻燕山胡骑鸣啾啾。',p:'dàn wén yān shān hú jì míng jiū jiū'},{t:'万里赴戎机，',p:'wàn lǐ fù róng jī'},{t:'关山度若飞。',p:'guān shān dù ruò fēi'},{t:'朔气传金柝，',p:'shuò qì chuán jīn tuò'},{t:'寒光照铁衣。',p:'hán guāng zhào tiě yī'},{t:'将军百战死，',p:'jiāng jūn bǎi zhàn sǐ'},{t:'壮士十年归。',p:'zhuàng shì shí nián guī'},{t:'归来见天子，',p:'guī lái jiàn tiān zi'},{t:'天子坐明堂。',p:'tiān zi zuò míng táng'},{t:'策勋十二转，',p:'cè xūn shí èr zhuǎn'},{t:'赏赐百千强。',p:'shǎng cì bǎi qiān qiáng'},{t:'可汗问所欲，',p:'kè hán wèn suǒ yù'},{t:'木兰不用尚书郎，',p:'mù lán bù yòng shàng shū láng'},{t:'愿驰千里足，',p:'yuàn chí qiān lǐ zú'},{t:'送儿还故乡。',p:'sòng ér hái gù xiāng'},{t:'爷娘闻女来，',p:'yé niáng wén nǚ lái'},{t:'出郭相扶将；',p:'chū guō xiāng fú jiāng'},{t:'阿姊闻妹来，',p:'ā zǐ wén mèi lái'},{t:'当户理红妆；',p:'dāng hù lǐ hóng zhuāng'},{t:'小弟闻姊来，',p:'xiǎo dì wén zǐ lái'},{t:'磨刀霍霍向猪羊。',p:'mó dāo huò huò xiàng zhū yáng'},{t:'开我东阁门，',p:'kāi wǒ dōng gé mén'},{t:'坐我西阁床，',p:'zuò wǒ xī gé chuáng'},{t:'脱我战时袍，',p:'tuō wǒ zhàn shí páo'},{t:'著我旧时裳。',p:'zhuó wǒ jiù shí cháng'},{t:'当窗理云鬓，',p:'dāng chuāng lǐ yún bìn'},{t:'对镜帖花黄。',p:'duì jìng tiē huā huáng'},{t:'出门看火伴，',p:'chū mén kàn huǒ bàn'},{t:'火伴皆惊忙：',p:'huǒ bàn jiē jīng máng'},{t:'同行十二年，',p:'tóng háng shí èr nián'},{t:'不知木兰是女郎。',p:'bù zhī mù lán shì nǚ láng'},{t:'雄兔脚扑朔，',p:'xióng tù jiǎo pū shuò'},{t:'雌兔眼迷离；',p:'cí tù yǎn mí lí'},{t:'双兔傍地走，',p:'shuāng tù bàng dì zǒu'},{t:'安能辨我是雄雌？',p:'ān néng biàn wǒ shì xióng cí'}],
+   anno:[{w:'万里赴戎机',m:'远行万里，投身战事。戎机，战事。'},{w:'关山度若飞',m:'像飞一样地越过一道道关塞山岭。度，越过。'},{w:'朔气传金柝',m:'北方的寒气传送着打更的声音。朔，北方。金柝，古时军中白天用来烧饭、夜里用来打更的器具。'},{w:'铁衣',m:'铠甲，古代军人穿的护身服装。'},{w:'天子',m:'指上文的"可汗"。'},{w:'明堂',m:'古代帝王举行大典的朝堂。'},{w:'策勋十二转',m:'记很大的功。策勋，记功；转，勋位每升一级叫一转。'},{w:'赏赐百千强',m:'赏赐很多的财物。强，有余。'},{w:'问所欲',m:'问（木兰）想要什么。'},{w:'尚书郎',m:'尚书省的官。尚书省是古代朝廷中管理国家政事的机关。'},{w:'愿驰千里足',m:'希望骑上千里马。驰，赶马快跑。'},{w:'郭',m:'外城。'},{w:'扶将',m:'扶持。'},{w:'红妆',m:'指女子的艳丽装束。'},{w:'霍霍',m:'磨刀的声音。'},{w:'著',m:'穿。'},{w:'云鬓',m:'像云那样的鬓发，形容好看的头发。'},{w:'帖花黄',m:'帖，同"贴"；花黄，古代妇女的一种面部装饰物。'},{w:'火伴',m:'军中的同伴。当时规定若干士兵同一个灶吃饭，所以称"火伴"。'},{w:'扑朔',m:'（雄兔前脚）时时动弹。'},{w:'迷离',m:'（雌兔两眼）时常眯着。'},{w:'傍',m:'靠近、临近。'},{w:'走',m:'跑。'}],
    trans:'北朝民歌，叙木兰代父从军、征战十年、辞官还乡，歌颂其勇敢、孝心与不慕名利。',emo:'爱国',style:'叙事',place:'黄河·黑山',placeModern:'今华北一带',createdYear:'南北朝',
    history:[{y:'南北朝',t:'木兰诗·南北朝代',hi:true}],related:[]},
   {id:'dengyouzhou',title:'登幽州台歌',grade:7,volume:'七年级下册',dyn:'唐',poet:'chenziang',
@@ -1905,6 +1949,16 @@ lsLoad();
 /* ── 初始化 ── */
 const roleOv=document.getElementById('role-overlay');
 const gradeOv=document.getElementById('grade-overlay');
+/* 视觉风格切换：朱墨册页 ⇄ 水墨（默认朱墨，存 localStorage pg_theme） */
+function applyTheme(t){
+  const zhumo=(t!=='inkwash'); document.body.classList.toggle('theme-zhumo',zhumo);
+  const b=document.getElementById('theme-chip'); if(b)b.innerHTML='<span class="ic">'+(zhumo?'🖌':'💧')+'</span>'+(zhumo?'朱墨':'水墨');
+}
+function toggleTheme(){
+  const next=document.body.classList.contains('theme-zhumo')?'inkwash':'zhumo';
+  try{localStorage.setItem('pg_theme',next);}catch(e){} applyTheme(next);
+}
+applyTheme(localStorage.getItem('pg_theme')||'zhumo');
 function boot(){
   if(ST.role&&ST.grade){
     document.body.dataset.guide='';
@@ -2041,7 +2095,8 @@ function openDetail(id){
   // hero
   document.getElementById('d-meta').innerHTML='<span class="dyn">'+p.dyn+'代</span> · '+POETS[p.poet].name+' · '+p.volume;
   document.getElementById('d-title').textContent=p.title;
-  document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'">'+rubyLine(l)+lineScene(l.t)+'</span>').join('');
+  document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'">'+rubyLine(l,p.anno)+lineScene(l.t)+'</span>').join('');
+  bindAnnoPop();
   reciteStop();
   recApplyLangAvail();
   // tabs
@@ -2050,15 +2105,54 @@ function openDetail(id){
   fillDetail(p);
   dTab(0);
 }
-function rubyLine(l){
+function annoEsc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function circledNum(n){ // ①..⑳ (U+2460) / ㉑..㉟ (U+3251) / 其余括号兜底
+  if(n>=1&&n<=20)return String.fromCharCode(0x2460+n-1);
+  if(n>=21&&n<=35)return String.fromCharCode(0x3251+n-21);
+  return '('+n+')';
+}
+function rubyLine(l,annos){
   // 拼音按"空格或标点"切分为音节，与汉字一一对应（标点不占音节）
   const sylls=l.p.split(/[\s，。？！、；：·,.!?]+/).filter(Boolean);
-  const chars=[...l.t];let out='';let si=0;
-  for(const ch of chars){
+  const chars=[...l.t];
+  // 注释就地标注：把本行中出现的注释词/短语包成可点 .annoword（按字下标，中文皆 BMP 与下标对齐）
+  const startAt={},endAt={};
+  if(annos&&annos.length)annos.forEach((a,ai)=>{
+    const key=a.k||a.w; const idx=l.t.indexOf(key); if(idx<0)return;
+    const e=idx+[...key].length-1;
+    if(startAt[idx]===undefined){startAt[idx]={w:a.w,m:a.m,n:ai+1}; endAt[e]=ai+1;} // 序号=在 anno 中的位置；先到先得避免重叠
+  });
+  let out='';let si=0;
+  for(let ci=0;ci<chars.length;ci++){
+    const ch=chars[ci];
+    if(startAt[ci]!==undefined){const a=startAt[ci];out+='<span class="annoword" data-w="'+annoEsc(a.w)+'" data-m="'+annoEsc(a.m)+'" data-n="'+a.n+'">';}
     if(/[一-龥]/.test(ch)){out+='<ruby>'+ch+'<rt>'+(sylls[si]||'')+'</rt></ruby>';si++;}
     else out+=ch; // 标点：不推进音节指针
+    if(endAt[ci])out+='<sup class="annonum">'+circledNum(endAt[ci])+'</sup></span>';
   }
   return out;
+}
+/* 注释就地气泡：词旁弹释义（point-of-need 最短阅读动线）。
+   桌面=悬停即显/挪开即隐；iPad 触屏=点词显示/点别处隐藏（触屏无 hover，必须保留点击）。*/
+function showAnnoPop(aw){
+  let pop=document.getElementById('anno-pop');
+  if(!pop){pop=document.createElement('div');pop.id='anno-pop';document.body.appendChild(pop);}
+  document.querySelectorAll('.annoword.act').forEach(x=>x.classList.remove('act'));aw.classList.add('act');
+  pop.innerHTML='<b>'+(aw.dataset.n?circledNum(+aw.dataset.n)+' ':'')+annoEsc(aw.dataset.w)+'</b>'+annoEsc(aw.dataset.m);
+  pop.style.display='block';
+  const r=aw.getBoundingClientRect();
+  pop.style.left=Math.max(8,Math.min(window.innerWidth-pop.offsetWidth-8,r.left+r.width/2-pop.offsetWidth/2))+'px';
+  let top=r.bottom+8; if(top+pop.offsetHeight>window.innerHeight-8)top=r.top-pop.offsetHeight-8;
+  pop.style.top=Math.max(8,top)+'px';
+}
+function hideAnnoPop(){const pop=document.getElementById('anno-pop');if(pop)pop.style.display='none';document.querySelectorAll('.annoword.act').forEach(x=>x.classList.remove('act'));}
+var _annoHover=null;
+function bindAnnoPop(){ if(window._annoBound)return; window._annoBound=true;
+  // 桌面：悬停即显，挪开即隐（在 .annoword 内部子元素间移动不闪）
+  document.addEventListener('mouseover',function(e){const aw=e.target.closest&&e.target.closest('.annoword');if(aw&&aw!==_annoHover){_annoHover=aw;showAnnoPop(aw);}});
+  document.addEventListener('mouseout',function(e){const aw=e.target.closest&&e.target.closest('.annoword');if(!aw)return;const to=e.relatedTarget;if(to&&aw.contains&&aw.contains(to))return;_annoHover=null;hideAnnoPop();});
+  // 触屏/点击：点词显示，点别处隐藏
+  document.addEventListener('click',function(e){const aw=e.target.closest&&e.target.closest('.annoword');if(aw){showAnnoPop(aw);}else if(!e.target.closest('#anno-pop')){hideAnnoPop();}});
 }
 function dTab(i){
   ST.tab=i;
@@ -2072,7 +2166,7 @@ function fillDetail(p){
   let H='';
   // 0 原文（注释 + 意象，均可缺省）
   H+='<div class="dpanel">';
-  if(p.anno&&p.anno.length)H+='<div class="sec"><h3><span class="bar"></span>字词注释</h3><div class="annos">'+p.anno.map(a=>'<span class="anno"><b>'+a.w+'</b>'+a.m+'</span>').join('')+'</div></div>';
+  if(p.anno&&p.anno.length)H+='<div class="sec"><h3><span class="bar"></span>字词注释</h3><div class="annos">'+p.anno.map((a,i)=>'<span class="anno"><b>'+circledNum(i+1)+' '+a.w+'</b>'+a.m+'</span>').join('')+'</div></div>';
   if(p.imagery&&p.imagery.length)H+='<div class="sec"><h3><span class="bar"></span>诗中意象</h3><div class="imagery">'+p.imagery.map(im=>'<span class="imk">'+im+'</span>').join('')+'</div></div>';
   if(typeof LIANZI!=='undefined'&&LIANZI[p.id])H+='<div class="sec"><h3><span class="bar" style="background:var(--ochre)"></span>炼字赏析 · 品一个字</h3><div class="annos">'+LIANZI[p.id].map(z=>'<span class="anno lz"><b>'+z.w+'</b>'+z.m+'</span>').join('')+'</div></div>';
   if(!(p.anno&&p.anno.length)&&!(p.imagery&&p.imagery.length))H+='<div class="sec"><p style="color:var(--ink3)">原文与拼音见上方。</p></div>';
