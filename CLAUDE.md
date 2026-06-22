@@ -3,9 +3,19 @@
 ## 跨 AI 工具接手（强制）
 
 本项目会在多个 AI 编程工具（不同 Claude Code 账号 / Codex 等）间切换开发。
-- **接手第一步（省 token）**：会话开始**默认只读仓库根 `AGENTS.md`**（单一事实来源），据此直接继续。`docs/PROJECT_PLAN.md` / `docs/DESIGN.md` 仅在 AGENTS.md 指向、或确需详细历史/设计细节时**按需才读**，不要预读，更不要全量重扫代码库。
+- **接手第一步（省 token）**：会话开始**默认只读仓库根 `AGENTS.md` 的「当前状态 + 下一步 TODO」**，据此直接继续。
 - **收尾**：日常只更新 `AGENTS.md`；PROJECT_PLAN / DESIGN 仅里程碑收尾才更新（见下「文档维护规则」）。
 - 项目状态以仓库文件为准（可移植，跨账号生效），不依赖任何工具私有记忆（私有记忆不跨账号同步）。
+
+### 接手省 token 协议（强制）
+> 教训：曾因 AGENTS.md 膨胀 + dump 大 diff，光初始化就耗掉用户 ~26% token。
+
+1. **分层只读**：接手只读 `AGENTS.md`（已精简，仅状态/TODO）。**实现细节按需读 `docs/IMPL_NOTES.md` 对应段**；变更历史用 `git log`（别读巨型 changelog）；PROJECT_PLAN/DESIGN 不预读。
+2. **AGENTS.md 保持精简**：只放 状态/TODO/硬约束/文件地图，**变更日志不入 AGENTS**（进 git log/PROJECT_PLAN），实现备忘放 `docs/IMPL_NOTES.md`。每条 changelog/备忘**一句话**，禁长段落。
+3. **工具调用省 token**：
+   - 看改动用 `git diff --stat`，**绝不** `git diff 大文件` 或把整段日志/长行 grep 出来 dump；要看内容用窄 grep + `head -c` 限长。
+   - 只 `Read` 需要的行段（offset/limit），不整文件读巨型代码；不全量扫码。
+   - 验证优先 DOM 文字/`eval` 断言，截图节制（仅成品图）。
 
 ---
 
