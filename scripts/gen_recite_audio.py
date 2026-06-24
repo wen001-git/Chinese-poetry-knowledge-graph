@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 """
-生成并内嵌「朗读音频」RECITE_AUDIO 到 poemgraph.html（仅【语舒】· 离线版）。
+生成并内嵌「朗读 / 历史故事」音频到 poemgraph.html（手机离线可播·三轨）。
 
 用途：国产安卓(小米等)Chrome 常无 TTS 引擎 → speechSynthesis 不发声；
-     本脚本把精选诗词用【语舒】预渲染成 mp3(base64)内嵌作离线朗读兜底(全设备可用)。
-     朗读音色分工(见 poemgraph.html reciteStart)：
-       · 语舒 = 离线内嵌音频(默认，手机/小米也能读)
-       · 语舒 / Li-Mu = 浏览器系统 TTS(零字节，依赖设备语音引擎)
+     本脚本把内容预渲染成 mp3(base64)内嵌作离线兜底(全设备可播)：
+       · RECITE_AUDIO     = 语舒·普通话·诗词朗读（默认音色，见 reciteStart）
+       · RECITE_AUDIO_YUE = 善怡·粤语·诗词朗读（recLang=cantonese 时用）
+       · EVENT_AUDIO      = 语舒·历史故事旁白（openEvent/eventNarrate 时用）
+     另两个浏览器音色(美嘉/Li-Mu/事件男声)仍走系统 TTS(零字节)。
 
-引擎：macOS AVSpeechSynthesis(/tmp/synth_batch.swift) → ffmpeg 转 mp3 单声道 → base64。
-     已存在 /tmp/rec3/{pid}__yushu.{caf,mp3} 则复用，不重合成(省时)。
+引擎：macOS AVSpeechSynthesis(/tmp/synth_batch.swift) → ffmpeg 22k 单声道 → base64。
+     已存在 /tmp/rec3/*.caf 则复用，不重合成(省时)。
 依赖：macOS(swift) + ffmpeg。
 
-数据结构：const RECITE_AUDIO = { poemId: "data:audio/mpeg;base64,...", ... }   # 单字符串 = 语舒
-
-扩覆盖面：把诗 id 加进 MID_PICK（小学 grade<=3 自动全包含）再跑。
-订正误读：在 TONE_FIX 登记「原字→正确声调同音字」(仅改音频文本，不改显示)。
+扩覆盖面：诗加进 MID_PICK（小学 grade<=3 自动全包含）；事件自动全包含(EVENTS)。
+订正误读：TONE_FIX 登记「原字→正确声调同音字」(仅改音频文本，不改显示)。
 """
 import re, pathlib, subprocess, base64, os
 
@@ -24,16 +23,16 @@ HTML = ROOT / 'poemgraph.html'
 SWIFT = '/tmp/synth_batch.swift'
 REC_DIR = '/tmp/rec3'
 RATE, BITRATE = '0.42', '22k'
-VOICE = 'com.apple.ttsbundle.siri_yushu_zh-CN_compact'   # 语舒（离线内嵌）
-TONE_FIX = {'鹅': '俄'}  # 鹅 é(2声) 部分音误读 → 俄(é)；同声调同音字，安全
+V_YUSHU = 'com.apple.ttsbundle.siri_yushu_zh-CN_compact'   # 语舒·普通话
+V_SINJI = 'com.apple.voice.compact.zh-HK.Sinji'           # 善怡·粤语
+TONE_FIX = {'鹅': '俄'}
 MID_PICK = ['mulan','wangyue','chunwang','guolingding','shuidiaogetou','yueyeyi',
 'chouletian','wuti','emeishan','jiangnanfeng','xingjun9','yeshangshou','fengrujing',
 'wanchun','songyouren','dengyouzhou','busuanbao','poszhenzi','guisuishou','yewang',
 'guanju','wangdongtinghu','poshansisi']
 
 
-def main():
-    html = HTML.read_text()
+def parse_poems(html):
     start = html.index('const POEMS=[')
     poems = {}
     for m in re.finditer(r"\{id:'([a-z0-9]+)',title:'([^']*)',grade:(\d)", html[start:]):
@@ -42,50 +41,86 @@ def main():
         lm = re.search(r"lines:\[(.*?)\]", seg, re.S)
         lines = re.findall(r"t:'([^']*)'", lm.group(1)) if lm else []
         poems[pid] = (grade, lines)
+    return poems
+
+
+def parse_events(html):
+    start = html.index('const EVENTS=[')
+    block = html[start: html.index('\n];', start)]
+    evs = []
+    for m in re.finditer(r"\{id:'([a-z0-9]+)',year:'([^']*)',[^}]*?t:'([^']*)',desc:'([^']*)',impact:'([^']*)'", block):
+        evs.append(m.groups())   # (id, year, t, desc, impact)
+    return evs
+
+
+def synth(jobs):
+    """jobs: [(vid, caf, text)]，只合成缺失的 .caf。"""
+    pending = [(v, c, t) for v, c, t in jobs if not os.path.exists(c)]
+    if not pending:
+        print(f"  {len(jobs)} clips all cached → skip synth")
+        return
+    tsv = '\n'.join(v + '\t' + c + '\t' + t.replace('\n', '\\n') for v, c, t in pending)
+    pathlib.Path('/tmp/jobs.tsv').write_text(tsv)
+    print(f"  synthesizing {len(pending)}/{len(jobs)} clips...")
+    subprocess.run(['swift', SWIFT, '/tmp/jobs.tsv', RATE], check=True)
+
+
+def mp3_b64(caf, mp3):
+    if not os.path.exists(mp3):
+        subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', caf, '-ac', '1',
+                        '-ar', '22050', '-b:a', BITRATE, mp3], check=True)
+    return 'data:audio/mpeg;base64,' + base64.b64encode(pathlib.Path(mp3).read_bytes()).decode()
+
+
+def embed(html, varname, mapping):
+    block = 'const ' + varname + '={' + ','.join('%s:"%s"' % (k, v) for k, v in mapping.items()) + '};\n'
+    if 'const ' + varname + '={' in html:
+        return re.sub(r'const ' + varname + r'=\{.*?\};\n', block, html, count=1, flags=re.S)
+    anchor = html.index('F · 朗读')
+    i = html.rfind('/*', 0, html.rfind('\n', 0, anchor) + 1)
+    return html[:i] + block + html[i:]
+
+
+def main():
+    html = HTML.read_text()
+    poems = parse_poems(html)
     curated = [p for p, (g, _) in poems.items() if g <= 3] + [p for p in MID_PICK if p in poems]
     curated = [p for p in dict.fromkeys(curated) if poems[p][1]]
-
     os.makedirs(REC_DIR, exist_ok=True)
-    # 仅合成缺失的 .caf（已有语舒片段则复用，不重合成）
-    jobs = []
-    for pid in curated:
-        caf = f'{REC_DIR}/{pid}__yushu.caf'
-        if os.path.exists(caf):
-            continue
-        txt = '\n'.join(poems[pid][1])
+
+    def ptext(pid):
+        t = '\n'.join(poems[pid][1])
         for a, b in TONE_FIX.items():
-            txt = txt.replace(a, b)
-        esc = txt.replace('\n', '\\n')
-        jobs.append(f"{VOICE}\t{caf}\t{esc}")
-    if jobs:
-        pathlib.Path('/tmp/jobs.tsv').write_text('\n'.join(jobs))
-        print(f"synthesizing {len(jobs)} missing meijia clips...")
-        subprocess.run(['swift', SWIFT, '/tmp/jobs.tsv', RATE], check=True)
-    else:
-        print("all yushu .caf present → skip synth (reuse)")
+            t = t.replace(a, b)
+        return t
 
-    audio = {}; tot = 0
-    for pid in curated:
-        caf = f'{REC_DIR}/{pid}__yushu.caf'
-        mp3 = f'{REC_DIR}/{pid}__yushu.mp3'
-        if not os.path.exists(mp3):
-            subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', caf, '-ac', '1',
-                            '-ar', '22050', '-b:a', BITRATE, mp3], check=True)
-        b64 = base64.b64encode(pathlib.Path(mp3).read_bytes()).decode()
-        audio[pid] = 'data:audio/mpeg;base64,' + b64
-        tot += len(b64)
+    # 1) 语舒·普通话·诗
+    synth([(V_YUSHU, f'{REC_DIR}/{p}__yushu.caf', ptext(p)) for p in curated])
+    rec = {p: mp3_b64(f'{REC_DIR}/{p}__yushu.caf', f'{REC_DIR}/{p}__yushu.mp3') for p in curated}
 
-    block = 'const RECITE_AUDIO={' + ','.join(f'{p}:"{audio[p]}"' for p in audio) + '};\n'
-    if 'const RECITE_AUDIO={' in html:
-        html = re.sub(r'const RECITE_AUDIO=\{.*?\};\n', block, html, count=1, flags=re.S)
-    else:  # 首次注入：放在朗读模块注释之前
-        i = html.index('F · 朗读')
-        i = html.rfind('\n', 0, i) + 1
-        i = html.rfind('/*', 0, i)
-        html = html[:i] + block + html[i:]
+    # 2) 善怡·粤语·诗
+    synth([(V_SINJI, f'{REC_DIR}/{p}__sinji.caf', ptext(p)) for p in curated])
+    yue = {p: mp3_b64(f'{REC_DIR}/{p}__sinji.caf', f'{REC_DIR}/{p}__sinji.mp3') for p in curated}
+
+    # 3) 语舒·历史故事旁白
+    events = parse_events(html)
+
+    def etext(eid, year, t, desc, impact):
+        s = f'{t}，{year}年。\n{desc}'
+        if impact:
+            s += f'\n对诗人与诗作的影响。\n{impact}'
+        return s
+    synth([(V_YUSHU, f'{REC_DIR}/evt_{e[0]}__yushu.caf', etext(*e)) for e in events])
+    evt = {e[0]: mp3_b64(f'{REC_DIR}/evt_{e[0]}__yushu.caf', f'{REC_DIR}/evt_{e[0]}__yushu.mp3') for e in events}
+
+    html = embed(html, 'RECITE_AUDIO', rec)
+    html = embed(html, 'RECITE_AUDIO_YUE', yue)
+    html = embed(html, 'EVENT_AUDIO', evt)
     HTML.write_text(html)
-    print(f"poems={len(audio)} (语舒/离线)  audio base64 {tot/1024/1024:.2f} MB  "
-          f"file {HTML.stat().st_size/1024/1024:.2f} MB")
+
+    mb = lambda d: sum(len(v) for v in d.values()) / 1024 / 1024
+    print(f"普通话诗={len(rec)}({mb(rec):.2f}MB)  粤语诗={len(yue)}({mb(yue):.2f}MB)  "
+          f"历史故事={len(evt)}({mb(evt):.2f}MB)  文件 {HTML.stat().st_size/1024/1024:.2f}MB")
 
 
 if __name__ == '__main__':

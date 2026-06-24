@@ -14,12 +14,13 @@
 - **里程碑测试（强制）**：断网可用、五入口+详情正常、控制台 0 报错、iPad/桌面响应式。
 
 ## 硬约束（不可违反）
-- 单文件 / 完全离线 / 无 CDN（当前 ~3.52MB，含 57 首语舒内嵌朗读音频）。**体积目标 ≤ ~10MB**，但真红线＝**目标 iPad 上秒开 + 滚动点击不卡**（体积≠流畅度：卡顿来自运行时动画/DOM，非字节数；10MB 主要是音频/文字时现代 iPad 浏览顺滑，仅开页多 ~1s）。**文字/SVG/数据几乎免费、随便用**；**内嵌音频/栅格图才是体积大头，需压缩克制**。若将来要"每首真人朗诵"(几十 MB)再改为"文件夹：HTML+音频"，仍离线。
+- 单文件 / 完全离线 / 无 CDN（当前 ~7.30MB，含内嵌音频三轨：普通话诗57+粤语诗57+历史故事9）。**体积目标 ≤ ~10MB**，但真红线＝**目标 iPad 上秒开 + 滚动点击不卡**（体积≠流畅度：卡顿来自运行时动画/DOM，非字节数；10MB 主要是音频/文字时现代 iPad 浏览顺滑，仅开页多 ~1s）。**文字/SVG/数据几乎免费、随便用**；**内嵌音频/栅格图才是体积大头，需压缩克制**。若将来要"每首真人朗诵"(几十 MB)再改为"文件夹：HTML+音频"，仍离线。
 - 宣纸白 `#f7f5f0` / 浓墨 `#1c1c1e` / 墨青 `#2d5a6b` + **朱砂红 `#c1352b` 可作强调/印章/朱批**（禁红规则已取消，配色可演进；视觉用 `/frontend-design` 迭代中）
 - 内容对齐**统编版**课本；进度/偏好存 `localStorage`（键 `pg_v1`），无账号系统
 
 ## 当前状态（2026-06-24）
-- **朗读·三音色分工**：音色＝语舒/美嘉/Li-Mu(`recVoiceChoice` 存 `pg_recvoice`，**默认语舒**)。**语舒＝离线内嵌音频** `RECITE_AUDIO`(57首语舒 mp3 base64，**单字符串/首** `RECITE_AUDIO[id]`，整首播+整体高亮，全设备可用——解决小米等国产安卓无 TTS 引擎不发声)；**美嘉/Li-Mu＝浏览器系统 TTS**(零字节，逐句高亮，浏览器不支持会 confirm 提示)。`reciteStart`：语舒有内嵌即播 `recitePlayAudio`，否则及美嘉/Li-Mu走 TTS；浏览器无音色/看门狗1.6s无声→confirm 切语舒内嵌。生成 `scripts/gen_recite_audio.py`(**语舒单音色** `siri_yushu_zh-CN`，AVSpeech `/tmp/synth_batch.swift`→ffmpeg 22k 单声道→base64，复用 `/tmp/rec3/{id}__yushu` 已有片段免重合成；扩覆盖改 `MID_PICK` 再跑)。文件 ~3.52MB(≤10MB 预算内)。
+- **朗读·三音色分工**：音色＝语舒/美嘉/Li-Mu(`recVoiceChoice` 存 `pg_recvoice`，**默认语舒**)。**语舒＝离线内嵌音频** `RECITE_AUDIO`(57首语舒 mp3 base64，**单字符串/首** `RECITE_AUDIO[id]`，整首播+整体高亮，全设备可用——解决小米等国产安卓无 TTS 引擎不发声)；**美嘉/Li-Mu＝浏览器系统 TTS**(零字节，逐句高亮，浏览器不支持会 confirm 提示)。`reciteStart`：语舒有内嵌即播 `recitePlayAudio`，否则及美嘉/Li-Mu走 TTS；浏览器无音色/看门狗1.6s无声→confirm 切语舒内嵌。**粤语朗读**(`recLang=cantonese`)：内嵌 `RECITE_AUDIO_YUE`(57首善怡 zh-HK)，手机也能播，故粤语按钮始终可用(`recApplyLangAvail` 不再因无浏览器粤语音色置灰)；`recitePlayAudio(p,track)` track='yue'选粤语轨。**历史故事朗读**(`openEvent`→`eventNarrate`)：优先内嵌 `EVENT_AUDIO`(9事件语舒，`eventPlayAudio`+`evtAudioEl`)，否则浏览器男声 TTS。生成 `scripts/gen_recite_audio.py`(**三轨**：语舒普通话诗+善怡粤语诗+语舒历史故事，AVSpeech `/tmp/synth_batch.swift`→ffmpeg 22k 单声道→base64，复用 `/tmp/rec3` 已有片段免重合成；扩覆盖改 `MID_PICK` 再跑)。文件 ~7.30MB(≤10MB 预算内)。
+- **诗词听读·夜读电台**(共用一套播放引擎 `#sleep-player`，两个导航入口)：🌙**听诗入眠** `openSleep('sleep')`(默认安神诗单+30分定时，睡前场景)；🎧**磨耳朵** `openSleep('eartrain')`(默认按当前年级+不限时循环，给宝宝磨耳朵)。播放器内**诗单选择器** `#sleep-picker`(安神入眠`SLEEP_CALM`/全部/各年级，`sleepBuildList`/`sleepGradesAvail`/`sleepSetPlaylist`)。连播内嵌音频(`sleepTrack` 按 `recLang` 选普/粤轨)、首间留白 2.5s、古琴垫底、**睡眠定时**(墙钟 `sleepStopAt`+~6s 渐弱 `sleepFadeStop` 抗后台限流)、**锁屏 MediaSession**、`onended` 链式连播(息屏续播)。〔测试勿真播：会在用户机器出声，验逻辑即可。〕
 - **字词注释（进行中）**：详情页原文「就地注释」——有注释的词带朱批虚线下划线+①②③上标圈码，悬停(桌面)/点击(触屏)弹释义气泡，底部清单同号。数据复用 `anno:[{w,m,k?}]`(k=匹配键，用于非连续/消歧)。已注释 36 首(木兰诗+蒹葭+送杜少府+13+5+7+10)；渲染器对任何有 `anno` 的诗自动生效。剩余初中约 27 首待补(A 我录/B 用户贴课本)。
 - **133 首**（小学70+初中63，含《木兰诗》《关雎》等，年级1-9全覆盖）；批量扩充流水线（pypinyin+多音字FIX，新诗只需正文+元数据+短译文，`autoQuiz` 自动测验）
 - 六入口（年级/卡片墙/知识图谱/地图/时间轴/诗人长廊）+闯关；三角色（学生/家长/教师）+探索/学习模式；详情页8区块；三类练习+得星；5维搜索；教师打印
