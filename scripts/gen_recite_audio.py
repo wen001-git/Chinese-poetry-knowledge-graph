@@ -13,7 +13,7 @@
      已存在 /tmp/rec3/*.caf 则复用，不重合成(省时)。
 依赖：macOS(swift) + ffmpeg。
 
-扩覆盖面：诗加进 MID_PICK（小学 grade<=3 自动全包含）；事件自动全包含(EVENTS)。
+扩覆盖面：诗加进 MID_PICK（小学 grade<=6 自动全包含）；事件自动全包含(EVENTS)。
 订正误读：TONE_FIX 登记「原字→正确声调同音字」(仅改音频文本，不改显示)。
 """
 import re, pathlib, subprocess, base64, os
@@ -84,7 +84,7 @@ def embed(html, varname, mapping):
 def main():
     html = HTML.read_text()
     poems = parse_poems(html)
-    curated = [p for p, (g, _) in poems.items() if g <= 3] + [p for p in MID_PICK if p in poems]
+    curated = [p for p, (g, _) in poems.items() if g <= 6] + [p for p in MID_PICK if p in poems]
     curated = [p for p in dict.fromkeys(curated) if poems[p][1]]
     os.makedirs(REC_DIR, exist_ok=True)
 
