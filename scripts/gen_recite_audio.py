@@ -32,15 +32,23 @@ MID_PICK = ['mulan','wangyue','chunwang','guolingding','shuidiaogetou','yueyeyi'
 'guanju','wangdongtinghu','poshansisi']
 
 
+def parse_poet_names(html):
+    """诗人 id → 姓名，用于朗读开头报「朝代·作者」。"""
+    start = html.index('const POETS=')
+    block = html[start: html.index('\n};', start) + 3]
+    return {m.group(1): m.group(2) for m in re.finditer(r"([a-z0-9]+):\{name:'([^']*)'", block)}
+
+
 def parse_poems(html):
     start = html.index('const POEMS=[')
     poems = {}
     for m in re.finditer(r"\{id:'([a-z0-9]+)',title:'([^']*)',grade:(\d)", html[start:]):
-        pid, grade = m.group(1), int(m.group(3))
+        pid, title, grade = m.group(1), m.group(2), int(m.group(3))
         seg = html[start + m.start(): start + m.start() + 5000]
         lm = re.search(r"lines:\[(.*?)\]", seg, re.S)
         lines = re.findall(r"t:'([^']*)'", lm.group(1)) if lm else []
-        poems[pid] = (grade, lines)
+        dm = re.search(r"dyn:'([^']*)'", seg); pm = re.search(r"poet:'([^']*)'", seg)
+        poems[pid] = (grade, lines, title, dm.group(1) if dm else '', pm.group(1) if pm else '')
     return poems
 
 
@@ -84,12 +92,17 @@ def embed(html, varname, mapping):
 def main():
     html = HTML.read_text()
     poems = parse_poems(html)
-    curated = [p for p, (g, _) in poems.items() if g <= 6] + [p for p in MID_PICK if p in poems]
+    poet_names = parse_poet_names(html)
+    curated = [p for p, v in poems.items() if v[0] <= 6] + [p for p in MID_PICK if p in poems]
     curated = [p for p in dict.fromkeys(curated) if poems[p][1]]
     os.makedirs(REC_DIR, exist_ok=True)
 
     def ptext(pid):
-        t = '\n'.join(poems[pid][1])
+        _, lines, title, dyn, poet = poems[pid]
+        author = poet_names.get(poet, '')
+        # 开头报题：「标题。朝代·作者。」再读正文（句号→自然停顿，与句间节奏一致）
+        head = title + '。' + (dyn + '·' if dyn else '') + author + '。'
+        t = head + '\n' + '\n'.join(lines)
         for a, b in TONE_FIX.items():
             t = t.replace(a, b)
         return t
