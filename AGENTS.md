@@ -29,7 +29,7 @@
 - **诗词地图**：缩放平移、2D浮雕山脉、标注4选1(古/今/名胜/无)、名胜图标、诗人足迹、按诗人展开、墨珠地标+悬停浮标、历史大事点「讲」→事件卡+男声朗读
 - **时空联动(D)**：底部年份游标播放→逐年点亮地图+诗作列表(E 两栏/筛选/定位)
 - **氛围(F)**：详情逐句朗读+普通话/粤语切换(语舒/善怡)；古琴背景(程序合成/内嵌《阳关三叠》CC BY-SA 署名)；诗人剪影头像(性别×朝代冠服)
-- **诗人长廊(C)**：选择器+面板(称号头条/传奇人生章节故事/代表作/足迹)。**「传奇人生」叙事**(`POET_STORY{epithet称号,tagline矛盾,chapters[{h,body,quote,from}],coda升华}`，`renderPoetPanel` 有则显故事+章节竖轴+朱批名句+升华卡、无则回退 `po.intro`)：已写 6 位大家(libai/dufu/sushi/baijuyi/wangwei/xinqiji)，其余 62 位待增量扩(史实+名句出处须准确)。样式 `.poet-epithet/.poet-tagline/.story-ch/.story-quote/.story-coda`。
+- **诗人长廊(C)**：选择器+面板(称号头条/传奇人生章节故事/代表作/足迹)。**「传奇人生」叙事**(`POET_STORY{epithet称号,tagline矛盾,chapters[{h,body,quote,from}],coda升华}`，`renderPoetPanel` 有则显故事+章节竖轴+朱批名句+升华卡、无则回退 `po.intro`)：已写 7 位大家(libai/dufu/sushi/baijuyi/wangwei/xinqiji/wanganshi)，其余待增量扩(史实+名句出处须准确)。**故事内古地名一律附今地名**(如「碎叶城（今吉尔吉斯斯坦境内）」)。样式 `.poet-epithet/.poet-tagline/.story-ch/.story-quote/.story-coda`。
 - **家长画报·迁徙金线图**(A4竖版可打印)：5诗人迁徙路线，每人**一色一线型**(`TRACK_STYLE`：色+虚实双重区分，灰度打印也能分清)，`trackStyle(k)` 取样式。**已从装饰海报改造为「亲子陪读任务单」**：尾部加「✏️边走边问」引导问题+留白(`buildMigrationPoster`)，引导问题数据 `POET_JOURNEY_Q{poet:{q,why}}`(5诗人,真实史实,屏幕地图+打印共用单一来源)。
 - **打印学习单·三角色版**(`buildPrintSheet(p,role)`，**打印按钮在详情页常驻操作栏 `#d-print`**[朗读那行]，所有标签页可见、标签随角色由 `fillDetail` 设；原藏在测验页已移出)：**学生**=自测单(原文+注释+自测题+留白)；**家长**=完整离屏学习单(让孩子在纸上学,减少看屏；+白话译文+练习+「家长陪读提问」复用 `POET_JOURNEY_Q`)；**教师**=班级作业单(姓名/班级栏)。`printSheet()` 传 `ST.role`。
 - **交互地图·边走边问**：地图选中诗人(`mapPoet`)时 `renderMapList` 头部显 `POET_JOURNEY_Q[mapPoet].q` 提示框(`.ml-ask`,朱批左边)，所有角色可见(课堂/亲子/自学通用)
