@@ -18,8 +18,8 @@
 - 宣纸白 `#f7f5f0` / 浓墨 `#1c1c1e` / 墨青 `#2d5a6b` + **朱砂红 `#c1352b` 可作强调/印章/朱批**（禁红规则已取消，配色可演进；视觉用 `/frontend-design` 迭代中）
 - 内容对齐**统编版**课本；进度/偏好存 `localStorage`（键 `pg_v1`），无账号系统
 
-## 当前状态（2026-06-25）
-- **人物关系·朋友圈**（图谱新功能）：图谱工具栏「🤝 朋友圈」入口 `openCircle('libai')`。SVG 自环图(`#circle-modal`)：中心人物+一圈关系人，**同代＝实线**(墨青`#2d5a6b`)、**跨代影响＝虚线+箭头**(赭`#a0603a`，前人→后人，`inf:1` 时 `a`=源头)、**非诗人＝赭色节点+「非诗人」标注**。**每条边带 tip 显「依据」**(点关系线/标签→`showCircleTip(i)` 底部显 `desc`；hover `<title>` 同款)，点头像换看 TA 的朋友圈，点中心看本人简介。数据：`FIGURES{}`(5 非诗人:汪伦/唐玄宗/严武/房琯/赵明诚)+`RELATIONS[]`(33 条经核对的真实关系，每条 `{a,b,type,desc,inf?}`)；另补 8 位无诗诗人(高适/元稹/孟郊/苏辙/黄庭坚/欧阳修/谢朓/柳宗元)入 `POETS` 仅供朋友圈引用。**新诗人/FIGURES 无 `POEMS` 条目 → 不出现在图谱/卡片墙/地图**(那些由 POEMS 构建)。函数：`openCircle/closeCircle/renderCircle/showCircleTip/personOf/personRelations/_ce`(紧接 `setGLayout` 后)。〔已测：33 关系端点全解析、边tip依据、人物跳转、箭头方向、控制台0错误。〕
+## 当前状态（2026-06-27）
+- **人物关系·朋友圈**（图谱新功能）：图谱工具栏「🤝 朋友圈」入口 `openCircle('libai')`。SVG 自环图(`#circle-modal`)：中心人物+一圈关系人，**同代＝实线**(墨青`#2d5a6b`)、**跨代影响＝虚线+箭头**(赭`#a0603a`，前人→后人，`inf:1` 时 `a`=源头)、**非诗人＝赭色节点+「非诗人」标注**。**每条边 hover/点 → tip 显「戴建业式俏皮话(`fun`)大字 + 依据(`desc`)小字」**(`showCircleTip(i)`，给小学生好记又可考查；`.ct-fun`/`.ct-basis` 样式；标签带 ⓘ 提示可点)，点头像换看 TA 的朋友圈，点中心看本人简介。数据：`FIGURES{}`(5 非诗人:汪伦/唐玄宗/严武/房琯/赵明诚)+`RELATIONS[]`(33 条经核对的真实关系，每条 `{a,b,type,desc,inf?}`)；另补 8 位无诗诗人(高适/元稹/孟郊/苏辙/黄庭坚/欧阳修/谢朓/柳宗元)入 `POETS` 仅供朋友圈引用。**新诗人/FIGURES 无 `POEMS` 条目 → 不出现在图谱/卡片墙/地图**(那些由 POEMS 构建)。函数：`openCircle/closeCircle/renderCircle/showCircleTip/personOf/personRelations/_ce`(紧接 `setGLayout` 后)。〔已测：33 关系端点全解析、边tip依据、人物跳转、箭头方向、控制台0错误。〕
 - **朗读·三音色分工**：音色＝语舒/美嘉/Li-Mu(`recVoiceChoice` 存 `pg_recvoice`，**默认语舒**)。**语舒＝离线内嵌音频** `RECITE_AUDIO`(57首语舒 mp3 base64，**单字符串/首** `RECITE_AUDIO[id]`，整首播+整体高亮，全设备可用——解决小米等国产安卓无 TTS 引擎不发声)；**美嘉/Li-Mu＝浏览器系统 TTS**(零字节，逐句高亮，浏览器不支持会 confirm 提示)。`reciteStart`：语舒有内嵌即播 `recitePlayAudio`，否则及美嘉/Li-Mu走 TTS；浏览器无音色/看门狗1.6s无声→confirm 切语舒内嵌。**粤语朗读**(`recLang=cantonese`)：内嵌 `RECITE_AUDIO_YUE`(57首善怡 zh-HK)，手机也能播，故粤语按钮始终可用(`recApplyLangAvail` 不再因无浏览器粤语音色置灰)；`recitePlayAudio(p,track)` track='yue'选粤语轨。**历史故事朗读**(`openEvent`→`eventNarrate`)：优先内嵌 `EVENT_AUDIO`(9事件语舒，`eventPlayAudio`+`evtAudioEl`)，否则浏览器男声 TTS。生成 `scripts/gen_recite_audio.py`(**三轨**：语舒普通话诗+善怡粤语诗+语舒历史故事，AVSpeech `/tmp/synth_batch.swift`→ffmpeg 22k 单声道→base64，复用 `/tmp/rec3` 已有片段免重合成；扩覆盖改 `MID_PICK` 再跑)。文件 ~7.30MB(≤10MB 预算内)。
 - **诗词听读·夜读电台**(共用一套播放引擎 `#sleep-player`，两个导航入口)：🌙**听诗入眠** `openSleep('sleep')`(默认安神诗单+30分定时，睡前场景)；🎧**磨耳朵** `openSleep('eartrain')`(默认按当前年级+不限时循环，给宝宝磨耳朵)。播放器内**诗单选择器** `#sleep-picker`(安神入眠`SLEEP_CALM`/全部/各年级，`sleepBuildList`/`sleepGradesAvail`/`sleepSetPlaylist`)。连播内嵌音频(`sleepTrack` 按 `recLang` 选普/粤轨)、首间留白 2.5s、古琴垫底、**睡眠定时**(墙钟 `sleepStopAt`+~6s 渐弱 `sleepFadeStop` 抗后台限流)、**锁屏 MediaSession**、`onended` 链式连播(息屏续播)。〔测试勿真播：会在用户机器出声，验逻辑即可。〕
 - **字词注释（进行中）**：详情页原文「就地注释」——有注释的词带朱批虚线下划线+①②③上标圈码，悬停(桌面)/点击(触屏)弹释义气泡，底部清单同号。数据复用 `anno:[{w,m,k?}]`(k=匹配键，用于非连续/消歧)。已注释 36 首(木兰诗+蒹葭+送杜少府+13+5+7+10)；渲染器对任何有 `anno` 的诗自动生效。剩余初中约 27 首待补(A 我录/B 用户贴课本)。
@@ -30,9 +30,10 @@
 - **时空联动(D)**：底部年份游标播放→逐年点亮地图+诗作列表(E 两栏/筛选/定位)
 - **氛围(F)**：详情逐句朗读+普通话/粤语切换(语舒/善怡)；古琴背景(程序合成/内嵌《阳关三叠》CC BY-SA 署名)；诗人剪影头像(性别×朝代冠服)
 - **诗人长廊(C)**：选择器+面板(生平/足迹/代表作)
+- **家长画报·迁徙金线图**(A4竖版可打印)：5诗人迁徙路线，每人**一色一线型**(`TRACK_STYLE`：色+虚实双重区分，灰度打印也能分清)，`trackStyle(k)` 取样式
 
 ## 下一步 TODO（从这里继续）
-- [ ] **【未提交】本账号最新一批改动待 commit**（已验证可跑、控制台0报错）：①UI/UX评审5项适龄性修复（引导态隐藏顶栏`body[data-guide=1]`；`.vtab`/`.dtab`/`.d-recite`撑到44px触控；学生角色地图密集筛选默认收起`mapMoreOpen`+「🔧更多」，家长/教师全显；图谱提示去术语→👆图形）；②**诗词朗读跨平台稳健**：`_ttsKeep`保活(被暂停自动resume)、cancel后延时120ms再speak(避Android失效)、`reciteLine`若recVoice空再取一次(Win/Android语音异步加载)。
+- [x] UI/UX评审5项适龄修复 + 朗读跨平台稳健（`_ttsKeep`/cancel延时/recVoice重取）已提交 ✅
 - [x] 历史大事讲故事"拖音"已修（清晰优先：`pickNarratorVoice` 只认清晰男声 Kangkang/云希，**排除 Apple 角色音 Reed/Eddy**，Apple 无则退清晰语舒）✅
 - [ ] 诗词朗读音色：Apple 设备男声皆带拖音→目前用清晰女声(语舒)；如需男声需内嵌预渲染音频(评估过~1MB/9事件，体积可接受但未做)
 - [ ] 双击展开为"封顶12克制版"，用户原想"纯自由展开(无上限)"——可改
