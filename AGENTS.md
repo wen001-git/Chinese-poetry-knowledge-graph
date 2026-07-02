@@ -37,6 +37,7 @@
 ## 下一步 TODO（从这里继续）
 - [x] UI/UX评审5项适龄修复 + 朗读跨平台稳健（`_ttsKeep`/cancel延时/recVoice重取）已提交 ✅
 - [x] 历史大事讲故事"拖音"已修（清晰优先：`pickNarratorVoice` 只认清晰男声 Kangkang/云希，**排除 Apple 角色音 Reed/Eddy**，Apple 无则退清晰语舒）✅
+- [x] 演示视频素材：`demo/showcase.html`（5张双语章节卡：开场/学生/家长/教师/收尾，水墨风+朱印章签名元素，←→翻页）+ `demo/VIDEO_SCRIPT.md`（90秒双语讲稿，点击路径已对照源码核实）已创建 ✅
 - [ ] 诗词朗读音色：Apple 设备男声皆带拖音→目前用清晰女声(语舒)；如需男声需内嵌预渲染音频(评估过~1MB/9事件，体积可接受但未做)
 - [ ] 双击展开为"封顶12克制版"，用户原想"纯自由展开(无上限)"——可改
 - [ ] `related` 相关推荐字段多为空（autoQuiz/详情已健壮，可后补）
@@ -46,4 +47,5 @@
 - `docs/IMPL_NOTES.md` — **关键实现备忘**（改地图/图谱/朗读等前按需读）+ 素材授权署名义务
 - `docs/PROJECT_PLAN.md` / `docs/DESIGN.md` — 里程碑进度/设计（按需）
 - `CLAUDE.md` — 项目规则（视觉约束、文档维护、接手省 token 协议）
+- `demo/showcase.html` + `demo/VIDEO_SCRIPT.md` — 演示视频章节卡+讲稿（不改 poemgraph.html 本体）
 - 完整变更历史 → `git log`

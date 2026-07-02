@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>诗词图谱 PoemGraph · 演示章节卡</title>
+<style>
+:root{
+  --ink:#1c1c1e; --ink2:#5c5c6e; --ink3:#9a9aaa;
+  --paper:#f7f5f0; --paper2:#efece4; --paper3:#e8e5dc;
+  --teal:#2d5a6b; --teal-l:#e4ecef;
+  --cinnabar:#b23a2e; --cinnabar-l:#f7e8e4; --gold:#b8923f;
+  --border:#d8d4c8;
+  --serif:"STKaiti","KaiTi","楷体","STSong","SimSun",serif;
+  --sans:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:var(--sans);background:var(--paper);color:var(--ink);
+  position:relative;
+}
+
+/* faint rice-paper grain */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 20% 30%, rgba(28,28,30,.02) 0, transparent 40%),
+                    radial-gradient(circle at 80% 75%, rgba(28,28,30,.025) 0, transparent 45%);
+}
+
+/* ── decorative ink-wash mountain, fixed at the base of every slide ── */
+.mtn{position:fixed;left:0;right:0;bottom:0;height:22vh;pointer-events:none;z-index:0;opacity:.55}
+.mtn svg{width:100%;height:100%}
+
+.deck{position:relative;z-index:1;height:100vh;width:100vw}
+
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:6vh 8vw;opacity:0;pointer-events:none;
+  transition:opacity .5s ease;
+}
+.slide.active{opacity:1;pointer-events:auto}
+
+.slide .inner{max-width:900px;width:100%}
+
+/* staggered entrance */
+.slide .eyebrow,.slide h1,.slide .tagline,.slide .bullets,.slide .seal-row{
+  opacity:0;transform:translateY(14px);
+  transition:opacity .55s ease,transform .55s ease;
+}
+.slide.active .eyebrow{transition-delay:.05s}
+.slide.active h1{transition-delay:.14s}
+.slide.active .tagline{transition-delay:.22s}
+.slide.active .bullets{transition-delay:.32s}
+.slide.active .seal-row{transition-delay:.4s}
+.slide.active .eyebrow,.slide.active h1,.slide.active .tagline,.slide.active .bullets,.slide.active .seal-row{
+  opacity:1;transform:translateY(0);
+}
+
+.eyebrow{
+  font-family:var(--serif);letter-spacing:.5em;font-size:14px;color:var(--teal);
+  margin-bottom:18px;
+}
+.eyebrow .num{color:var(--cinnabar);font-weight:700;margin-right:6px}
+
+h1{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(34px,5.4vw,68px);line-height:1.25;
+  letter-spacing:.06em;color:var(--ink);
+  margin-bottom:10px;
+}
+h1 .role-ic{font-size:.72em;vertical-align:-.08em;margin-right:.15em;font-family:var(--sans)}
+
+.tagline{
+  font-size:clamp(14px,1.7vw,19px);color:var(--ink2);
+  letter-spacing:.02em;margin-bottom:8px;
+}
+.tagline .en{
+  display:block;font-family:var(--sans);font-size:.72em;color:var(--ink3);
+  font-style:italic;letter-spacing:.01em;margin-top:6px;
+}
+
+.bullets{
+  display:flex;flex-wrap:wrap;gap:14px;justify-content:center;
+  margin-top:34px;
+}
+.bullets .chip{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 22px;border-radius:24px;
+  background:var(--paper2);border:1px solid var(--border);
+  font-size:clamp(14px,1.6vw,17px);color:var(--ink);
+  box-shadow:0 2px 12px rgba(28,28,30,.06);
+}
+.bullets .chip .ic{font-size:1.25em}
+.bullets .chip.hi{border-color:var(--cinnabar);color:var(--cinnabar);background:var(--cinnabar-l)}
+
+/* stat chips on the opening slide */
+.stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:30px}
+.stats span{
+  font-family:var(--serif);font-size:15px;letter-spacing:.1em;
+  padding:8px 16px;border:1px solid var(--gold);color:var(--gold);
+  border-radius:4px;background:rgba(184,146,63,.06);
+}
+
+/* ── the seal / stamp signature element ── */
+.seal{
+  width:74px;height:74px;border-radius:6px;
+  border:3px solid var(--cinnabar);color:var(--cinnabar);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:30px;font-weight:700;
+  position:relative;background:rgba(178,58,46,.04);
+  transform:scale(1.6) rotate(-8deg);opacity:0;
+}
+.slide.active .seal{
+  animation:stamp .5s cubic-bezier(.2,1.6,.4,1) .55s forwards;
+}
+@keyframes stamp{
+  0%{opacity:0;transform:scale(2.4) rotate(-14deg)}
+  60%{opacity:1;transform:scale(.92) rotate(-4deg)}
+  100%{opacity:.92;transform:scale(1) rotate(-6deg)}
+}
+.seal-row{margin-top:44px;display:flex;justify-content:center;align-items:center;gap:18px}
+.seal-row .seal{width:52px;height:52px;font-size:21px;transform:scale(1) rotate(-6deg);opacity:.85;animation:none}
+.seal-solo{display:flex;justify-content:center}
+
+.filepath{
+  margin-top:26px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+  color:var(--ink2);letter-spacing:.02em;
+}
+
+/* nav: dots + arrows */
+.nav-dots{
+  position:fixed;left:50%;bottom:28px;transform:translateX(-50%);
+  display:flex;gap:9px;z-index:2;
+}
+.nav-dots button{
+  width:8px;height:8px;border-radius:50%;border:1px solid var(--ink3);
+  background:transparent;cursor:pointer;padding:0;transition:.25s;
+}
+.nav-dots button.on{background:var(--cinnabar);border-color:var(--cinnabar);width:22px;border-radius:5px}
+
+.arrow{
+  position:fixed;top:50%;transform:translateY(-50%);z-index:2;
+  width:44px;height:44px;border-radius:50%;border:1px solid var(--border);
+  background:var(--paper2);color:var(--ink2);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:.55;transition:opacity .2s;
+}
+.arrow:hover{opacity:1;border-color:var(--teal);color:var(--teal)}
+.arrow.prev{left:22px}
+.arrow.next{right:22px}
+
+.hint{
+  position:fixed;top:20px;right:26px;z-index:2;
+  font-size:12px;color:var(--ink3);letter-spacing:.04em;
+  font-family:var(--sans);
+}
+
+@media(prefers-reduced-motion:reduce){
+  .slide,.slide *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="mtn"><svg viewBox="0 0 1200 200" preserveAspectRatio="none">
+  <path d="M0,200 L0,140 L90,80 L170,130 L260,55 L360,120 L470,40 L560,110 L680,60 L790,125 L900,70 L1010,130 L1100,85 L1200,140 L1200,200 Z" fill="#2d5a6b" opacity=".12"/>
+  <path d="M0,200 L0,165 L120,120 L230,160 L340,100 L460,155 L600,95 L730,150 L860,110 L980,158 L1100,120 L1200,165 L1200,200 Z" fill="#1c1c1e" opacity=".07"/>
+</svg></div>
+
+<div class="hint" id="hint">← → 翻页 · 全屏建议 F11</div>
+
+<div class="deck" id="deck">
+
+  <!-- 00 开场 -->
+  <section class="slide active" data-seal="诗">
+    <div class="inner">
+      <div class="eyebrow"><span class="num">00</span>诗词图谱</div>
+      <h1>PoemGraph</h1>
+      <div class="tagline">一部装进浏览器的小学语文诗词世界
+        <span class="en">A whole primary-school poetry curriculum, offline in one file</span>
+      </div>
+      <div class="stats">
+        <span>133 首</span><span>1–9 年级</span><span>6 大入口</span><span>完全离线</span>
+      </div>
+      <div class="seal-row"><div class="seal">诗</div></div>
+    </div>
+  </section>
+
+  <!-- 01 学生篇 -->
+  <section class="slide" data-seal="学">
+    <div class="inner">
+      <div class="eyebrow"><span class="num">01</span>学生篇</div>
+      <h1><span class="role-ic">🎓</span>一个人也能学出滋味</h1>
+      <div class="tagline">Learn on your own, and actually enjoy it
+        <span class="en">Explore the knowledge graph, read aloud, quiz for stars</span>
+      </div>
+      <div class="bullets">
+        <div class="chip"><span class="ic">🕸</span>图谱探索 · 双击展开</div>
+        <div class="chip"><span class="ic">🔊</span>跟读高亮 · 普通话/粤语</div>
+        <div class="chip"><span class="ic">🚩</span>闯关答题 · 集星</div>
+      </div>
+      <div class="seal-row"><div class="seal">学</div></div>
+    </div>
+  </section>
+
+  <!-- 02 家长篇 -->
+  <section class="slide" data-seal="亲">
+    <div class="inner">
+      <div class="eyebrow"><span class="num">02</span>家长篇</div>
+      <h1><span class="role-ic">👨‍👩‍👧</span>睡前路上，纸上屏外</h1>
+      <div class="tagline">Bedtime, car rides, and screen-free moments
+        <span class="en">Sleep playlists, ear-training loops, printable parent-child worksheets</span>
+      </div>
+      <div class="bullets">
+        <div class="chip"><span class="ic">🌙</span>听诗入眠 · 定时安神</div>
+        <div class="chip"><span class="ic">🎧</span>磨耳朵 · 按年级循环</div>
+        <div class="chip hi"><span class="ic">🖨</span>彩色学习单 · 边走边问</div>
+      </div>
+      <div class="seal-row"><div class="seal">亲</div></div>
+    </div>
+  </section>
+
+  <!-- 03 教师篇 -->
+  <section class="slide" data-seal="师">
+    <div class="inner">
+      <div class="eyebrow"><span class="num">03</span>教师篇</div>
+      <h1><span class="role-ic">🏫</span>一张地图讲一堂课</h1>
+      <div class="tagline">One map turns into a whole lesson
+        <span class="en">Poet trails on a real map, time-linked playback, class worksheets</span>
+      </div>
+      <div class="bullets">
+        <div class="chip"><span class="ic">🗺</span>诗人足迹 · 诗词地图</div>
+        <div class="chip"><span class="ic">⏳</span>时空联动 · 逐年播放</div>
+        <div class="chip"><span class="ic">🖨</span>班级作业单</div>
+      </div>
+      <div class="seal-row"><div class="seal">师</div></div>
+    </div>
+  </section>
+
+  <!-- 04 收尾 -->
+  <section class="slide" data-seal="合">
+    <div class="inner">
+      <div class="eyebrow"><span class="num">04</span>结语</div>
+      <h1>一个文件 · 打开即用</h1>
+      <div class="tagline">One file. No install. Just open and explore.
+        <span class="en">Everything above runs fully offline — no server, no account</span>
+      </div>
+      <div class="filepath">poemgraph.html</div>
+      <div class="seal-row">
+        <div class="seal">诗</div><div class="seal">学</div><div class="seal">亲</div><div class="seal">师</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<button class="arrow prev" onclick="go(-1)" aria-label="上一页">‹</button>
+<button class="arrow next" onclick="go(1)" aria-label="下一页">›</button>
+<div class="nav-dots" id="dots"></div>
+
+<script>
+var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+var i = 0;
+var dotsEl = document.getElementById('dots');
+slides.forEach(function(_, idx){
+  var b = document.createElement('button');
+  if(idx===0) b.className='on';
+  b.setAttribute('aria-label','跳到第'+(idx+1)+'页');
+  b.onclick = function(){ show(idx); };
+  dotsEl.appendChild(b);
+});
+function show(n){
+  n = Math.max(0, Math.min(slides.length-1, n));
+  slides[i].classList.remove('active');
+  i = n;
+  slides[i].classList.add('active');
+  Array.prototype.forEach.call(dotsEl.children, function(d, idx){
+    d.className = idx===i ? 'on' : '';
+  });
+}
+function go(delta){ show(i+delta); }
+document.addEventListener('keydown', function(e){
+  if(e.key==='ArrowRight' || e.key===' '){ go(1); e.preventDefault(); }
+  else if(e.key==='ArrowLeft'){ go(-1); e.preventDefault(); }
+});
+document.getElementById('deck').addEventListener('click', function(e){
+  if(e.target.closest('.arrow') || e.target.closest('.nav-dots')) return;
+  var x = e.clientX / window.innerWidth;
+  go(x < .5 ? -1 : 1);
+});
+// hide the corner hint shortly after load so it doesn't linger in the recording
+setTimeout(function(){
+  var h = document.getElementById('hint');
+  if(h){ h.style.transition='opacity .6s'; h.style.opacity='0'; }
+}, 3500);
+</script>
+
+</body>
+</html>
