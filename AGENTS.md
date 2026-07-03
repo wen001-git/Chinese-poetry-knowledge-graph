@@ -36,12 +36,14 @@
 - **视频录屏展示页**：根目录 `video-showcase.html` 已创建（7页场景化录屏页：开场/三类用户/学生/图谱探索/家长/教师/镜头清单；中文主讲+少量英文副标题；N 显示/隐藏旁白，←→翻页，按钮切到真实 `poemgraph.html`）。
 - **诗人长廊·查询体验**：①详情页「诗人」tab 新增「📜 查看XX完整传奇人生 →」跳转按钮（仅 `POET_STORY` 有数据的诗人显示），点击 `poetSel=key;showView('poets')` 跳到诗人长廊对应诗人，避免与传奇人生长文重复维护。②诗人长廊头部新增搜索框(`poetFilterQ`,按姓名子串)+朝代快捷筛选chip(`poetFilterDyn`,复用`.sf`样式,`selectPoetDyn`)，无匹配显示空状态提示；函数 `renderPoetPicker/renderPoetDynFilters`。已用 puppeteer-core+本机 Chrome headless 测试：搜索/朝代过滤/空态/跳转链接均正确，控制台0错误。✅
 
-## 部署/托管选型（2026-07-03：已选定 EdgeOne Pages，部署进行中）
-- **已选 腾讯云 EdgeOne Pages**（`console.tencentcloud.com/edgeone`），项目名 `Chinese-poetry-knowledge-graph`，已连接 GitHub 仓库 `wen001-git/Chinese-poetry-knowledge-graph` 分支 `main`，加速区域选 **Global (MLC excluded)**（对应免 ICP 备案模式），push 到 main 自动触发重新部署。
-- 部署地址访问路径：仓库根目录新增了 `index.html`（自动 `location.replace('poemgraph.html')` 跳转），所以裸域名（如 `https://xxx.edgeone.app/`）和 `.../poemgraph.html` 都能直达应用，不需要用户记完整文件名。
-- Render 作为备选未启用（未来若要账号+数据库，参考下方对比结论）。
+## 部署/托管选型（2026-07-03：已双平台部署，EdgeOne 被实测证实无 ICP 会硬拦大陆）
+- **腾讯云 EdgeOne Pages** 已部署：`https://peomgraph-dpw1a040zswi.edgeone.dev`，加速区域 **Global (MLC excluded)**。**实测结论（重要，纠正此前"可能只是不加速"的猜测）**：该模式对大陆 IP 是**硬拦截**，返回 401 `UNAUTHORIZED`（"Access Restricted...For 'Global (MLC excluded)' projects, check your network environment"），挂 VPN 才能访问，直连大陆网络完全打不开——**不是"慢"，是"打不开"**。EdgeOne 作为腾讯云(大陆公司)产品，对未备案项目似乎主动阻断大陆流量以满足合规。**此结论大概率对腾讯云其他"免备案海外加速"产品同样适用，需要时应先实测而非假设"能连上只是慢"**。
+- **Cloudflare Pages 已部署成功**：`https://pg-cyq.pages.dev`（经典 Pages 导入流程，而非 Workers 流程——Cloudflare 新版 Dashboard 默认引导走 Workers+wrangler.jsonc 那条路，会卡在"需要注册 workers.dev 子域名"报错；正确入口是 Workers&Pages 创建页最下方的"Looking to deploy Pages? Get started"链接，走 Pages 专属 import 流程）。Cloudflare 非大陆公司，理论上不会像 EdgeOne 那样主动拦截，但未做大陆网络下的实测确认。
+- 仓库根目录 `index.html` 自动跳转到 `poemgraph.html`，两个部署地址访问裸域名都直达应用。
+- **ICP备案 是中国大陆监管要求，非腾讯云独有**——阿里云同理：大陆节点未备案会被阿里云自己的监测系统阻断（官方文档明确写着），香港/海外节点不需要备案但也就只是海外节点。换阿里云/腾讯云都绕不开这道坎，备案流程和成本基本一致。阿里云有 **ESA(边缘安全加速)** 产品，其 "Pages" 功能同样支持"导入GitHub仓库自动部署"，体验类似 Cloudflare/EdgeOne Pages。
+- **ICP备案完整成本**（供以后参考，本轮未启动）：域名(¥30-60/年，任意注册商) + **备案要求绑定一台大陆区服务器**(购买时长≥3个月，如轻量应用服务器¥30-40+/月) + 个人实名认证(身份证+人脸核身) + 审核周期(腾讯云初审1-2工作日+短信核验+管局审核≤20工作日，现实预期2-4周) + 备案后需在页脚展示备案号(法定要求) + EdgeOne等CDN大陆节点流量需升级付费套餐(大陆流量1:1计费比例，比海外节点划算)。**决定**：现阶段不启动备案，先用 Render/Cloudflare Pages（用户实测/推测均无需VPN）；等真要做付费账号系统(CloudBase)时再一次性备案，静态页+未来账号系统共用同一次投入。
 - **未来账号+数据库**（用户路线图：计划做付费账号+权限控制）：对比结论——Render 加数据库约 **¥40+/月**（用户另一项目实测数据）；**腾讯云开发 CloudBase（云开发TCB）** 数据库+认证+云函数+托管打包一体，免费额度 3000点/月，超额后 **¥19.9/月起**（比 Render 数据库单项省一半+，且含内置用户认证，不用自己写登录鉴权）——**如未来要做账号系统，优先评估 CloudBase**。CloudBase 自定义域名需 ICP 备案，默认域名(`*.tcloudbaseapp.com`)不需要。
-- **未来若需要后端/Python 服务**（不只是数据库）：按场景分档——标准无状态 REST API → CloudBase 云函数(已支持Python运行时，并入同一¥19.9/月套餐)；想零学习成本 → Render Web Service(~$7+/月，美元计费)；需要长连接/常驻进程/重计算(serverless扛不住的场景) → 腾讯云轻量应用服务器 Lighthouse 香港节点(2核2G ¥24/月，免ICP，但需自己运维)。
+- **未来若需要后端/Python 服务**（不只是数据库）：按场景分档——标准无状态 REST API → CloudBase 云函数(已支持Python运行时，GA非beta，并入同一¥19.9/月套餐)；想零学习成本 → Render Web Service(~$7+/月，美元计费，成熟);Cloudflare Workers+D1(~$5/月起,~¥35-40,**但 Python Workers 仍是 open beta 非GA**,不如前两者成熟；且Cloudflare无内置认证需自己写)；需要长连接/常驻进程/重计算(serverless扛不住的场景) → 腾讯云轻量应用服务器 Lighthouse 香港节点(2核2G ¥24/月，免ICP，但需自己运维)。
 - **风险提示**：GitHub Pages / Vercel / Netlify 因 DNS 污染/跨境路由问题，中国大陆访问历史上不稳定，**不建议**作为面向大陆用户的主入口。
 - 详见完整分析：`/Users/Zhuanz/.claude/plans/i-want-to-make-declarative-seal.md`（本机 Claude 计划文件，非仓库内文档）。
 
@@ -49,7 +51,9 @@
 - [x] UI/UX评审5项适龄修复 + 朗读跨平台稳健（`_ttsKeep`/cancel延时/recVoice重取）已提交 ✅
 - [x] 历史大事讲故事"拖音"已修（清晰优先：`pickNarratorVoice` 只认清晰男声 Kangkang/云希，**排除 Apple 角色音 Reed/Eddy**，Apple 无则退清晰语舒）✅
 - [x] 演示视频素材：`demo/showcase.html`（5张双语章节卡）+ `demo/VIDEO_SCRIPT.md`（90秒双语讲稿）+ `video-showcase.html`（正式录屏场景页，含旁白提示/镜头清单/真实应用跳转）已创建 ✅
-- [ ] **部署上线**：EdgeOne Pages 已连接仓库并点击部署，等待用户确认实际访问地址+大陆网络实测速度（见上方"部署/托管选型"）
+- [x] **部署上线**：EdgeOne Pages(`https://peomgraph-dpw1a040zswi.edgeone.dev`，**大陆直连401被拦**，需VPN) + Cloudflare Pages(`https://pg-cyq.pages.dev`，未做大陆实测) 均已部署成功 ✅
+- [ ] 待用户确认 Cloudflare Pages 在大陆直连(不用VPN)下的实际可用性——若也不行，则回退用 Render(用户另一项目实测过大陆无需VPN可访问)
+- [ ] ICP备案暂缓：待真要做付费账号系统(CloudBase)时一次性办理，见上方"部署/托管选型"完整成本分析
 - [ ] 诗词朗读音色：Apple 设备男声皆带拖音→目前用清晰女声(语舒)；如需男声需内嵌预渲染音频(评估过~1MB/9事件，体积可接受但未做)
 - [ ] 双击展开为"封顶12克制版"，用户原想"纯自由展开(无上限)"——可改
 - [ ] `related` 相关推荐字段多为空（autoQuiz/详情已健壮，可后补）
