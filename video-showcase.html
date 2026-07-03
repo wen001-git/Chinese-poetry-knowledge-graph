@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PoemGraph 视频展示脚本</title>
+<style>
+:root{
+  --paper:#f7f5f0;
+  --paper-2:#efece4;
+  --paper-3:#e5dfd2;
+  --ink:#1c1c1e;
+  --muted:#5c5c6e;
+  --soft:#8b877d;
+  --line:#d8d4c8;
+  --teal:#2d5a6b;
+  --teal-2:#e4ecef;
+  --red:#c1352b;
+  --red-2:#f4e4df;
+  --gold:#b8923f;
+  --green:#55725d;
+  --shadow:0 22px 60px rgba(28,28,30,.13);
+  --serif:"STKaiti","KaiTi","Songti SC","STSong","SimSun",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--paper);color:var(--ink)}
+body{font-family:var(--sans)}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.9;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(193,53,43,.055), transparent 25%),
+    radial-gradient(circle at 86% 72%, rgba(45,90,107,.08), transparent 28%),
+    linear-gradient(90deg, rgba(28,28,30,.018) 1px, transparent 1px),
+    linear-gradient(rgba(28,28,30,.014) 1px, transparent 1px);
+  background-size:auto,auto,42px 42px,42px 42px;
+}
+.mountains{
+  position:fixed;left:0;right:0;bottom:0;height:21vh;z-index:0;pointer-events:none;opacity:.62;
+}
+.mountains svg{display:block;width:100%;height:100%}
+.deck{position:relative;z-index:1;width:100vw;height:100vh}
+.slide{
+  position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);
+  gap:42px;align-items:center;padding:7vh 7vw 8vh;
+  opacity:0;transform:translateX(16px);pointer-events:none;
+  transition:opacity .38s ease,transform .38s ease;
+}
+.slide.active{opacity:1;transform:none;pointer-events:auto}
+.slide.full{grid-template-columns:1fr;text-align:center;place-items:center}
+.copy{max-width:760px}
+.eyebrow{
+  display:flex;align-items:center;gap:12px;margin-bottom:18px;color:var(--teal);
+  font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+}
+.num{
+  min-width:42px;height:28px;border:1px solid var(--red);border-radius:4px;color:var(--red);
+  display:inline-flex;align-items:center;justify-content:center;font-family:var(--serif);letter-spacing:0;
+  background:rgba(193,53,43,.05);
+}
+h1{
+  margin:0 0 18px;font-family:var(--serif);font-size:clamp(42px,6.4vw,82px);
+  line-height:1.08;letter-spacing:0;color:var(--ink);
+}
+h2{
+  margin:0 0 16px;font-family:var(--serif);font-size:clamp(32px,4.5vw,58px);
+  line-height:1.12;letter-spacing:0;color:var(--ink);
+}
+.lead{
+  max-width:680px;margin:0;color:var(--muted);font-size:clamp(18px,2vw,24px);
+  line-height:1.65;
+}
+.en{display:block;margin-top:8px;color:var(--soft);font-size:.76em;letter-spacing:.02em}
+.pill-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:8px 14px;border:1px solid var(--line);
+  background:rgba(239,236,228,.78);border-radius:999px;color:var(--ink);font-size:15px;
+}
+.pill strong{color:var(--red)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.btn{
+  height:46px;padding:0 18px;border:1px solid var(--teal);border-radius:6px;background:var(--teal);
+  color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:8px;font-weight:700;
+  box-shadow:0 8px 22px rgba(45,90,107,.18);
+}
+.btn.secondary{background:transparent;color:var(--teal);box-shadow:none}
+.screen{
+  min-height:430px;border:1px solid rgba(216,212,200,.95);background:rgba(247,245,240,.86);
+  box-shadow:var(--shadow);border-radius:8px;overflow:hidden;position:relative;
+}
+.screen::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(135deg, rgba(255,255,255,.34), transparent 38%);
+}
+.browserbar{
+  height:38px;border-bottom:1px solid var(--line);background:rgba(239,236,228,.9);
+  display:flex;align-items:center;gap:7px;padding:0 14px;color:var(--soft);font-size:12px;
+}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--red);opacity:.75}
+.dot:nth-child(2){background:var(--gold)}.dot:nth-child(3){background:var(--green)}
+.url{margin-left:8px;height:22px;line-height:22px;border:1px solid var(--line);border-radius:4px;padding:0 12px;flex:1;background:rgba(255,255,255,.34)}
+.screen-body{position:relative;padding:24px;min-height:392px}
+.caption{
+  position:absolute;right:18px;bottom:16px;padding:7px 10px;border-radius:4px;background:rgba(28,28,30,.72);
+  color:#fff;font-size:12px;letter-spacing:.04em;
+}
+.mock-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mini-card{
+  border:1px solid var(--line);border-radius:7px;background:rgba(239,236,228,.74);
+  padding:16px;min-height:128px;position:relative;overflow:hidden;
+}
+.mini-title{font-family:var(--serif);font-size:22px;font-weight:700;margin-bottom:8px;color:var(--ink)}
+.mini-line{height:9px;border-radius:9px;background:rgba(45,90,107,.18);margin:8px 0;width:86%}
+.mini-line.red{background:rgba(193,53,43,.18);width:58%}
+.mini-line.gold{background:rgba(184,146,63,.2);width:72%}
+.poem-panel{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:stretch}
+.poem-text{
+  border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.28);padding:22px;
+}
+.poem-text h3{font-family:var(--serif);font-size:32px;margin:0 0 14px}
+.verse{font-family:var(--serif);font-size:24px;line-height:2;color:var(--ink)}
+.anno{color:var(--red);border-bottom:2px dotted var(--red);position:relative}
+.anno::after{content:"1";font-family:var(--sans);font-size:10px;position:absolute;right:-10px;top:-9px;border:1px solid var(--red);border-radius:50%;width:14px;height:14px;line-height:13px;text-align:center;background:var(--red-2)}
+.side-stack{display:grid;gap:12px}
+.audio{
+  border:1px solid var(--line);border-radius:7px;background:var(--teal-2);padding:16px;
+}
+.bars{display:flex;align-items:end;gap:5px;height:60px;margin-top:14px}
+.bars i{display:block;width:8px;border-radius:8px 8px 0 0;background:var(--teal);opacity:.75}
+.bars i:nth-child(1){height:22px}.bars i:nth-child(2){height:42px}.bars i:nth-child(3){height:31px}.bars i:nth-child(4){height:55px}.bars i:nth-child(5){height:36px}.bars i:nth-child(6){height:48px}.bars i:nth-child(7){height:27px}
+.quiz{
+  border:1px solid var(--line);border-radius:7px;background:var(--red-2);padding:16px;
+}
+.stars{color:var(--gold);font-size:22px;letter-spacing:.08em;margin-top:8px}
+.graph-wrap{height:330px;position:relative;border:1px solid var(--line);border-radius:7px;background:radial-gradient(circle at 50% 45%, rgba(45,90,107,.1), transparent 40%)}
+.node{
+  position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;
+  color:#fff;font-family:var(--serif);font-weight:700;box-shadow:0 10px 24px rgba(28,28,30,.16);
+}
+.n1{left:42%;top:35%;width:96px;height:96px;background:var(--teal);font-size:26px}
+.n2{left:15%;top:18%;width:74px;height:74px;background:var(--red)}
+.n3{left:68%;top:16%;width:72px;height:72px;background:var(--gold)}
+.n4{left:19%;top:68%;width:68px;height:68px;background:var(--green)}
+.n5{left:70%;top:67%;width:82px;height:82px;background:#7b5f7d}
+.edge{position:absolute;height:2px;background:rgba(45,90,107,.36);transform-origin:left center}
+.e1{left:28%;top:31%;width:170px;transform:rotate(14deg)}.e2{left:51%;top:39%;width:165px;transform:rotate(-28deg)}.e3{left:29%;top:70%;width:160px;transform:rotate(-30deg)}.e4{left:52%;top:58%;width:158px;transform:rotate(29deg)}
+.map{
+  min-height:324px;border:1px solid var(--line);border-radius:7px;position:relative;overflow:hidden;
+  background:linear-gradient(145deg, rgba(228,236,239,.96), rgba(239,236,228,.92));
+}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.route{fill:none;stroke:var(--red);stroke-width:4;stroke-dasharray:10 7;stroke-linecap:round}
+.route.two{stroke:var(--teal);stroke-dasharray:1 9}
+.pin{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--red);border:3px solid var(--paper);box-shadow:0 4px 12px rgba(28,28,30,.2)}
+.p1{left:24%;top:28%}.p2{left:49%;top:43%}.p3{left:68%;top:58%}
+.timeline{position:absolute;left:26px;right:26px;bottom:28px;height:52px;border-top:2px solid rgba(45,90,107,.25)}
+.tick{position:absolute;top:-8px;width:14px;height:14px;border-radius:50%;background:var(--teal)}
+.tick:nth-child(1){left:8%}.tick:nth-child(2){left:43%;background:var(--red)}.tick:nth-child(3){left:76%;background:var(--gold)}
+.print-sheet{
+  border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.45);padding:20px;min-height:310px;
+  display:grid;grid-template-columns:1fr 1fr;gap:18px;
+}
+.sheet-page{background:#fff;border:1px solid var(--line);padding:18px;box-shadow:0 8px 20px rgba(28,28,30,.08)}
+.sheet-page h4{font-family:var(--serif);font-size:24px;margin:0 0 12px;color:var(--red)}
+.blank{height:42px;border-bottom:1px dashed var(--line);margin-top:14px}
+.scenario-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:34px;text-align:left}
+.scenario{
+  border:1px solid var(--line);border-radius:8px;background:rgba(239,236,228,.76);padding:20px;min-height:220px;
+}
+.scenario h3{margin:0 0 10px;font-family:var(--serif);font-size:30px;color:var(--teal)}
+.scenario p{margin:0;color:var(--muted);line-height:1.65;font-size:16px}
+.shot-list{display:grid;gap:12px;margin-top:24px}
+.shot{
+  display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;
+  padding:13px 15px;border:1px solid var(--line);border-radius:7px;background:rgba(239,236,228,.72);
+  text-align:left;
+}
+.shot b{font-family:var(--serif);font-size:20px}
+.shot span{color:var(--muted);font-size:14px}
+.tag{font-size:12px;color:var(--red);border:1px solid var(--red);border-radius:4px;padding:4px 7px;background:rgba(193,53,43,.05)}
+.notes{
+  position:fixed;left:28px;right:28px;bottom:28px;z-index:3;
+  display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:center;
+  border:1px solid rgba(193,53,43,.42);background:rgba(247,245,240,.94);border-radius:8px;
+  padding:12px 14px;box-shadow:0 12px 38px rgba(28,28,30,.12);
+  transform:translateY(130%);transition:transform .28s ease;
+}
+.notes.show{transform:translateY(0)}
+.notes b{font-family:var(--serif);color:var(--red);font-size:22px}
+.notes p{margin:0;color:var(--ink);line-height:1.55;font-size:15px}
+.nav{
+  position:fixed;right:28px;top:24px;z-index:4;display:flex;align-items:center;gap:10px;
+}
+.nav button{
+  width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:rgba(239,236,228,.92);
+  color:var(--teal);font-size:20px;cursor:pointer;
+}
+.progress{font-size:13px;color:var(--soft);min-width:58px;text-align:center}
+.hint{position:fixed;left:28px;top:26px;z-index:4;color:var(--soft);font-size:13px}
+.seal{
+  position:absolute;right:7vw;bottom:7vh;width:82px;height:82px;border:3px solid var(--red);
+  color:var(--red);border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:34px;font-weight:700;transform:rotate(-7deg);opacity:.82;background:rgba(193,53,43,.035);
+}
+@media(max-width:980px){
+  .slide{grid-template-columns:1fr;gap:22px;overflow:auto;padding:72px 5vw 96px}
+  .screen{min-height:360px}.screen-body{min-height:322px}.scenario-list{grid-template-columns:1fr}
+  .poem-panel,.print-sheet{grid-template-columns:1fr}
+  .seal{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .slide,.notes{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="mountains" aria-hidden="true">
+  <svg viewBox="0 0 1200 220" preserveAspectRatio="none">
+    <path d="M0 220V145l95-52 92 44 92-86 94 85 110-103 108 86 99-56 96 72 116-88 104 90 103-46 91 64v75z" fill="#2d5a6b" opacity=".12"/>
+    <path d="M0 220v-45l128-48 126 37 116-62 124 66 134-79 126 70 134-55 118 65 103-44 91 48v47z" fill="#1c1c1e" opacity=".07"/>
+  </svg>
+</div>
+
+<div class="hint">← → 翻页 · N 显示/隐藏旁白 · 录屏建议 16:9 全屏</div>
+<div class="nav">
+  <button type="button" id="prev" aria-label="上一页">‹</button>
+  <div class="progress" id="progress">1 / 7</div>
+  <button type="button" id="next" aria-label="下一页">›</button>
+</div>
+
+<main class="deck" id="deck">
+  <section class="slide active full" data-note="开场先讲一句：PoemGraph 不是普通诗词列表，而是把课本诗词变成孩子、家长、老师都能用的离线互动世界。">
+    <div class="copy">
+      <div class="eyebrow"><span class="num">00</span>视频开场</div>
+      <h1>PoemGraph<br>诗词图谱</h1>
+      <p class="lead">把 133 首统编版古诗，变成图谱、地图、朗读、练习和纸质学习单。
+        <span class="en">A visual, offline poetry world for students, parents, and teachers.</span>
+      </p>
+      <div class="pill-row" style="justify-content:center">
+        <span class="pill"><strong>133</strong> 首诗</span>
+        <span class="pill">1-9 年级</span>
+        <span class="pill">单文件离线</span>
+        <span class="pill">普通话 / 粤语朗读</span>
+      </div>
+      <div class="actions" style="justify-content:center">
+        <a class="btn" href="poemgraph.html" target="_blank" rel="noopener">打开真实 PoemGraph</a>
+        <a class="btn secondary" href="#shot-plan">查看录制镜头</a>
+      </div>
+    </div>
+    <div class="seal">诗</div>
+  </section>
+
+  <section class="slide" data-note="这里解释视频结构：不要先堆功能，而是先讲三类人怎么用。学生负责预习和自学，家长负责陪伴和离屏学习，老师负责课堂讲解和作业。">
+    <div class="copy">
+      <div class="eyebrow"><span class="num">01</span>用场景讲产品</div>
+      <h2>三类用户，三条故事线</h2>
+      <p class="lead">录视频时先讲“谁在用”，再切到真实功能。这样观众会更快理解 PoemGraph 的价值。</p>
+      <div class="scenario-list">
+        <article class="scenario">
+          <h3>学生</h3>
+          <p>明天要学一首诗。孩子打开年级入口，看拼音和注释，听一遍，做小练习，把“会背”变成“看得懂”。</p>
+        </article>
+        <article class="scenario">
+          <h3>家长</h3>
+          <p>不想孩子一直盯屏幕。家长用听诗入眠、磨耳朵和彩色学习单，把诗词学习带到睡前、路上和纸上。</p>
+        </article>
+        <article class="scenario">
+          <h3>教师</h3>
+          <p>一节课需要讲诗人、地点、时代和关系。老师用图谱、地图、时间轴和打印作业单组织课堂。</p>
+        </article>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="browserbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">video-showcase.html / user scenarios</span></div>
+      <div class="screen-body">
+        <div class="mock-grid">
+          <div class="mini-card"><div class="mini-title">学生预习</div><div class="mini-line"></div><div class="mini-line red"></div><div class="mini-line gold"></div></div>
+          <div class="mini-card"><div class="mini-title">家长陪读</div><div class="mini-line gold"></div><div class="mini-line"></div><div class="mini-line red"></div></div>
+          <div class="mini-card"><div class="mini-title">教师课堂</div><div class="mini-line"></div><div class="mini-line"></div><div class="mini-line gold"></div></div>
+          <div class="mini-card"><div class="mini-title">真实演示</div><div class="mini-line red"></div><div class="mini-line gold"></div><div class="mini-line"></div></div>
+        </div>
+        <div class="caption">展示页负责讲故事，PoemGraph 负责真实互动</div>
+      </div>
+    </div>
+    <div class="seal">用</div>
+  </section>
+
+  <section class="slide" data-note="学生段落建议直接切到真实 PoemGraph：年级入口，打开一首诗，点注释，点朗读，再做一道题。强调孩子不是只背诗，而是在理解诗。">
+    <div class="copy">
+      <div class="eyebrow"><span class="num">02</span>学生场景</div>
+      <h2>明天要学的诗，今天自己预习</h2>
+      <p class="lead">孩子从年级入口打开诗，拼音帮助读准，朱批注释解释难词，离线朗读带着跟读，最后用小测验得星巩固。</p>
+      <div class="pill-row">
+        <span class="pill">年级入口</span>
+        <span class="pill">拼音 ruby</span>
+        <span class="pill">就地注释</span>
+        <span class="pill">朗读高亮</span>
+        <span class="pill">练习得星</span>
+      </div>
+      <div class="actions">
+        <a class="btn" href="poemgraph.html" target="_blank" rel="noopener">切到真实演示：学生预习</a>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="browserbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">poemgraph.html / poem detail</span></div>
+      <div class="screen-body">
+        <div class="poem-panel">
+          <div class="poem-text">
+            <h3>静夜思</h3>
+            <div class="verse">床前<span class="anno">明月</span>光，<br>疑是地上霜。<br>举头望明月，<br>低头思故乡。</div>
+          </div>
+          <div class="side-stack">
+            <div class="audio"><strong>普通话离线朗读</strong><div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+            <div class="quiz"><strong>小测验</strong><p style="margin:8px 0 0;color:var(--muted)">这首诗表达了什么心情？</p><div class="stars">★ ★ ★</div></div>
+          </div>
+        </div>
+        <div class="caption">录制镜头：点注释 → 播朗读 → 做一题</div>
+      </div>
+    </div>
+    <div class="seal">学</div>
+  </section>
+
+  <section class="slide" data-note="这一页讲探索感。建议在真实应用里打开知识图谱，双击节点展开，再点朋友圈。旁白重点：孩子会发现诗不是孤零零的一首，而是在诗人、朝代、地点、关系里。">
+    <div class="copy">
+      <div class="eyebrow"><span class="num">03</span>探索场景</div>
+      <h2>诗不是孤岛，是一张关系网</h2>
+      <p class="lead">知识图谱把诗、诗人、朝代、地点和情感连起来。朋友圈则把李白、杜甫、王维这些人物关系讲得更好记。</p>
+      <div class="pill-row">
+        <span class="pill">Canvas 知识图谱</span>
+        <span class="pill">双击展开 1-hop</span>
+        <span class="pill">诗人朋友圈</span>
+        <span class="pill">俏皮话 + 历史依据</span>
+      </div>
+      <div class="actions">
+        <a class="btn" href="poemgraph.html" target="_blank" rel="noopener">切到真实演示：图谱与朋友圈</a>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="browserbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">poemgraph.html / knowledge graph</span></div>
+      <div class="screen-body">
+        <div class="graph-wrap">
+          <span class="edge e1"></span><span class="edge e2"></span><span class="edge e3"></span><span class="edge e4"></span>
+          <div class="node n1">李白</div>
+          <div class="node n2">杜甫</div>
+          <div class="node n3">盛唐</div>
+          <div class="node n4">长安</div>
+          <div class="node n5">月</div>
+        </div>
+        <div class="caption">录制镜头：双击展开 → 打开朋友圈 → 点一条关系</div>
+      </div>
+    </div>
+    <div class="seal">图</div>
+  </section>
+
+  <section class="slide" data-note="家长段落建议讲两个痛点：孩子需要多听，但手机不一定有 TTS；家长希望少看屏幕。所以展示听诗入眠、磨耳朵、打印学习单。">
+    <div class="copy">
+      <div class="eyebrow"><span class="num">04</span>家长场景</div>
+      <h2>睡前听，路上听，最后落到纸上</h2>
+      <p class="lead">普通话和粤语朗读都可以离线播放。家长还可以打印彩色学习单或省墨版，把诗词学习从屏幕带回纸面。</p>
+      <div class="pill-row">
+        <span class="pill">听诗入眠</span>
+        <span class="pill">磨耳朵</span>
+        <span class="pill">离线音频</span>
+        <span class="pill">亲子陪读任务单</span>
+        <span class="pill">彩色 / 省墨打印</span>
+      </div>
+      <div class="actions">
+        <a class="btn" href="poemgraph.html" target="_blank" rel="noopener">切到真实演示：家长陪读</a>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="browserbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">poemgraph.html / parent workflow</span></div>
+      <div class="screen-body">
+        <div class="print-sheet">
+          <div class="sheet-page">
+            <h4>彩色学习单</h4>
+            <div class="mini-line red"></div><div class="mini-line gold"></div><div class="mini-line"></div>
+            <div class="blank"></div><div class="blank"></div>
+          </div>
+          <div class="sheet-page">
+            <h4 style="color:var(--teal)">边走边问</h4>
+            <div class="map" style="min-height:170px">
+              <svg viewBox="0 0 400 220" preserveAspectRatio="none"><path class="route" d="M70 65 C155 20 190 122 310 125"/><path class="route two" d="M80 155 C150 110 225 180 320 80"/></svg>
+              <span class="pin p1"></span><span class="pin p2"></span><span class="pin p3"></span>
+            </div>
+          </div>
+        </div>
+        <div class="caption">录制镜头：夜读电台 → 打印学习单</div>
+      </div>
+    </div>
+    <div class="seal">亲</div>
+  </section>
+
+  <section class="slide" data-note="教师段落建议展示地图和时间轴。旁白重点：老师不用把背景知识讲成一堆文字，可以让地点、年份、诗人足迹自己动起来。">
+    <div class="copy">
+      <div class="eyebrow"><span class="num">05</span>教师场景</div>
+      <h2>把诗放回地点和时代里讲</h2>
+      <p class="lead">课堂上可以用诗词地图、历史时间轴和诗人足迹，解释一首诗为什么在那个地方、那个时代被写出来。</p>
+      <div class="pill-row">
+        <span class="pill">诗词地图</span>
+        <span class="pill">古今地名</span>
+        <span class="pill">历史大事旁白</span>
+        <span class="pill">时间轴播放</span>
+        <span class="pill">教师作业单</span>
+      </div>
+      <div class="actions">
+        <a class="btn" href="poemgraph.html" target="_blank" rel="noopener">切到真实演示：教师课堂</a>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="browserbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">poemgraph.html / map and timeline</span></div>
+      <div class="screen-body">
+        <div class="map">
+          <svg viewBox="0 0 600 360" preserveAspectRatio="none">
+            <path d="M115 92 C185 35 245 75 292 58 C370 30 435 80 488 58 C534 40 568 74 590 118 L590 360 L0 360 L0 130 C38 117 75 122 115 92Z" fill="rgba(45,90,107,.13)"/>
+            <path d="M55 250 C150 105 243 235 345 118 S470 235 555 135" class="route"/>
+            <path d="M75 120 C185 188 245 72 370 174 S485 98 552 210" class="route two"/>
+          </svg>
+          <span class="pin p1"></span><span class="pin p2"></span><span class="pin p3"></span>
+          <div class="timeline"><span class="tick"></span><span class="tick"></span><span class="tick"></span></div>
+        </div>
+        <div class="caption">录制镜头：选诗人 → 播放年份 → 点历史大事“讲”</div>
+      </div>
+    </div>
+    <div class="seal">师</div>
+  </section>
+
+  <section class="slide full" id="shot-plan" data-note="最后这页可以作为录制前检查清单。真正录制时可以停在这里，按顺序打开真实应用补录每个镜头。">
+    <div class="copy">
+      <div class="eyebrow"><span class="num">06</span>录制镜头清单</div>
+      <h2>建议 90 秒结构</h2>
+      <p class="lead">每个 live demo 镜头保持 8-12 秒，页面之间用这份 showcase 串起来。录制时可以先讲场景，再切真实应用。</p>
+      <div class="shot-list">
+        <div class="shot"><b>1</b><span>开场：一句话介绍 PoemGraph，强调离线、课本对齐、三类用户。</span><em class="tag">showcase</em></div>
+        <div class="shot"><b>2</b><span>学生：年级入口 → 诗详情 → 点注释 → 朗读 → 小测验。</span><em class="tag">live</em></div>
+        <div class="shot"><b>3</b><span>探索：知识图谱双击展开 → 诗人朋友圈 → 点一条关系。</span><em class="tag">live</em></div>
+        <div class="shot"><b>4</b><span>家长：听诗入眠 / 磨耳朵 → 打印彩色学习单或迁徙任务单。</span><em class="tag">live</em></div>
+        <div class="shot"><b>5</b><span>教师：地图足迹 → 时间轴播放 → 历史大事旁白 → 教师作业单。</span><em class="tag">live</em></div>
+        <div class="shot"><b>6</b><span>收尾：一个 HTML 文件，打开即用，适合学生、家长和老师。</span><em class="tag">showcase</em></div>
+      </div>
+      <div class="actions" style="justify-content:center">
+        <a class="btn" href="poemgraph.html" target="_blank" rel="noopener">开始录真实应用镜头</a>
+      </div>
+    </div>
+    <div class="seal">录</div>
+  </section>
+</main>
+
+<aside class="notes" id="notes" aria-live="polite">
+  <b>旁白</b>
+  <p id="noteText"></p>
+</aside>
+
+<script>
+var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+var index = 0;
+var progress = document.getElementById('progress');
+var notes = document.getElementById('notes');
+var noteText = document.getElementById('noteText');
+var notesOn = false;
+
+function update(){
+  slides.forEach(function(slide, i){ slide.classList.toggle('active', i === index); });
+  progress.textContent = (index + 1) + ' / ' + slides.length;
+  noteText.textContent = slides[index].getAttribute('data-note') || '';
+}
+function go(delta){
+  index = Math.max(0, Math.min(slides.length - 1, index + delta));
+  update();
+}
+function toggleNotes(){
+  notesOn = !notesOn;
+  notes.classList.toggle('show', notesOn);
+}
+document.getElementById('prev').addEventListener('click', function(){ go(-1); });
+document.getElementById('next').addEventListener('click', function(){ go(1); });
+document.addEventListener('keydown', function(e){
+  if(e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); go(1); }
+  if(e.key === 'ArrowLeft'){ e.preventDefault(); go(-1); }
+  if(e.key === 'n' || e.key === 'N'){ e.preventDefault(); toggleNotes(); }
+});
+document.getElementById('deck').addEventListener('click', function(e){
+  if(e.target.closest('a,button')) return;
+  go(e.clientX > window.innerWidth / 2 ? 1 : -1);
+});
+update();
+</script>
+</body>
+</html>

@@ -132,6 +132,12 @@ body[data-guide="1"] #nav{display:none}
 .dchip.locked:hover{filter:none}
 .dchip .sw{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
 /* 诗人长廊 */
+.poet-search-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.poet-search-bar input{flex:0 1 220px;min-width:140px;padding:7px 14px;border-radius:20px;
+  border:1px solid var(--border);background:var(--paper2);font-size:13px;color:var(--ink);outline:none;transition:.15s}
+.poet-search-bar input:focus{border-color:var(--teal)}
+.poet-dyn-filters{display:flex;gap:6px;flex-wrap:wrap}
+.poet-picker-empty{padding:24px 2px;text-align:center;color:var(--ink3);font-size:13px;border-bottom:1px solid var(--border);margin-bottom:20px}
 .poet-picker{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 12px;margin-bottom:20px;
   border-bottom:1px solid var(--border);scrollbar-width:thin}
 .poet-chip{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;width:74px;
@@ -858,6 +864,10 @@ body.sleep-open{overflow:hidden}
     <div class="page-head"><h2 class="serif">诗人长廊</h2><span class="hint">点选诗人，览其生平、足迹与诗作</span>
       <button class="poster-btn no-print" style="margin-left:auto" onclick="printPoster()" title="淡墨地图+金线足迹，把唐代名家的迁徙之路打印成海报贴在书桌前">🖨 打印诗人迁徙图（金线）</button>
       <button class="poster-link no-print" onclick="printPoster('timeline')" title="改打印按朝代排列的诗人时间轴卡片版">时间轴版</button></div>
+    <div class="poet-search-bar no-print">
+      <input id="poet-search-input" placeholder="🔍 搜索诗人姓名…" autocomplete="off" oninput="poetFilterQ=this.value;renderPoetPicker(poetKeysSorted())">
+      <div class="poet-dyn-filters" id="poet-dyn-filters"></div>
+    </div>
     <div class="poet-picker" id="poet-picker"></div>
     <div id="poet-panel"></div>
   </section>
@@ -2547,7 +2557,9 @@ function fillDetail(p){
      '<p>'+(p.story||poet.intro||'')+'</p>'+
      (p.storyT?(teacher?'<div class="teacher-box on"><b>延伸：</b>'+p.storyT+'</div>':'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">了解更多 ▾</button><div class="teacher-box">'+p.storyT+'</div>'):'')+
      '</div>'+
-     '<div class="sec"><h3><span class="bar"></span>诗人简介</h3><p>'+poet.intro+'</p></div></div>';
+     '<div class="sec"><h3><span class="bar"></span>诗人简介</h3><p>'+poet.intro+'</p>'+
+     (POET_STORY[p.poet]?'<button class="toggle-btn" onclick="poetSel=\''+p.poet+'\';showView(\'poets\')">📜 查看 '+poet.name+' 完整传奇人生 →</button>':'')+
+     '</div></div>';
   // 3 历史
   H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>历史背景 · '+(p.createdYear||'')+'</h3>'+
      ((p.history&&p.history.length)?'<div class="minihist">'+p.history.map(e=>'<div class="mh-item'+(e.hi?' hi':'')+'"><span class="mdot"></span><div class="my">'+e.y+'</div><div class="mt">'+e.t+'</div></div>').join('')+'</div>':'<p style="color:var(--ink3)">'+poet.dyn+'代 · '+poet.years+'</p>')+
@@ -3666,7 +3678,7 @@ function renderTimeline(){
    诗人长廊（C1 选择器 / C2 面板 / C3 足迹）
    ══════════════════════════════════════════ */
 const DYN_ORDER={'唐':1,'宋':2,'元':3,'明':4,'清':5};
-let poetSel=null;
+let poetSel=null,poetFilterQ='',poetFilterDyn='';
 function poetBirth(key){const m=(POETS[key].years||'').match(/\d{3,4}/);return m?+m[0]:9999;}
 function poetKeysSorted(){
   return Object.keys(POETS).filter(k=>POEMS.some(p=>p.poet===k))
@@ -3824,15 +3836,37 @@ function printPoster(kind){
 function renderPoets(){
   const keys=poetKeysSorted();
   if(!poetSel||!keys.includes(poetSel))poetSel=keys[0];
+  renderPoetDynFilters(keys);
   renderPoetPicker(keys);
   renderPoetPanel(poetSel);
 }
-function renderPoetPicker(keys){
-  document.getElementById('poet-picker').innerHTML=keys.map(k=>{const po=POETS[k];
+function selectPoetDyn(d){poetFilterDyn=d;
+  renderPoetDynFilters(poetKeysSorted());
+  renderPoetPicker(poetKeysSorted());
+}
+function renderPoetDynFilters(keys){
+  const dyns=[...new Set(keys.map(k=>POETS[k].dyn))].sort((a,b)=>eraRank(a)-eraRank(b));
+  document.getElementById('poet-dyn-filters').innerHTML=
+    '<button class="sf'+(poetFilterDyn===''?' on':'')+'" onclick="selectPoetDyn(\'\')">全部朝代</button>'+
+    dyns.map(d=>'<button class="sf'+(poetFilterDyn===d?' on':'')+'" onclick="selectPoetDyn(\''+d+'\')">'+d+'</button>').join('');
+}
+function renderPoetPicker(allKeys){
+  const q=poetFilterQ.trim();
+  const keys=allKeys.filter(k=>(!q||POETS[k].name.includes(q))&&(!poetFilterDyn||POETS[k].dyn===poetFilterDyn));
+  const picker=document.getElementById('poet-picker');
+  if(!keys.length){picker.style.display='none';
+    let empty=document.getElementById('poet-picker-empty');
+    if(!empty){empty=document.createElement('div');empty.id='poet-picker-empty';empty.className='poet-picker-empty';picker.insertAdjacentElement('afterend',empty);}
+    empty.textContent='没有找到「'+(q||poetFilterDyn)+'」相关的诗人';empty.style.display='';
+    return;
+  }
+  picker.style.display='';
+  const empty=document.getElementById('poet-picker-empty');
+  if(empty)empty.style.display='none';
+  picker.innerHTML=keys.map(k=>{const po=POETS[k];
     return '<button class="poet-chip'+(k===poetSel?' on':'')+'" onclick="selectPoet(\''+k+'\')">'+
       '<span class="pav">'+poetAvatarSVG(k)+'</span><span class="pnm">'+po.name+'</span>'+
       '<span class="pdy">'+po.dyn+'·'+poetBirth(k)+'</span></button>';}).join('');
-  const picker=document.getElementById('poet-picker');
   const on=picker.querySelector('.poet-chip.on');
   if(on)picker.scrollLeft=on.offsetLeft-picker.clientWidth/2+on.clientWidth/2;
 }
