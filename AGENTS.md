@@ -36,9 +36,10 @@
 - **视频录屏展示页**：根目录 `video-showcase.html` 已创建（7页场景化录屏页：开场/三类用户/学生/图谱探索/家长/教师/镜头清单；中文主讲+少量英文副标题；N 显示/隐藏旁白，←→翻页，按钮切到真实 `poemgraph.html`）。
 - **诗人长廊·查询体验**：①详情页「诗人」tab 新增「📜 查看XX完整传奇人生 →」跳转按钮（仅 `POET_STORY` 有数据的诗人显示），点击 `poetSel=key;showView('poets')` 跳到诗人长廊对应诗人，避免与传奇人生长文重复维护。②诗人长廊头部新增搜索框(`poetFilterQ`,按姓名子串)+朝代快捷筛选chip(`poetFilterDyn`,复用`.sf`样式,`selectPoetDyn`)，无匹配显示空状态提示；函数 `renderPoetPicker/renderPoetDynFilters`。已用 puppeteer-core+本机 Chrome headless 测试：搜索/朝代过滤/空态/跳转链接均正确，控制台0错误。✅
 
-## 部署/托管选型（研究已做，尚未实际部署，2026-07-03）
-- `poemgraph.html` **目前未部署到任何服务器**（此前误以为已在 Render，已核实：那是用户另一个项目的经验，非本项目）。
-- **静态发布（现阶段，无账号/数据库需求）**：Render Static Site 或 腾讯云 EdgeOne Pages 均可（都免费），选哪个不影响未来技术栈，用户尚未最终选定，需用户本人账号操作（登录/连 GitHub/点部署），Claude 无法代为完成。
+## 部署/托管选型（2026-07-03：已选定 EdgeOne Pages，部署进行中）
+- **已选 腾讯云 EdgeOne Pages**（`console.tencentcloud.com/edgeone`），项目名 `Chinese-poetry-knowledge-graph`，已连接 GitHub 仓库 `wen001-git/Chinese-poetry-knowledge-graph` 分支 `main`，加速区域选 **Global (MLC excluded)**（对应免 ICP 备案模式），push 到 main 自动触发重新部署。
+- 部署地址访问路径：仓库根目录新增了 `index.html`（自动 `location.replace('poemgraph.html')` 跳转），所以裸域名（如 `https://xxx.edgeone.app/`）和 `.../poemgraph.html` 都能直达应用，不需要用户记完整文件名。
+- Render 作为备选未启用（未来若要账号+数据库，参考下方对比结论）。
 - **未来账号+数据库**（用户路线图：计划做付费账号+权限控制）：对比结论——Render 加数据库约 **¥40+/月**（用户另一项目实测数据）；**腾讯云开发 CloudBase（云开发TCB）** 数据库+认证+云函数+托管打包一体，免费额度 3000点/月，超额后 **¥19.9/月起**（比 Render 数据库单项省一半+，且含内置用户认证，不用自己写登录鉴权）——**如未来要做账号系统，优先评估 CloudBase**。CloudBase 自定义域名需 ICP 备案，默认域名(`*.tcloudbaseapp.com`)不需要。
 - **未来若需要后端/Python 服务**（不只是数据库）：按场景分档——标准无状态 REST API → CloudBase 云函数(已支持Python运行时，并入同一¥19.9/月套餐)；想零学习成本 → Render Web Service(~$7+/月，美元计费)；需要长连接/常驻进程/重计算(serverless扛不住的场景) → 腾讯云轻量应用服务器 Lighthouse 香港节点(2核2G ¥24/月，免ICP，但需自己运维)。
 - **风险提示**：GitHub Pages / Vercel / Netlify 因 DNS 污染/跨境路由问题，中国大陆访问历史上不稳定，**不建议**作为面向大陆用户的主入口。
@@ -48,7 +49,7 @@
 - [x] UI/UX评审5项适龄修复 + 朗读跨平台稳健（`_ttsKeep`/cancel延时/recVoice重取）已提交 ✅
 - [x] 历史大事讲故事"拖音"已修（清晰优先：`pickNarratorVoice` 只认清晰男声 Kangkang/云希，**排除 Apple 角色音 Reed/Eddy**，Apple 无则退清晰语舒）✅
 - [x] 演示视频素材：`demo/showcase.html`（5张双语章节卡）+ `demo/VIDEO_SCRIPT.md`（90秒双语讲稿）+ `video-showcase.html`（正式录屏场景页，含旁白提示/镜头清单/真实应用跳转）已创建 ✅
-- [ ] **部署上线**：用户需在 Render 或 腾讯云 EdgeOne Pages 二选一（或都部署），完成账号注册+连接 GitHub 仓库+点部署（见上方"部署/托管选型"，需用户本人操作）
+- [ ] **部署上线**：EdgeOne Pages 已连接仓库并点击部署，等待用户确认实际访问地址+大陆网络实测速度（见上方"部署/托管选型"）
 - [ ] 诗词朗读音色：Apple 设备男声皆带拖音→目前用清晰女声(语舒)；如需男声需内嵌预渲染音频(评估过~1MB/9事件，体积可接受但未做)
 - [ ] 双击展开为"封顶12克制版"，用户原想"纯自由展开(无上限)"——可改
 - [ ] `related` 相关推荐字段多为空（autoQuiz/详情已健壮，可后补）
