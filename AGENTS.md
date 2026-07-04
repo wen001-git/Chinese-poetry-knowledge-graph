@@ -34,6 +34,7 @@
 - **打印学习单·三角色版**(`buildPrintSheet(p,role)`，**打印按钮在详情页常驻操作栏 `#d-print`**[朗读那行]，所有标签页可见、标签随角色由 `fillDetail` 设；原藏在测验页已移出)：**学生**=自测单(原文+注释+自测题+留白)；**家长**=完整离屏学习单(让孩子在纸上学,减少看屏；+白话译文+练习+「家长陪读提问」复用 `POET_JOURNEY_Q`)；**教师**=班级作业单(姓名/班级栏)。`printSheet()` 传 `ST.role`。**彩色/省墨双版**(`printColor` 存 `pg_printcolor`，操作栏 `#print-mode` 切换)：彩色=`colorSheet`(莫兰迪调色板 `PRINT_PAL` **按 `p.emo` 选色** `printPalette`、楷体居中诗、**金句淡金高亮**`printGoldLines`(取自 `POET_STORY` 引用句)、标签式注释、页脚远山飞鸟 SVG、`print-color-adjust:exact`)；省墨=`plainSheet`(黑白朴素,整班打印)。
 - **交互地图·边走边问**：地图选中诗人(`mapPoet`)时 `renderMapList` 头部显 `POET_JOURNEY_Q[mapPoet].q` 提示框(`.ml-ask`,朱批左边)，所有角色可见(课堂/亲子/自学通用)
 - **视频录屏展示页**：根目录 `video-showcase.html` 已创建（7页场景化录屏页：开场/三类用户/学生/图谱探索/家长/教师/镜头清单；中文主讲+少量英文副标题；N 显示/隐藏旁白，←→翻页，按钮切到真实 `poemgraph.html`）。
+- **闯关引导修复（⚠️待用户点击验证，浏览器自动化本轮不可用）**：用户反馈闯关模式点开诗后不知道要做练习题才能解锁下一关。修复：`openDetail` 检测 `ST.view==='path'` 时设 `ST.questMode`，在「练习」tab 加脉冲红点(`.quest-target`+`questPulse`动画)+ 详情页顶部显示 `.ml-ask` 风格提示条(`#quest-banner`,"🚩 闯关中·完成「练习」解锁下一关")；`submitQuiz()` 通关后追加「返回闯关」按钮(`showView('path')`)；顺手修复 `backFromDetail()` 原本闯关模式下会退回卡片墙而非闯关页的 bug。**仅做了 JS 语法校验+逐函数调用链人工追踪，未做真实浏览器点击验证**——已提交但标记待确认。
 - **诗人长廊·查询体验**：①详情页「诗人」tab 新增「📜 查看XX完整传奇人生 →」跳转按钮（仅 `POET_STORY` 有数据的诗人显示），点击 `poetSel=key;showView('poets')` 跳到诗人长廊对应诗人，避免与传奇人生长文重复维护。②诗人长廊头部新增搜索框(`poetFilterQ`,按姓名子串)+朝代快捷筛选chip(`poetFilterDyn`,复用`.sf`样式,`selectPoetDyn`)，无匹配显示空状态提示；函数 `renderPoetPicker/renderPoetDynFilters`。已用 puppeteer-core+本机 Chrome headless 测试：搜索/朝代过滤/空态/跳转链接均正确，控制台0错误。✅
 
 ## 部署/托管选型（2026-07-03：已双平台部署，EdgeOne 被实测证实无 ICP 会硬拦大陆）
