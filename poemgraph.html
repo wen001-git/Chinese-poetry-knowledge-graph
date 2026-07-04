@@ -769,7 +769,11 @@ body.sleep-open{overflow:hidden}
       <button id="m-learn" onclick="setMode('learn')">学习</button>
     </div>
     <button class="chip" id="role-chip" onclick="openRolePick()"><span class="ic">🧒</span><span>学生</span></button>
-    <button class="chip" id="grade-chip" onclick="openGradePick()">年级 ▼</button>
+    <select class="chip" id="grade-chip" onchange="quickPickGrade(this.value)">
+      <option value="1">1年级</option><option value="2">2年级</option><option value="3">3年级</option>
+      <option value="4">4年级</option><option value="5">5年级</option><option value="6">6年级</option>
+      <option value="7">7年级</option><option value="8">8年级</option><option value="9">9年级</option>
+    </select>
     <button class="chip" onclick="openSearch()"><span class="ic">🔍</span>搜索</button>
     <button class="chip" id="sleep-entry" onclick="openSleep('sleep')" title="连续播放诗词朗读·睡前听诗入眠（安神诗单+睡眠定时、锁屏可播）"><span class="ic">🌙</span>听诗入眠</button>
     <button class="chip" id="eartrain-entry" onclick="openSleep('eartrain')" title="按年级连续播放·给宝宝磨耳朵（不限时循环，可切年级/安神/全部）"><span class="ic">🎧</span>磨耳朵</button>
@@ -2359,11 +2363,13 @@ function applyRole(){
 function pickGrade(g){ST.grade=g;lsSave();document.body.dataset.guide='';gradeOv.style.display='none';
   applyRole();updateChips();setMode(ST.mode,true);showView('grade');}
 function openGradePick(){document.body.dataset.guide='1';gradeOv.style.display='flex';}
+/* 顶栏年级下拉：原地切换年级，停留在当前视图（闯关/图谱/地图等），不像 pickGrade 那样跳走 */
+function quickPickGrade(g){ST.grade=+g;lsSave();updateChips();showView(ST.view);}
 function updateChips(){
   const ri=ROLE_INFO[ST.role]||ROLE_INFO.student;
   const rc=document.getElementById('role-chip');
   rc.innerHTML='<span class="ic">'+ri.ic+'</span><span>'+ri.nm+'</span>';
-  document.getElementById('grade-chip').textContent=(ST.grade?ST.grade+'年级':'年级')+' ▼';
+  document.getElementById('grade-chip').value=ST.grade||1;
 }
 /* ── 模式 ── */
 function setMode(m,silent){
