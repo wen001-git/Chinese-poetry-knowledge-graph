@@ -4298,7 +4298,7 @@ function poetMapSVG(key){
    闯关路径
    ══════════════════════════════════════════ */
 function renderPath(){
-  const ps=visiblePoems();
+  const ps=POEMS.filter(p=>!ST.grade||p.grade===ST.grade);
   document.getElementById('path-hint').textContent=ST.role==='student'?'完成测验解锁下一关，收集星星！':'按顺序学习，逐课闯关';
   let h='',unlockedIdx=0;
   // 第一个未满星的为当前关
