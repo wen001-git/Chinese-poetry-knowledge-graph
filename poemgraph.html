@@ -74,6 +74,14 @@ body[data-guide="1"] #nav{display:none}
   font-size:13px;color:var(--ink);transition:.18s;white-space:nowrap}
 .chip:hover{border-color:var(--teal);color:var(--teal)}
 .chip .ic{margin-right:4px}
+/* 顶栏年级下拉：全局年级筛选器（驱动所有视图的 visiblePoems）。去原生箭头，自绘水墨小三角并留足与圆角边框的间距 */
+select.chip#grade-chip{appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  padding:6px 30px 6px 12px;cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1.5 1.5L6 6l4.5-4.5' fill='none' stroke='%235c5c6e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
+select.chip#grade-chip:hover,select.chip#grade-chip:focus{border-color:var(--teal);color:var(--teal);outline:none}
+body.theme-zhumo select.chip#grade-chip{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1.5 1.5L6 6l4.5-4.5' fill='none' stroke='%23c1352b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>")}
 .mode-switch{display:inline-flex;border:1px solid var(--border);border-radius:20px;overflow:hidden}
 .mode-switch button{padding:6px 12px;font-size:13px;color:var(--ink2);background:var(--paper2)}
 .mode-switch button.on{background:var(--teal);color:#fff}
@@ -3697,7 +3705,9 @@ const DYN_ORDER={'唐':1,'宋':2,'元':3,'明':4,'清':5};
 let poetSel=null,poetFilterQ='',poetFilterDyn='';
 function poetBirth(key){const m=(POETS[key].years||'').match(/\d{3,4}/);return m?+m[0]:9999;}
 function poetKeysSorted(){
-  return Object.keys(POETS).filter(k=>POEMS.some(p=>p.poet===k))
+  /* 学习模式：按所选年级累计过滤，与卡片墙/图谱/地图/时间轴一致；探索模式：诗人图鉴自由浏览，不受年级限制 */
+  const pool=ST.mode==='learn'?visiblePoems():POEMS;
+  return Object.keys(POETS).filter(k=>pool.some(p=>p.poet===k))
     .sort((a,b)=>(DYN_ORDER[POETS[a].dyn]-DYN_ORDER[POETS[b].dyn])||(poetBirth(a)-poetBirth(b)));
 }
 /* 诗人剪影头像（按性别×朝代冠服，水墨剪影，非真人长相，零字节 SVG） */
