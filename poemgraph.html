@@ -372,7 +372,7 @@ body.theme-zhumo select.chip#grade-chip{
   display:inline-block;padding-bottom:7px;background:linear-gradient(transparent 84%,rgba(178,58,46,.26) 0)}
 .d-verse{font-family:var(--serif);font-size:clamp(18px,3.4vw,24px);line-height:2.5}
 .d-verse ruby rt{font-size:.42em;color:var(--ink3);font-family:var(--sans);letter-spacing:0}
-.d-verse .ln{display:block;transition:.25s;border-radius:6px;padding:0 6px;margin:0 -6px}
+.d-verse .ln{display:block;transition:.25s;border-radius:6px;padding:0 6px;margin:0 -6px;cursor:pointer}
 .d-verse .ln.reciting{background:var(--teal-l);color:var(--teal)}
 .d-verse .annoword{border-bottom:1.5px dashed rgba(178,58,46,.5);cursor:pointer;border-radius:3px;transition:background .15s}
 .d-verse .annoword:hover,.d-verse .annoword.act{background:var(--cinnabar-l)}
@@ -2594,7 +2594,7 @@ function openDetail(id){
   // hero
   document.getElementById('d-meta').innerHTML='<span class="dyn">'+p.dyn+'代</span> · '+POETS[p.poet].name+' · '+p.volume;
   document.getElementById('d-title').textContent=p.title;
-  document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'">'+rubyLine(l,p.anno)+lineScene(l.t)+'</span>').join('');
+  document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'" onclick="recitePickLine(event,'+i+')">'+rubyLine(l,p.anno)+lineScene(l.t)+'</span>').join('');
   bindAnnoPop();
   updateReciteFloatShow();
   reciteStop();
@@ -4757,10 +4757,79 @@ function _ttsKeep(on){
   },7000);
 }
 /* 朗读：系统 TTS 优先(逐句高亮);若设备无可用语音/不发声→自动回退「内嵌音频」(RECITE_AUDIO，覆盖国产安卓如小米 Chrome 无 TTS 引擎的情况) */
-var recAudioEl=null, recWatchdog=null, recStarted=false, recMode=null;
+var recAudioEl=null, recWatchdog=null, recStarted=false, recMode=null, recHiIdx=-99, recPaused=false, recStartIdx=0, recAudioMeta=null, recRunId=0;
+var REC_AUDIO_HI_ADVANCE=0.75; /* 内嵌整首音频无逐句时间戳：高亮略提前，贴近实际声音 */
 function reciteHasAudio(p){ return !!(typeof RECITE_AUDIO!=='undefined' && p && RECITE_AUDIO[p.id]); }
 function reciteHasAudioYue(p){ return !!(typeof RECITE_AUDIO_YUE!=='undefined' && p && RECITE_AUDIO_YUE[p.id]); }
-function reciteToggle(){ recReciting?reciteStop():reciteStart(); }
+function reciteToggle(){ if(recReciting){recPaused?reciteResume():recitePause();}else reciteStart(); }
+function reciteScrollLine(el){
+  if(!el)return;
+  var r=el.getBoundingClientRect(), vh=window.innerHeight||document.documentElement.clientHeight||0;
+  if(!vh)return;
+  if(r.top>vh*.26 && r.bottom<vh*.72)return;
+  var top=(window.pageYOffset||document.documentElement.scrollTop||0)+r.top-vh*.42+r.height/2;
+  var reduce=false; try{reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+  try{window.scrollTo({top:Math.max(0,top),behavior:reduce?'auto':'smooth'});}catch(e){window.scrollTo(0,Math.max(0,top));}
+}
+function reciteHighlightLine(i, lines){
+  if(i===recHiIdx)return;
+  recHiIdx=i;
+  var lns=lines||[].slice.call(document.querySelectorAll('#d-verse .ln'));
+  for(var k=0;k<lns.length;k++)lns[k].classList.toggle('reciting',k===i);
+  if(i>=0)reciteScrollLine(lns[i]);
+}
+function reciteClampLine(i){var n=(ST.poem&&ST.poem.lines&&ST.poem.lines.length)||0; i=+i||0; return Math.max(0,Math.min(n?n-1:0,i));}
+function reciteAudioLineTime(i,d){
+  if(!recAudioMeta||!d||!isFinite(d))return 0;
+  var w=recAudioMeta.w, acc=recAudioMeta.pre;
+  for(var k=0;k<i;k++)acc+=w[k]||1;
+  return Math.max(0,acc/recAudioMeta.total*d-0.08);
+}
+function reciteAudioSeekLine(i,playAfter){
+  if(!recAudioEl||!recAudioMeta)return;
+  i=reciteClampLine(i);
+  var d=recAudioEl.duration;
+  if(!d||!isFinite(d)){
+    if(playAfter){recPaused=false;var pr0=recAudioEl.play();if(pr0&&pr0.catch)pr0.catch(function(){});setReciteBtn(true);}
+    return;
+  }
+  try{recAudioEl.currentTime=reciteAudioLineTime(i,d);}catch(e){}
+  reciteHighlightLine(i,recAudioMeta.lns);
+  if(playAfter){recPaused=false;var pr=recAudioEl.play();if(pr&&pr.catch)pr.catch(function(){});setReciteBtn(true);}
+}
+function recitePickLine(ev,i){
+  if(ev&&ev.target&&ev.target.closest&&ev.target.closest('.annoword'))return;
+  if(ev&&ev.stopPropagation)ev.stopPropagation();
+  recStartIdx=reciteClampLine(i);
+  if(recReciting&&recMode==='audio'){reciteAudioSeekLine(recStartIdx,true);return;}
+  if(recReciting&&recMode==='tts'){
+    if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;}
+    recRunId++;
+    try{speechSynthesis.cancel();}catch(e){}
+    recIdx=recStartIdx; recPaused=false; setReciteBtn(true); reciteHighlightLine(recIdx); _ttsKeep(true);
+    setTimeout(reciteLine,80); return;
+  }
+  reciteHighlightLine(recStartIdx);
+  reciteStart();
+}
+function recitePause(){
+  if(!recReciting)return;
+  recPaused=true; _ttsKeep(false);
+  if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;}
+  if(recMode==='audio'&&recAudioEl){try{recAudioEl.pause();}catch(e){}}
+  else if(recMode==='tts'&&'speechSynthesis' in window){try{speechSynthesis.pause();}catch(e){}}
+  setReciteBtn(true);
+}
+function reciteResume(){
+  if(!recReciting)return;
+  recPaused=false; setReciteBtn(true);
+  if(recMode==='audio'&&recAudioEl){var pr=recAudioEl.play(); if(pr&&pr.catch)pr.catch(function(){});}
+  else if(recMode==='tts'&&'speechSynthesis' in window){
+    try{speechSynthesis.resume();}catch(e){}
+    if(!speechSynthesis.speaking)setTimeout(reciteLine,80);
+    _ttsKeep(true);
+  }
+}
 function reciteStart(){
   const p=ST.poem; if(!p)return;
   if(!reciteAudioReady()){
@@ -4798,7 +4867,7 @@ function reciteStart(){
   recMode='tts';
   recVoice=recVoicePick();
   speechSynthesis.cancel();
-  recReciting=true; recIdx=0; recStarted=false;
+  recReciting=true; recPaused=false; recIdx=reciteClampLine(recStartIdx); recStarted=false; recHiIdx=-99; recRunId++;
   recQueue=p.lines.map(l=>l.t);
   setReciteBtn(true);
   _ttsKeep(true);
@@ -4807,16 +4876,18 @@ function reciteStart(){
   setTimeout(reciteLine,120);   // cancel 后稍等再 speak：规避 Android/Chrome "取消即播放" 失效
 }
 function reciteLine(){
+  if(recPaused)return;
   if(!recReciting||recMode!=='tts'||recIdx>=recQueue.length){ if(recReciting&&recMode==='tts')reciteStop(); return; }
+  var run=recRunId;
   if(!recVoice)recVoice=recVoicePick();   // 语音迟到加载时再取一次（Win/Android 首次常为空）
-  document.querySelectorAll('#d-verse .ln').forEach(el=>el.classList.toggle('reciting',+el.dataset.li===recIdx));
+  reciteHighlightLine(recIdx);
   const u=new SpeechSynthesisUtterance(recQueue[recIdx].replace(/[，。？！、；：]/g,'，'));
   u.lang=(recLang==='cantonese')?'zh-HK':'zh-CN';
   if(recVoice)u.voice=recVoice;
   u.rate=0.84; u.pitch=1.0; /* 统一、自然、放慢的诵读节奏 */
-  u.onstart=()=>{ recStarted=true; if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;} };
-  u.onend=()=>{ if(!recReciting||recMode!=='tts')return; recIdx++; setTimeout(reciteLine,360); };
-  u.onerror=(ev)=>{ if(recReciting&&recMode==='tts'){recIdx++;setTimeout(reciteLine,360);} };
+  u.onstart=()=>{ if(run!==recRunId)return; recStarted=true; if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;} };
+  u.onend=()=>{ if(run!==recRunId||!recReciting||recMode!=='tts'||recPaused)return; recIdx++; setTimeout(reciteLine,360); };
+  u.onerror=(ev)=>{ if(run===recRunId&&recReciting&&recMode==='tts'&&!recPaused){recIdx++;setTimeout(reciteLine,360);} };
   try{speechSynthesis.speak(u);}catch(e){ recIdx++; setTimeout(reciteLine,360); }
 }
 /* 内嵌音频朗读：整首播放 + 整体高亮(无逐句时间戳),任何浏览器都支持 <audio> */
@@ -4824,23 +4895,26 @@ function recitePlayAudio(p, track){
   recMode='audio';
   if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;}
   if('speechSynthesis' in window){try{speechSynthesis.cancel();}catch(e){}}
-  recReciting=true; setReciteBtn(true);
+  recReciting=true; recPaused=false; setReciteBtn(true);
   // 逐句高亮（与 TTS 观感一致）：按每行汉字数估算时间边界，随音频进度只标当前一行
   var _lns=[].slice.call(document.querySelectorAll('#d-verse .ln'));
   _lns.forEach(function(el){el.classList.remove('reciting');});
+  recHiIdx=-99;
   var _w=_lns.map(function(el){var m=(el.textContent||'').match(/[一-鿿]/g);return Math.max(1,m?m.length:1);});
   // 音频开头先报「标题。朝代·作者。」——按其字数估时长,这段不点亮诗句
   var _author=(POETS[p.poet]&&POETS[p.poet].name)||'';
   var _pmm=(p.title+(p.dyn||'')+_author).match(/[一-鿿]/g); var _pre=Math.max(1,_pmm?_pmm.length:1);
   var _tot=_pre+_w.reduce(function(a,b){return a+b;},0)||1;
-  function _hiLn(i){for(var k=0;k<_lns.length;k++)_lns[k].classList.toggle('reciting',k===i);}
-  _hiLn(-1);
+  recAudioMeta={lns:_lns,w:_w,pre:_pre,total:_tot};
+  function _hiLn(i){reciteHighlightLine(i,_lns);}
+  if(recStartIdx>0)_hiLn(recStartIdx); else _hiLn(-1);
   if(!recAudioEl)recAudioEl=new Audio();
   recAudioEl.src=((track==='yue'&&typeof RECITE_AUDIO_YUE!=='undefined')?RECITE_AUDIO_YUE:RECITE_AUDIO)[p.id];
+  recAudioEl.onloadedmetadata=function(){ if(recStartIdx>0)reciteAudioSeekLine(recStartIdx,false); };
   recAudioEl.ontimeupdate=function(){
-    if(!recReciting||recMode!=='audio')return;
+    if(!recReciting||recMode!=='audio'||recPaused)return;
     var d=recAudioEl.duration; if(!d||!isFinite(d))return;
-    var t=recAudioEl.currentTime, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
+    var t=recAudioEl.currentTime+REC_AUDIO_HI_ADVANCE, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
     for(var i=0;i<segs.length;i++){ acc+=segs[i]/_tot*d; if(t<acc){idx=i;break;} }
     _hiLn(idx-1); /* idx 0=报题段→不点亮;之后顺延到第 idx-1 句 */
   };
@@ -4849,7 +4923,7 @@ function recitePlayAudio(p, track){
   var pr=recAudioEl.play(); if(pr&&pr.catch)pr.catch(function(){ reciteStop(); });
 }
 function reciteStop(){
-  recReciting=false; recMode=null; _ttsKeep(false);
+  recReciting=false; recPaused=false; recMode=null; recHiIdx=-99; recStartIdx=0; recAudioMeta=null; recRunId++; _ttsKeep(false);
   if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;}
   if('speechSynthesis' in window)speechSynthesis.cancel();
   if(recAudioEl){ try{recAudioEl.pause();recAudioEl.currentTime=0;}catch(e){} }
@@ -4857,7 +4931,7 @@ function reciteStop(){
   setReciteBtn(false);
 }
 function setReciteBtn(on){
-  const t=on?'⏸ 停止':'🔊 朗读';
+  const t=on?(recPaused?'▶ 继续':'⏸ 暂停'):'🔊 朗读';
   const b=document.getElementById('d-recite');if(b){b.textContent=t;b.classList.toggle('on',on);}
   const f=document.getElementById('d-recite-float');if(f){f.textContent=t;f.classList.toggle('on',on);}
 }
