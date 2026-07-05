@@ -18,7 +18,7 @@
 **地图·控件/交互** renderMap 2759 · mapPoetKeys 2761(拼音排序) · renderMapPoets 2769 · filterMapPoets 2784 · renderMapControls 2936(标注4选1+学生折叠) · toggleMapMore 2955 · setMapDyn/Poet/Terrain/Label 2956-2959 · 缩放 clampZoom/applyZoom/zoomAt 3055-3058 · bindMapZoom 3066 · ensureZoomCtrl 3079 · showMapPop 3095
 **时间轴/时空联动** rebuildMapTime 2792 · refreshMapTime 2800 · applyMapYear 2806 · renderTimeScrubber 2816 · tlPlay 2849 · renderMapList 2868 · openEvent 2895(事件卡+男声朗读) · closeEvent 2911 · locatePoem 2920 · poemYear 3113 · renderTimeline 3121
 **诗人长廊** poetKeysSorted 3159 · poetAvatarSVG 3171 · renderPoets 3195 · renderPoetPicker 3201 · selectPoet 3210 · renderPoetPanel 3215 · gotoMapPoet 3241 · poetMapSVG 3242
-**学习路径/搜索/打印** renderPath 3277 · initSearch 3300 · doSearch 3318 · buildPrintSheet 3341 · printSheet 3354
+**学习路径/搜索/打印** renderPath 4316 · initSearch 4339 · doSearch 4357(**搜索不受年级筛选**，2026-07-04 起故意全量 `POEMS`，年级改显示为结果徽章 `.sr-grade`，勿改回 `visiblePoems()`) · buildPrintSheet 4416 · printSheet 4474
 **朗读/古琴(F)** pickMandarinVoice/pickCantoneseVoice/recVoicePick/pickNarratorVoice · eventNarrate/evtNarrLine · setRecLang · _ttsKeep(跨平台保活) · **reciteStart**(TTS优先,无音色→内嵌音频) · reciteLine(逐句TTS+高亮) · **recitePlayAudio**(整首内嵌mp3兜底+整体高亮) · reciteStop · `RECITE_AUDIO`(57首预渲染朗读base64,在recite函数前) · ambStart/Stop/Toggle/ambPlayClip · `GUQIN_CLIP`(古琴音频)
 > 注:朗读区行号因内嵌音频/注释改动漂移较大,用 `grep -n 'function reciteStart\|const RECITE_AUDIO' poemgraph.html` 现取。
 **注释就地渲染** annoEsc · circledNum(①②③圈码) · rubyLine(l,annos)(拼音ruby+注释词包裹+圈码) · ridge?無 · showAnnoPop/hideAnnoPop/bindAnnoPop(悬停+点击双轨气泡) — 均在 openDetail/rubyLine 附近,`grep -n 'function rubyLine\|function bindAnnoPop'` 定位
