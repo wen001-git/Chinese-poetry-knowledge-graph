@@ -7,7 +7,7 @@
  *       install 阶段不主动预缓存 12.9MB HTML，避免手机首访刚打开又后台重复下载。
  *       带查询串(?v=…)的请求一律放行走网络，方便开发期取最新代码、不被缓存挡住。
  */
-const CACHE = 'poemgraph-cache-v3';
+const CACHE = 'poemgraph-cache-v4';
 const CORE = './poemgraph.html';
 
 self.addEventListener('install', function(e){

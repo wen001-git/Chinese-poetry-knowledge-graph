@@ -4602,6 +4602,34 @@ window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(
    作用：手机上一次加载后把整份 HTML(含内嵌音频)持久缓存到本地，离线可用；
    普通在线访问优先校验服务器新版，避免用户长期卡在旧页面。 */
 function showUpdateToast(){var t=document.getElementById('pg-update-toast');if(t)t.classList.add('on');}
+var PG_APP_VERSION='2026-07-05-recite-lite-3';
+function pgStripAutoVersion(){
+  if(location.search.indexOf('pgv=')<0||!history.replaceState)return;
+  try{history.replaceState(null,'',location.pathname+location.hash);}catch(e){}
+}
+async function pgClearPoemCaches(){
+  try{
+    if('serviceWorker' in navigator){
+      var regs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(function(r){return r.unregister();}));
+    }
+  }catch(e){}
+  try{
+    if(window.caches){
+      var keys=await caches.keys();
+      await Promise.all(keys.filter(function(k){return /^poemgraph-cache-/.test(k);}).map(function(k){return caches.delete(k);}));
+    }
+  }catch(e){}
+}
+function pgCheckVersion(){
+  if(location.protocol.indexOf('http')!==0)return;
+  fetch('./version.json?ts='+Date.now(),{cache:'no-store'}).then(function(r){return r&&r.ok?r.json():null;}).then(function(v){
+    var latest=v&&v.version; if(!latest||latest===PG_APP_VERSION)return;
+    try{ if(sessionStorage.getItem('pg_updating_to')===latest)return; sessionStorage.setItem('pg_updating_to',latest); }catch(e){}
+    pgClearPoemCaches().then(function(){ location.replace(location.pathname+'?pgv='+encodeURIComponent(latest)); });
+  }).catch(function(){});
+}
+pgStripAutoVersion();
 if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   window.addEventListener('load',function(){
     var reg=function(){
@@ -4612,6 +4640,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
     };
     if('requestIdleCallback' in window)requestIdleCallback(reg,{timeout:3000});
     else setTimeout(reg,1800);
+    setTimeout(pgCheckVersion,2400);
   });
   navigator.serviceWorker.addEventListener('message',function(e){ if(e.data&&e.data.type==='pg-updated')showUpdateToast(); });
 }
