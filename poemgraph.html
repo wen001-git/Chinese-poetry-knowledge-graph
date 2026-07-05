@@ -55,24 +55,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   padding:11px 20px;border-radius:22px;background:var(--teal);color:#fff;font-size:14px;font-weight:600;
   box-shadow:0 4px 16px rgba(28,28,30,.28);opacity:0;pointer-events:none;transition:.28s;cursor:pointer;border:none;white-space:nowrap}
 .pg-update-toast.on{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
-.pig-loader{position:fixed;inset:0;z-index:210;background:var(--paper);
-  display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px}
-.pig-loader.on{display:flex}
-.pig-svg{animation:pig-bounce 1s ease-in-out infinite}
-.pig-body,.pig-ear{fill:var(--cinnabar-l);stroke:var(--cinnabar);stroke-width:2.5}
-.pig-ear-l{transform-origin:34px 26px;animation:pig-ear-wiggle 1s ease-in-out infinite}
-.pig-ear-r{transform-origin:86px 26px;animation:pig-ear-wiggle 1s ease-in-out infinite reverse}
-.pig-snout{fill:var(--cinnabar-l);stroke:var(--cinnabar);stroke-width:2}
-.pig-nostril{fill:var(--cinnabar)}
-.pig-eyes{transform-origin:center;animation:pig-blink 2.6s ease-in-out infinite}
-.pig-eye{fill:var(--ink)}
-.pig-cheek{fill:var(--cinnabar);opacity:.5}
-.pig-tail{stroke:var(--cinnabar);stroke-width:3;stroke-linecap:round;transform-origin:105px 72px;animation:pig-tail-wag .6s ease-in-out infinite}
-.pig-caption{font-family:var(--serif);font-size:17px;color:var(--ink2);letter-spacing:.06em}
-@keyframes pig-bounce{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-14px) rotate(-3deg)}}
-@keyframes pig-ear-wiggle{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-12deg)}}
-@keyframes pig-blink{0%,88%,100%{transform:scaleY(1)}92%{transform:scaleY(.15)}}
-@keyframes pig-tail-wag{0%,100%{transform:rotate(0deg)}50%{transform:rotate(14deg)}}
 .grade-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:420px;width:100%}
 .grade-btn{background:var(--paper2);border:1px solid var(--border);border-radius:var(--r);
   padding:20px 0;font-family:var(--serif);font-size:20px;font-weight:700;transition:.2s;box-shadow:var(--shadow)}
@@ -761,6 +743,17 @@ body.sleep-open{overflow:hidden}
 </head>
 <body>
 
+<script>
+/* 手机首访时,角色卡片可能先画出来,而主脚本/内嵌音频仍在解析。
+   先用极小 stub 接住早期点击,等真实 pickRole/pickGrade 就绪后回放。 */
+(function(){
+  var pending={role:null,grade:null};
+  window.__pgEarlyPick=pending;
+  window.pickRole=function(r){ pending.role=r; };
+  window.pickGrade=function(g){ pending.grade=+g; };
+})();
+</script>
+
 <!-- 角色选择 -->
 <div class="overlay" id="role-overlay">
   <h1 class="serif">诗词图谱</h1>
@@ -779,26 +772,6 @@ body.sleep-open{overflow:hidden}
 
 <!-- 有新版本时的刷新提示（Service Worker 后台发现服务器已更新时弹出） -->
 <button class="pg-update-toast" id="pg-update-toast" onclick="location.reload()">✨ 新版本已就绪 · 点此刷新</button>
-
-<!-- 可爱猪猪加载动画：角色/年级选定后短暂过渡，让等待感觉更短 -->
-<div class="pig-loader" id="pig-loader">
-  <svg class="pig-svg" viewBox="0 0 120 116" width="112" height="108" aria-hidden="true">
-    <ellipse class="pig-ear pig-ear-l" cx="34" cy="26" rx="15" ry="17"/>
-    <ellipse class="pig-ear pig-ear-r" cx="86" cy="26" rx="15" ry="17"/>
-    <ellipse class="pig-body" cx="60" cy="66" rx="46" ry="40"/>
-    <path class="pig-tail" d="M105,72 q16,-2 12,-17 q-3,-10 -14,-8" fill="none"/>
-    <ellipse class="pig-cheek pig-cheek-l" cx="27" cy="70" rx="7" ry="5"/>
-    <ellipse class="pig-cheek pig-cheek-r" cx="93" cy="70" rx="7" ry="5"/>
-    <g class="pig-eyes">
-      <ellipse class="pig-eye" cx="41" cy="56" rx="4" ry="5.5"/>
-      <ellipse class="pig-eye" cx="79" cy="56" rx="4" ry="5.5"/>
-    </g>
-    <ellipse class="pig-snout" cx="60" cy="76" rx="21" ry="15"/>
-    <ellipse class="pig-nostril" cx="52" cy="77" rx="3" ry="4"/>
-    <ellipse class="pig-nostril" cx="68" cy="77" rx="3" ry="4"/>
-  </svg>
-  <div class="pig-caption" id="pig-caption">诗词小猪驮着诗句飞奔来啦</div>
-</div>
 
 <!-- 年级选择 -->
 <div class="overlay" id="grade-overlay" style="display:none">
@@ -2433,30 +2406,25 @@ function boot(){
 }
 
 /* ── 角色 ── */
-/* 猪猪加载动画：纯CSS驱动，showXxx前先露出来，工作挪到下一帧再做，让浏览器有机会先画出动画；
-   保底显示时长350ms，避免设备快时一闪而过看不清 */
-function showPigLoader(){ document.getElementById('pig-loader').classList.add('on'); }
-function hidePigLoader(){ document.getElementById('pig-loader').classList.remove('on'); }
-function withPigLoader(work){
-  showPigLoader();
-  var t0=Date.now();
-  setTimeout(function(){
-    try{ work(); }
-    finally{ setTimeout(hidePigLoader, Math.max(0,350-(Date.now()-t0))); }
-  },30);
-}
-function pickRole(r){ withPigLoader(function(){
+function runChoice(work){ work(); }
+function pickRole(r){ runChoice(function(){
   ST.role=r;lsSave();roleOv.style.display='none';
   if(ST.grade){document.body.dataset.guide='';gradeOv.style.display='none';applyRole();updateChips();setMode(ST.mode,true);showView(ST.view||'cards');}
   else {document.body.dataset.guide='1';gradeOv.style.display='flex';}
 });}
+function flushEarlyPicks(){
+  var p=window.__pgEarlyPick; if(!p)return;
+  var r=p.role,g=p.grade; p.role=null;p.grade=null;
+  if(r){ pickRole(r); if(g)setTimeout(function(){pickGrade(g);},120); return; }
+  if(g)pickGrade(g);
+}
 function openRolePick(){document.body.dataset.guide='1';roleOv.style.display='flex';}
 function applyRole(){
   document.body.dataset.role=ST.role;
   // 学习模式下默认进入闯关；探索模式自由
 }
 /* ── 年级 ── */
-function pickGrade(g){ withPigLoader(function(){
+function pickGrade(g){ runChoice(function(){
   ST.grade=g;lsSave();document.body.dataset.guide='';gradeOv.style.display='none';
   applyRole();updateChips();setMode(ST.mode,true);showView('grade');
 });}
@@ -4431,7 +4399,10 @@ function renderPath(){
    搜索（5 维实时）
    ══════════════════════════════════════════ */
 const SF=[['all','全部'],['title','诗名'],['author','作者'],['dynasty','朝代'],['place','地点'],['mood','情感']];
+var searchInited=false;
 function initSearch(){
+  if(searchInited)return;
+  searchInited=true;
   document.getElementById('search-filters').innerHTML=SF.map((s,i)=>
     '<button class="sf'+(i===0?' on':'')+'" data-sf="'+s[0]+'">'+s[1]+'</button>').join('');
   document.querySelectorAll('.sf').forEach(b=>b.addEventListener('click',()=>{
@@ -4444,7 +4415,7 @@ function initSearch(){
     if(e.target.id==='search-panel')closeSearch();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch();});
 }
-function openSearch(){document.getElementById('search-panel').classList.add('on');
+function openSearch(){initSearch();document.getElementById('search-panel').classList.add('on');
   setTimeout(()=>document.getElementById('search-input').focus(),50);doSearch();}
 function closeSearch(){document.getElementById('search-panel').classList.remove('on');}
 function hl(text,q){if(!q)return text;
@@ -4570,8 +4541,8 @@ function printSheet(){if(ST.poem){buildPrintSheet(ST.poem, ST.role);window.print
 /* ══════════════════════════════════════════
    启动
    ══════════════════════════════════════════ */
-initSearch();
 boot();
+flushEarlyPicks();
 window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(gCanvas);}});
 
 /* Service Worker：仅 http(s) 下注册(file:// 打开时不启用，App 仍是自包含单文件)。
@@ -4579,7 +4550,11 @@ window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(
    后台发现服务器有新版时，SW 会 postMessage，这里弹「刷新」提示让用户主动更新，不强制打断。 */
 function showUpdateToast(){var t=document.getElementById('pg-update-toast');if(t)t.classList.add('on');}
 if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
-  window.addEventListener('load',function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
+  window.addEventListener('load',function(){
+    var reg=function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); };
+    if('requestIdleCallback' in window)requestIdleCallback(reg,{timeout:3000});
+    else setTimeout(reg,1800);
+  });
   navigator.serviceWorker.addEventListener('message',function(e){ if(e.data&&e.data.type==='pg-updated')showUpdateToast(); });
 }
 

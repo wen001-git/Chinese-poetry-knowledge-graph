@@ -1,17 +1,17 @@
 /* sw.js — 诗词图谱的离线缓存层（Service Worker）
- * 目的：手机上一次加载后，把整份 poemgraph.html(含 11.6MB 内嵌音频)持久存到本地，
- *       下次访问秒开、且可完全离线；朗读不再等下载。
+ * 目的：访问过 poemgraph.html 后，把整份 HTML(含 11.6MB 内嵌音频)持久存到本地，
+ *       后续访问秒开、且可完全离线；朗读不再等下载。
  * 只在 http(s) 下由页面注册；直接用 file:// 打开 HTML 时不启用，App 仍是自包含单文件。
  * 策略：对 poemgraph.html 用「缓存优先」——命中即刻返回(秒开)，同时后台带 ETag 做条件校验，
  *       服务器未变返回 304(极小)、变了才下载新版并通知页面弹「刷新」提示。
+ *       install 阶段不主动预缓存 12.9MB HTML，避免手机首访刚打开又后台重复下载。
  *       带查询串(?v=…)的请求一律放行走网络，方便开发期取最新代码、不被缓存挡住。
  */
-const CACHE = 'poemgraph-cache-v1';
+const CACHE = 'poemgraph-cache-v2';
 const CORE = './poemgraph.html';
 
 self.addEventListener('install', function(e){
   self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then(function(c){ return c.add(CORE); }).catch(function(){}));
 });
 
 self.addEventListener('activate', function(e){
