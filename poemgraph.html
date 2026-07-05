@@ -4599,12 +4599,17 @@ flushEarlyPicks();
 window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(gCanvas);}});
 
 /* Service Worker：仅 http(s) 下注册(file:// 打开时不启用，App 仍是自包含单文件)。
-   作用：手机上一次加载后把整份 HTML(含内嵌音频)持久缓存到本地，下次秒开+离线可用。
-   后台发现服务器有新版时，SW 会 postMessage，这里弹「刷新」提示让用户主动更新，不强制打断。 */
+   作用：手机上一次加载后把整份 HTML(含内嵌音频)持久缓存到本地，离线可用；
+   普通在线访问优先校验服务器新版，避免用户长期卡在旧页面。 */
 function showUpdateToast(){var t=document.getElementById('pg-update-toast');if(t)t.classList.add('on');}
 if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   window.addEventListener('load',function(){
-    var reg=function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); };
+    var reg=function(){
+      var opt={updateViaCache:'none'};
+      navigator.serviceWorker.register('./sw.js',opt).then(function(r){try{r.update();}catch(e){}}).catch(function(){
+        navigator.serviceWorker.register('./sw.js').then(function(r){try{r.update();}catch(e){}}).catch(function(){});
+      });
+    };
     if('requestIdleCallback' in window)requestIdleCallback(reg,{timeout:3000});
     else setTimeout(reg,1800);
   });
