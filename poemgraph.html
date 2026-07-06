@@ -2551,8 +2551,13 @@ function showView(v){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function visiblePoems(){return POEMS.filter(p=>!ST.grade||p.grade<=ST.grade);}
+/* 上一首/下一首专用顺序：POEMS 数组核心课标部分本身按年级升序，但末尾"日积月累"补充诗
+   不严格按年级单调递增(如己亥杂诗grade5紧挨着临江仙grade9)——卡片墙/图谱等格局展示型视图
+   用原始顺序不明显，但"下一首"强调连续翻阅的顺序感，直接用原始顺序会出现年级跳跃、显得像bug。
+   按年级重排(稳定排序，同年级内保留原有相对顺序)，只影响这一个导航功能，不改 visiblePoems() 本身 */
+function navOrderedPoems(){return visiblePoems().slice().sort(function(a,b){return a.grade-b.grade;});}
 function gotoAdjacentPoem(dir){
-  var list=visiblePoems();
+  var list=navOrderedPoems();
   var idx=list.findIndex(function(p){return p.id===ST.poem.id;});
   if(idx<0)return;
   var newIdx=idx+dir;
@@ -2560,7 +2565,7 @@ function gotoAdjacentPoem(dir){
   openDetail(list[newIdx].id);
 }
 function renderDetailNav(p, questMode){
-  var list=visiblePoems();
+  var list=navOrderedPoems();
   var idx=list.findIndex(function(x){return x.id===p.id;});
   var box=document.getElementById('d-nav');
   if(!box)return;
