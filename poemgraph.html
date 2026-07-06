@@ -4826,7 +4826,7 @@ function _ttsKeep(on){
 /* 朗读：系统 TTS 优先(逐句高亮);若设备无可用语音/不发声→自动回退「内嵌音频」(RECITE_AUDIO，覆盖国产安卓如小米 Chrome 无 TTS 引擎的情况) */
 var recAudioEl=null, recWatchdog=null, recStarted=false, recMode=null, recHiIdx=-99, recPaused=false, recStartIdx=0, recAudioMeta=null, recRunId=0;
 var REC_AUDIO_HI_ADVANCE=0.75; /* 内嵌整首音频无逐句时间戳：高亮略提前，贴近实际声音 */
-var REC_AUDIO_PAUSE_MARGIN=1.0; /* 跟读物理暂停延迟=抵消上面的提前量+安全余量，宁晚勿早，避免切断还没说完的话 */
+var REC_AUDIO_PAUSE_MARGIN=0.1; /* 跟读物理暂停延迟=抵消上面的提前量(现已按语速换算为真实秒,与语速无关)+安全余量 */
 function reciteHasAudio(p){ return !!(typeof RECITE_AUDIO!=='undefined' && p && RECITE_AUDIO[p.id]); }
 function reciteHasAudioYue(p){ return !!(typeof RECITE_AUDIO_YUE!=='undefined' && p && RECITE_AUDIO_YUE[p.id]); }
 function reciteToggle(){ if(recReciting){recPaused?reciteResume():recitePause();}else reciteStart(); }
@@ -4987,15 +4987,18 @@ function recitePlayAudio(p, track){
   recAudioEl.ontimeupdate=function(){
     if(!recReciting||recMode!=='audio'||recPaused)return;
     var d=recAudioEl.duration; if(!d||!isFinite(d))return;
-    var t=recAudioEl.currentTime+REC_AUDIO_HI_ADVANCE, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
+    /* REC_AUDIO_HI_ADVANCE 是"提前多少真实秒"，但 currentTime 走的是音频原始时间轴(不受播速影响)——
+       慢速播放时同样的原始时间轴跨度要更久的真实时间才走完，所以要按当前语速把它换算回原始时间轴单位，
+       否则语速越慢，高亮实际提前的真实秒数就越多(之前没换算，跟读0.65倍速下高亮明显超前于人声) */
+    var t=recAudioEl.currentTime+REC_AUDIO_HI_ADVANCE*RECITE_MODES[reciteMode].rate, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
     for(var i=0;i<segs.length;i++){ acc+=segs[i]/_tot*d; if(t<acc){idx=i;break;} }
     var newLn=idx-1, prevLn=recHiIdx, changed=(newLn!==prevLn);
     _hiLn(newLn); /* idx 0=报题段→不点亮;之后顺延到第 idx-1 句;高亮沿用上面提前量算出的 idx，观感不变 */
     if(changed&&prevLn>=0&&newLn>=0&&reciteMode==='follow'&&!reciteFollowT){
       /* prevLn>=0 排除"报题段(-1)→第一句诗(0)"这次跳变——报题刚说完不该停，
          得等真的读完一整句诗(上一次高亮也是>=0的真实诗句)才触发跟读停顿 */
-      /* 换行判定用了提前0.75s的估算(为了高亮好看)，直接拿来触发暂停会切断还没说完的话。
-         这里改成再等一段时间(抵消提前量+安全余量)才真正暂停，宁晚勿早 */
+      /* 换行判定用了提前 REC_AUDIO_HI_ADVANCE 真实秒的估算(为了高亮好看)，直接拿来触发暂停会切断还没说完的话。
+         这里改成再等一段真实时间(抵消提前量+安全余量)才真正暂停，宁晚勿早 */
       reciteFollowT=setTimeout(function(){
         reciteFollowT=null;
         if(!recReciting||recMode!=='audio'||recPaused||reciteMode!=='follow')return;
