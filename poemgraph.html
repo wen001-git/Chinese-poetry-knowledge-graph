@@ -4998,18 +4998,29 @@ function recitePlayAudio(p, track){
   function _hiLn(i){reciteHighlightLine(i,_lns);}
   if(recStartIdx>0)_hiLn(recStartIdx); else _hiLn(-1);
   if(!recAudioEl)recAudioEl=new Audio();
-  recAudioEl.src=((track==='yue'&&typeof RECITE_AUDIO_YUE!=='undefined')?RECITE_AUDIO_YUE:RECITE_AUDIO)[p.id];
+  var _audioSrc=((track==='yue'&&typeof RECITE_AUDIO_YUE!=='undefined')?RECITE_AUDIO_YUE:RECITE_AUDIO)[p.id];
+  recAudioEl.src=_audioSrc;
   recAudioEl.playbackRate=RECITE_MODES[reciteMode].rate;
   recAudioEl.onloadedmetadata=function(){ if(recStartIdx>0)reciteAudioSeekLine(recStartIdx,false); };
-  var _hiAdvance=(track==='yue')?REC_AUDIO_HI_ADVANCE_YUE:REC_AUDIO_HI_ADVANCE; /* 粤语/普通话录音节奏不同，提前量分开校准 */
+  var _hiAdvance=(track==='yue')?REC_AUDIO_HI_ADVANCE_YUE:REC_AUDIO_HI_ADVANCE; /* 粤语/普通话录音节奏不同，提前量分开校准(仅用于下面"回退估算"分支) */
+  var _myRun=recRunId, _recRealGaps=null; /* null=真实静音检测还没就绪或失败→用下面的字数比例回退；到位后是真实间隙时间点数组 */
+  getReciteGaps(p.id, track, _audioSrc, _lns.length).then(function(g){ if(_myRun===recRunId)_recRealGaps=g; });
   recAudioEl.ontimeupdate=function(){
     if(!recReciting||recMode!=='audio'||recPaused)return;
     var d=recAudioEl.duration; if(!d||!isFinite(d))return;
-    /* _hiAdvance 是"提前多少真实秒"，但 currentTime 走的是音频原始时间轴(不受播速影响)——
-       慢速播放时同样的原始时间轴跨度要更久的真实时间才走完，所以要按当前语速把它换算回原始时间轴单位，
-       否则语速越慢，高亮实际提前的真实秒数就越多(之前没换算，跟读0.65倍速下高亮明显超前于人声) */
-    var t=recAudioEl.currentTime+_hiAdvance*RECITE_MODES[reciteMode].rate, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
-    for(var i=0;i<segs.length;i++){ acc+=segs[i]/_tot*d; if(t<acc){idx=i;break;} }
+    var idx;
+    if(_recRealGaps){
+      /* 真实静音检测已就绪：直接用测出来的间隙时间点判断念到第几句，不再需要任何提前量/估算 */
+      idx=0;
+      for(var i=_recRealGaps.length-1;i>=0;i--){ if(recAudioEl.currentTime>=_recRealGaps[i]){idx=i+1;break;} }
+    }else{
+      /* 回退：真实检测还没就绪或失败，用字数比例估算(旧模型)。
+         _hiAdvance 是"提前多少真实秒"，但 currentTime 走的是音频原始时间轴(不受播速影响)——
+         慢速播放时同样的原始时间轴跨度要更久的真实时间才走完，所以要按当前语速把它换算回原始时间轴单位，
+         否则语速越慢，高亮实际提前的真实秒数就越多(之前没换算，跟读0.65倍速下高亮明显超前于人声) */
+      var t=recAudioEl.currentTime+_hiAdvance*RECITE_MODES[reciteMode].rate, segs=[_pre].concat(_w), acc=0; idx=segs.length-1;
+      for(var i=0;i<segs.length;i++){ acc+=segs[i]/_tot*d; if(t<acc){idx=i;break;} }
+    }
     var newLn=idx-1, prevLn=recHiIdx, changed=(newLn!==prevLn);
     if(reciteMode==='follow'&&changed&&prevLn>=0&&newLn>=0){
       /* 跟读模式：读完一句不立即高亮下一句(那样看着像"还没停顿就跳到下一句")，
@@ -5033,7 +5044,7 @@ function recitePlayAudio(p, track){
             if(recReciting&&recMode==='audio'&&!recPaused){var pr=recAudioEl.play();if(pr&&pr.catch)pr.catch(function(){});}
           }, preHiMs);
         }, Math.max(0,pauseMs-preHiMs));
-      }, (_hiAdvance+REC_AUDIO_PAUSE_MARGIN+(track==='yue'?REC_AUDIO_PAUSE_MARGIN_YUE_EXTRA:0))*1000);
+      }, _recRealGaps?0:(_hiAdvance+REC_AUDIO_PAUSE_MARGIN+(track==='yue'?REC_AUDIO_PAUSE_MARGIN_YUE_EXTRA:0))*1000); /* 真实间隙本身就是准确边界,不存在"提前偏差"要抵消,直接暂停 */
     }else{
       _hiLn(newLn); /* 非跟读模式(慢读/正常)，或跟读模式下未触发停顿的换行(如报题段)：立即高亮，保持原行为 */
     }
@@ -5078,6 +5089,7 @@ window.addEventListener('scroll', function(){
 /* ══════ 听诗入眠 · 夜读电台（连播内嵌音频 + 古琴垫底 + 睡眠定时渐弱 + 锁屏 MediaSession）══════ */
 var sleepOn=false, sleepList=[], sleepIdx=0, sleepAudio=null, sleepStopAt=0, sleepTimerMin=30, sleepFadeT=null, sleepGapT=null, sleepLnEls=[], sleepLnW=[], sleepLnTot=1, sleepPreW=1, sleepHiIdx=-99, sleepAmbOn=true;
 var sleepFollowT=null, SLEEP_PAUSE_MS=500, SLEEP_PAUSE_MARGIN=0.05; /* 句间停顿:计时器句柄+停顿时长+暂停前安全余量(此处currentTime无提前偏移,只是防估算误差的余量) */
+var sleepRunId=0, sleepRealGaps=null; /* 真实静音检测结果(null=还没就绪或失败→用字数比例回退)，sleepRunId 防止切诗后旧分析结果混进新一首 */
 try{ sleepAmbOn=localStorage.getItem('pg_sleep_amb')!=='0'; }catch(e){}
 function sleepTrack(){ return (recLang==='cantonese'&&typeof RECITE_AUDIO_YUE!=='undefined')?RECITE_AUDIO_YUE:RECITE_AUDIO; }
 function renderSleepAmbBtn(){
@@ -5175,11 +5187,20 @@ function sleepPlayCurrent(){
   sleepUpdateUI(p); sleepSetMedia(p);
   try{ sleepAudio.volume=1; sleepAudio.src=tr[id]; sleepAudio.playbackRate=sleepSpeed; var pr=sleepAudio.play(); if(pr&&pr.catch)pr.catch(function(){}); }catch(e){}
   sleepSyncAmb();
+  sleepRunId++; var _mySleepRun=sleepRunId; sleepRealGaps=null; /* 换诗时让旧的分析结果失效,不混进新一首 */
+  var _sleepTrackId=(recLang==='cantonese'&&typeof RECITE_AUDIO_YUE!=='undefined')?'yue':'cmn'; /* 跟详情页朗读同一套track命名,同一首诗同一语言可共用缓存 */
+  getReciteGaps(id, _sleepTrackId, tr[id], sleepLnW.length).then(function(g){ if(_mySleepRun===sleepRunId)sleepRealGaps=g; });
   sleepAudio.ontimeupdate=function(){
     if(!sleepOn)return;
     var d=sleepAudio.duration; if(!d||!isFinite(d))return;
-    var t=sleepAudio.currentTime, segs=[sleepPreW].concat(sleepLnW), acc=0, idx=segs.length-1;
-    for(var i=0;i<segs.length;i++){ acc+=segs[i]/sleepLnTot*d; if(t<acc){idx=i;break;} }
+    var idx;
+    if(sleepRealGaps){
+      idx=0;
+      for(var i=sleepRealGaps.length-1;i>=0;i--){ if(sleepAudio.currentTime>=sleepRealGaps[i]){idx=i+1;break;} }
+    }else{
+      var t=sleepAudio.currentTime, segs=[sleepPreW].concat(sleepLnW), acc=0; idx=segs.length-1;
+      for(var i=0;i<segs.length;i++){ acc+=segs[i]/sleepLnTot*d; if(t<acc){idx=i;break;} }
+    }
     var newLn=idx-1, prevLn=sleepHiIdx, changed=(newLn!==prevLn);
     if(changed&&prevLn>=0&&newLn>=0){
       /* 句间停顿0.5s，让听感不那么赶：跟详情页"跟读"同样的教训——读完一句不立即高亮下一句
@@ -5200,7 +5221,7 @@ function sleepPlayCurrent(){
             if(sleepOn){var pr=sleepAudio.play();if(pr&&pr.catch)pr.catch(function(){});}
           }, preHiMs);
         }, Math.max(0,pauseMs-preHiMs));
-      }, SLEEP_PAUSE_MARGIN*1000);
+      }, sleepRealGaps?0:SLEEP_PAUSE_MARGIN*1000); /* 真实间隙本身就是准确边界,不需要安全余量 */
     }else{
       sleepHiLn(newLn); /* idx 0=报题段→不点亮诗句;之后顺延到第 idx-1 句;报题段换行/无变化的tick立即高亮,行为不变 */
     }
@@ -5311,6 +5332,56 @@ function ambInit(){
   const wet=AC.createGain(); wet.gain.value=0.55; const dry=AC.createGain(); dry.gain.value=0.7;
   ambGain.connect(dry).connect(AC.destination);
   ambGain.connect(rev).connect(wet).connect(AC.destination);
+}
+/* ====== 朗读句间停顿精确化：解出真实音频波形，找句子之间的真实静音间隙，取代按字数比例猜时间 ======
+   现有的"按字数比例估算"模型(_pre/_w/_tot 及各种提前量/余量/加成常数)完整保留，只在真实检测
+   失败/不可用时才用它兜底——新机制纯增量，不删旧代码，零回归风险。 */
+var reciteGapCache={}; /* poemId+'|'+track -> Promise<number[]|null>，同一首诗同一音轨只解码分析一次 */
+function _percentile(sortedArr,p){ var i=Math.min(sortedArr.length-1,Math.max(0,Math.floor(sortedArr.length*p))); return sortedArr[i]; }
+async function analyzeReciteGaps(dataUri, expectedN){
+  try{
+    if(!AC)ambInit(); /* 复用古琴功能已建好的 AudioContext 单例,不新建 */
+    var base64=dataUri.slice(dataUri.indexOf(',')+1);
+    var bin=atob(base64), bytes=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    var buf=await AC.decodeAudioData(bytes.buffer);
+    var data=buf.getChannelData(0), sr=buf.sampleRate;
+    var winMs=20, hopMs=10, win=Math.round(sr*winMs/1000), hop=Math.round(sr*hopMs/1000);
+    var env=[];
+    for(var i=0;i+win<=data.length;i+=hop){
+      var s=0; for(var j=0;j<win;j++){var v=data[i+j]; s+=v*v;}
+      env.push(Math.sqrt(s/win));
+    }
+    if(!env.length)return null;
+    var sorted=env.slice().sort(function(a,b){return a-b;});
+    var floor=_percentile(sorted,0.15), peak=_percentile(sorted,0.97); /* 用各自录音自己的噪声底/峰值自适应阈值,兼容不同朗读者的录音响度差异 */
+    var thresh=Math.max(floor*2.5, peak*0.06);
+    var minSilenceFrames=Math.ceil(150/hopMs); /* 至少150ms才算真停顿,排除辅音闭塞等短促间隙 */
+    /* 触发点用静音区间的"起点"而不是中点：ontimeupdate 这个浏览器事件本身检测有滞后(通常每
+       100~250ms才触发一次)，如果用中点，滞后加上去很可能已经越过静音区间进到下一句了；
+       用起点则不管滞后多久，只要还在这段≥150ms的静音里就是安全的，最大化容错空间 */
+    var gaps=[], silStart=-1;
+    for(var w=0;w<env.length;w++){
+      if(env[w]<thresh){ if(silStart<0)silStart=w; }
+      else{ if(silStart>=0&&(w-silStart)>=minSilenceFrames)gaps.push(silStart*hopMs/1000); silStart=-1; }
+    }
+    if(silStart>=0&&(env.length-silStart)>=minSilenceFrames)gaps.push(silStart*hopMs/1000);
+    /* 实测发现两类"多余"间隙，都不是诗句之间的真实分界：
+       1) 音频末尾说完最后一句到文件结束之间的尾部静音——离 duration 很近，不是"下一句开始前"的停顿；
+       2) 报题段("标题。朝代·作者。")自己内部就有标点(标题后的句号)，会产生一次报题段内部的停顿，
+          它出现在音频最前面，比真正的"报题→第一句"分界更早。
+       两者都只会出现在开头/结尾，真正的诗句分界必然连续分布在中段——所以：先去掉贴近结尾的尾部静音，
+       若还有多余的，说明是报题段内部的，从最前面的开始丢，只保留最后 expectedN 个 */
+    var d=buf.duration;
+    gaps=gaps.filter(function(g){return (d-g)>0.4;});
+    if(gaps.length>expectedN)gaps=gaps.slice(gaps.length-expectedN);
+    return (gaps.length===expectedN)?gaps:null; /* 数量仍不对(比expectedN还少)就整体回退,不猜测具体缺哪个 */
+  }catch(e){ return null; } /* 解码失败/格式不支持等,一律安全回退,不抛错 */
+}
+function getReciteGaps(poemId,track,dataUri,n){
+  var key=poemId+'|'+track;
+  if(!reciteGapCache[key])reciteGapCache[key]=analyzeReciteGaps(dataUri,n).catch(function(){return null;});
+  return reciteGapCache[key];
 }
 function ambImpulse(dur,decay){const sr=AC.sampleRate,len=Math.floor(sr*dur),b=AC.createBuffer(2,len,sr);
   for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);}return b;}
