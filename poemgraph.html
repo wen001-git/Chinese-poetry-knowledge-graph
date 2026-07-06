@@ -4830,6 +4830,7 @@ var REC_AUDIO_HI_ADVANCE_YUE=0.35; /* 粤语(善怡)整体语速节奏跟普通�
 var REC_AUDIO_PAUSE_MARGIN=0.03; /* 跟读物理暂停延迟=抵消上面的提前量(现已按语速换算为真实秒,与语速无关)+安全余量 */
 var REC_AUDIO_PAUSE_MARGIN_YUE_EXTRA=0.2; /* 粤语高亮提前量校准好了(0.35)，但跟读暂停仍会切到上一句尾音，说明暂停本身还需要额外余量(不影响高亮，只加在暂停判定上) */
 var REC_AUDIO_YUE_PRE_SCALE=1.4; /* 粤语(善怡)录音报题段实际耗时比按字数估算的更长，放大报题段权重把首两句的估计边界往后推一点 */
+var PUNCT_PAUSE_BONUS=0.8; /* 句号/问号/叹号(整句结束)比逗号等标点通常多留一点自然停顿，给这类行的字数权重加成，详情页朗读和听诗入眠共用 */
 function reciteHasAudio(p){ return !!(typeof RECITE_AUDIO!=='undefined' && p && RECITE_AUDIO[p.id]); }
 function reciteHasAudioYue(p){ return !!(typeof RECITE_AUDIO_YUE!=='undefined' && p && RECITE_AUDIO_YUE[p.id]); }
 function reciteToggle(){ if(recReciting){recPaused?reciteResume():recitePause();}else reciteStart(); }
@@ -4975,7 +4976,15 @@ function recitePlayAudio(p, track){
   var _lns=[].slice.call(document.querySelectorAll('#d-verse .ln'));
   _lns.forEach(function(el){el.classList.remove('reciting');});
   recHiIdx=-99;
-  var _w=_lns.map(function(el){var m=(el.textContent||'').match(/[一-鿿]/g);return Math.max(1,m?m.length:1);});
+  /* 按字数比例估算每句边界，隐含"每个字说话时长一样"的假设——但真实朗读里，句号/问号/叹号(一句话说完)
+     通常比逗号/顿号(句中停顿)后面留白更长，纯字数模型完全不管这个，导致"有的句子准、有的句子(恰好句号结尾)
+     会偏"。给整句结束的行多记一点权重，把它估计的边界适当推后一些来补偿 */
+  var _w=_lns.map(function(el,i){
+    var m=(el.textContent||'').match(/[一-鿿]/g); var w=Math.max(1,m?m.length:1);
+    var rawT=(p.lines[i]&&p.lines[i].t)||'';
+    if(/[。？！]\s*$/.test(rawT))w+=PUNCT_PAUSE_BONUS;
+    return w;
+  });
   // 音频开头先报「标题。朝代·作者。」——按其字数估时长,这段不点亮诗句
   var _author=(POETS[p.poet]&&POETS[p.poet].name)||'';
   var _pmm=(p.title+(p.dyn||'')+_author).match(/[一-鿿]/g); var _pre=Math.max(1,_pmm?_pmm.length:1);
@@ -5250,7 +5259,9 @@ function sleepUpdateUI(p){
   (p.lines||[]).forEach(function(L){
     var d=document.createElement('div'); d.className='sl-ln'; d.textContent=L.t||'';
     box.appendChild(d); sleepLnEls.push(d);
-    var m=(L.t||'').match(/[一-鿿]/g); sleepLnW.push(Math.max(1,m?m.length:1));
+    var m=(L.t||'').match(/[一-鿿]/g); var w=Math.max(1,m?m.length:1);
+    if(/[。？！]\s*$/.test(L.t||''))w+=PUNCT_PAUSE_BONUS; /* 句号/问号/叹号结尾的整句，录音里通常多停顿一点，跟详情页朗读同一套补偿 */
+    sleepLnW.push(w);
   });
   var author=(POETS[p.poet]&&POETS[p.poet].name)||'';
   // 音频开头先报「标题。朝代·作者。」——按其字数估时长,这段不点亮任何诗句
