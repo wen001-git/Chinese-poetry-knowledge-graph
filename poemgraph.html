@@ -5052,7 +5052,7 @@ function recitePlayAudio(p, track){
   var _hiAdvance=(track==='yue')?REC_AUDIO_HI_ADVANCE_YUE:REC_AUDIO_HI_ADVANCE; /* 粤语/普通话录音节奏不同，提前量分开校准(仅用于下面"回退估算"分支) */
   var _myRun=recRunId, _recRealGaps=null; /* null=真实静音检测还没就绪或失败→用下面的字数比例回退；到位后是真实间隙时间点数组 */
   getReciteGaps(p.id, track, _audioSrc, _lns.length).then(function(g){ if(_myRun===recRunId)_recRealGaps=g; });
-  recAudioEl.ontimeupdate=function(){
+  function reciteCheckProgress(){
     if(!recReciting||recMode!=='audio'||recPaused)return;
     var d=recAudioEl.duration; if(!d||!isFinite(d))return;
     var idx;
@@ -5095,7 +5095,23 @@ function recitePlayAudio(p, track){
     }else{
       _hiLn(newLn); /* 非跟读模式(慢读/正常)，或跟读模式下未触发停顿的换行(如报题段)：立即高亮，保持原行为 */
     }
-  };
+  }
+  recAudioEl.ontimeupdate=reciteCheckProgress;
+  /* ontimeupdate 在部分手机浏览器上轮询间隔可能到 250ms+，遇到较短的真实静音间隙(比如
+     欢快的儿歌语速下有些句子间隙只有 200多ms)时，这个延迟本身就能吃掉整段静音、冲进下一句——
+     这是"鹅鹅鹅"在手机上跟读会带出下一句"白"字读音的根因，桌面端因为轮询更密集所以没暴露。
+     加一路 rAF(~16ms一帧，与显示器刷新率同步、不受 ontimeupdate 节流影响)跑同一份检测逻辑，
+     谁先发现跨过间隙谁触发——两路调用同一个幂等函数(靠 recHiIdx/changed 判断防重复)，纯增量，
+     不改变任何既有分支的判断逻辑本身，只是把"发现跨过间隙"这一步的延迟从几百毫秒降到一帧。 */
+  (function(){
+    var runId=_myRun;
+    function tick(){
+      if(runId!==recRunId||!recReciting||recMode!=='audio')return;
+      if(!recAudioEl.paused&&!recPaused)reciteCheckProgress();
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
   recAudioEl.onended=function(){ reciteStop(); };
   recAudioEl.onerror=function(){ reciteStop(); };
   var pr=recAudioEl.play(); if(pr&&pr.catch)pr.catch(function(){ reciteStop(); });
@@ -5238,7 +5254,7 @@ function sleepPlayCurrent(){
   sleepRunId++; var _mySleepRun=sleepRunId; sleepRealGaps=null; /* 换诗时让旧的分析结果失效,不混进新一首 */
   var _sleepTrackId=(recLang==='cantonese'&&typeof RECITE_AUDIO_YUE!=='undefined')?'yue':'cmn'; /* 跟详情页朗读同一套track命名,同一首诗同一语言可共用缓存 */
   getReciteGaps(id, _sleepTrackId, tr[id], sleepLnW.length).then(function(g){ if(_mySleepRun===sleepRunId)sleepRealGaps=g; });
-  sleepAudio.ontimeupdate=function(){
+  function sleepCheckProgress(){
     if(!sleepOn)return;
     var d=sleepAudio.duration; if(!d||!isFinite(d))return;
     var idx;
@@ -5273,7 +5289,19 @@ function sleepPlayCurrent(){
     }else{
       sleepHiLn(newLn); /* idx 0=报题段→不点亮诗句;之后顺延到第 idx-1 句;报题段换行/无变化的tick立即高亮,行为不变 */
     }
-  };
+  }
+  sleepAudio.ontimeupdate=sleepCheckProgress;
+  /* 跟详情页跟读同样的根因：ontimeupdate 在手机上轮询可能滞后 250ms+，短的真实静音间隙会被直接吃掉。
+     加一路 rAF 跑同一份检测逻辑，纯增量，不改变判断本身 */
+  (function(){
+    var runId=_mySleepRun;
+    function tick(){
+      if(runId!==sleepRunId||!sleepOn)return;
+      if(!sleepAudio.paused)sleepCheckProgress();
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
   sleepSetPlayBtn(); renderSleepList();
 }
 function sleepOnEnded(){
