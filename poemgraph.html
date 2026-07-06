@@ -1,8 +1,16 @@
 <!DOCTYPE html>
+<!--
+  诗词图谱 (PoemGraph)
+  © 2026 LiJiaWen. All rights reserved.
+  本应用界面与代码版权归 LiJiaWen 所有；诗词原文/拼音/注释内容参考统编版语文教材整理。
+  部分内嵌音频素材（如古琴背景乐《阳关三叠》）另按其原始授权协议（CC BY-SA）署名，
+  不在上述版权声明范围内。
+-->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2">
+<meta name="author" content="LiJiaWen">
 <title>诗词图谱 · 中国古诗词知识图谱</title>
 <style>
 /* ══════════ 水墨设计系统 ══════════ */
@@ -41,6 +49,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   background-image:radial-gradient(rgba(28,28,30,.02) 1px,transparent 1px);background-size:22px 22px}
 .overlay h1{font-family:var(--serif);font-size:clamp(30px,6vw,52px);letter-spacing:.18em;margin-bottom:6px;font-weight:700}
 .overlay .sub{color:var(--ink2);margin-bottom:6px;letter-spacing:.32em;font-size:14px}
+.copyright-line{color:var(--ink3);font-size:11px;margin-top:28px;letter-spacing:.04em}
 .overlay .seal{display:inline-block;margin:14px 0 34px;color:var(--ochre);border:1.5px solid var(--ochre);
   border-radius:6px;padding:2px 10px;font-family:var(--serif);font-size:14px;letter-spacing:.2em;opacity:.85}
 .opt-grid{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;max-width:720px}
@@ -811,6 +820,7 @@ body.sleep-open{overflow:hidden}
     <button class="opt-card" onclick="pickRole('teacher')">
       <div class="ic">👩‍🏫</div><div class="nm">教师</div><div class="ds">课堂演示·打印学习单</div></button>
   </div>
+  <div class="copyright-line">© 2026 LiJiaWen</div>
 </div>
 
 <!-- 有新版本时的刷新提示（Service Worker 后台发现服务器已更新时弹出） -->
