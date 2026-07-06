@@ -382,6 +382,7 @@ body.theme-zhumo select.chip#grade-chip{
 #anno-pop{position:fixed;z-index:170;max-width:min(330px,86vw);background:var(--paper);border:1px solid var(--border);border-left:4px solid var(--cinnabar);border-radius:10px;padding:9px 13px 9px 14px;font-family:var(--sans);font-size:14px;line-height:1.7;color:var(--ink);box-shadow:var(--shadow2);display:none}
 #anno-pop b{color:var(--cinnabar);font-family:var(--serif);font-size:16px;margin-right:5px}
 .d-recite-row{margin-top:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.d-print-group{display:flex;align-items:center;gap:12px;padding-left:12px;border-left:1px solid var(--border)}
 .d-recite{padding:10px 22px;border-radius:22px;background:linear-gradient(135deg,var(--cinnabar),#9a3026);color:#fff;
   font-size:15px;font-weight:600;transition:.16s;min-height:44px;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;box-shadow:0 3px 10px rgba(178,58,46,.28)}
 .d-recite:hover{filter:brightness(1.08)}
@@ -993,10 +994,12 @@ body.sleep-open{overflow:hidden}
           <button data-rv="meijia" onclick="setRecVoice('meijia')">美嘉</button>
           <button data-rv="limu" onclick="setRecVoice('limu')">Li-Mu</button>
         </div>
-        <button class="d-print" id="d-print" onclick="printSheet()">🖨 打印学习单</button>
-        <div class="rec-lang" id="print-mode" title="彩色更美观(按诗的情感配色)；省墨黑白适合整班打印">
-          <button data-pc="1" onclick="setPrintColor(true)">🎨 彩色</button>
-          <button data-pc="0" onclick="setPrintColor(false)">省墨</button>
+        <div class="d-print-group">
+          <button class="d-print" id="d-print" onclick="printSheet()">🖨 打印学习单</button>
+          <div class="rec-lang" id="print-mode" title="彩色更美观(按诗的情感配色)；省墨黑白适合整班打印">
+            <button data-pc="1" onclick="setPrintColor(true)">🎨 彩色</button>
+            <button data-pc="0" onclick="setPrintColor(false)">省墨</button>
+          </div>
         </div>
       </div>
     </div>
