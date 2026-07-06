@@ -4670,7 +4670,7 @@ var _reciteWaitT=null;
 var recVoice=null,recReciting=false,recQueue=[],recIdx=0; /* var：避免 boot 期 showView→reciteStop 的 TDZ */
 var recVoiceChoice=(function(){var v=localStorage.getItem('pg_recvoice');return (v==='meijia'||v==='limu')?v:'yushu';})(); /* 朗读音色:语舒(离线内嵌·默认,全设备可用)/美嘉(浏览器TTS)/Li-Mu(浏览器TTS),存 pg_recvoice */
 var recLang=(localStorage.getItem('pg_reclang')==='cantonese')?'cantonese':'mandarin'; /* 默认普通话 */
-var RECITE_MODES={follow:{rate:0.85,pause:2500},standard:{rate:1,pause:0},fluent:{rate:1.18,pause:0}}; /* 详情页朗读三档:跟读(慢+句间停顿供模仿)/标准/熟读(稍快供复习) */
+var RECITE_MODES={follow:{rate:0.65,pause:2500},standard:{rate:1,pause:0},fluent:{rate:1.18,pause:0}}; /* 详情页朗读三档:跟读(慢+句间停顿供模仿,语速与听诗入眠"舒缓"一致)/标准/熟读(稍快供复习) */
 var reciteMode=(function(){var v=localStorage.getItem('pg_recitemode');return RECITE_MODES[v]?v:'standard';})();
 var reciteFollowT=null; /* 跟读模式"读完一句→停顿→自动继续"的计时器句柄,中途打断需清掉防止多余触发 */
 /* 趣味/颤音音色，诵读不用 */
@@ -4806,10 +4806,16 @@ function setReciteMode(m){
 var sleepSpeed=(function(){var v=parseFloat(localStorage.getItem('pg_sleepspeed'));return (v===0.65||v===0.8)?v:1;})(); /* 听诗入眠三档:舒缓/慢读/标准,与详情页朗读速度完全独立,不停顿 */
 function sleepApplySpeedUI(){document.querySelectorAll('#sleep-speed button').forEach(function(b){b.classList.toggle('on',+b.dataset.speed===sleepSpeed);});}
 function setSleepSpeed(s){
+  var wasFollowPaused=!!sleepFollowT; /* 切走前先记：这是"舒缓"自己的自动停顿，还是用户手动暂停(sleepFollowT本就为空) */
+  if(sleepFollowT){clearTimeout(sleepFollowT);sleepFollowT=null;}
   sleepSpeed=(s===0.65||s===0.8)?s:1;
   try{localStorage.setItem('pg_sleepspeed',sleepSpeed);}catch(e){}
   sleepApplySpeedUI();
   if(sleepAudio)sleepAudio.playbackRate=sleepSpeed;
+  /* 切出"舒缓"时如果正卡在自动停顿里,立即续播；如果是用户自己手动暂停的(sleepFollowT本就没在跑)，不要帮ta续播 */
+  if(wasFollowPaused&&sleepSpeed!==0.65&&sleepAudio&&sleepAudio.paused&&sleepOn){
+    var pr=sleepAudio.play(); if(pr&&pr.catch)pr.catch(function(){});
+  }
 }
 if('speechSynthesis' in window){const _prev=speechSynthesis.onvoiceschanged;speechSynthesis.onvoiceschanged=function(){recApplyLangAvail();};}
 /* 跨平台保活：部分浏览器(尤其 Chrome 桌面/失焦时)会让 speechSynthesis 自动暂停→朗读中途停。
@@ -4826,6 +4832,7 @@ function _ttsKeep(on){
 /* 朗读：系统 TTS 优先(逐句高亮);若设备无可用语音/不发声→自动回退「内嵌音频」(RECITE_AUDIO，覆盖国产安卓如小米 Chrome 无 TTS 引擎的情况) */
 var recAudioEl=null, recWatchdog=null, recStarted=false, recMode=null, recHiIdx=-99, recPaused=false, recStartIdx=0, recAudioMeta=null, recRunId=0;
 var REC_AUDIO_HI_ADVANCE=0.75; /* 内嵌整首音频无逐句时间戳：高亮略提前，贴近实际声音 */
+var REC_AUDIO_PAUSE_MARGIN=0.5; /* 跟读物理暂停延迟=抵消上面的提前量+安全余量，宁晚勿早，避免切断还没说完的话 */
 function reciteHasAudio(p){ return !!(typeof RECITE_AUDIO!=='undefined' && p && RECITE_AUDIO[p.id]); }
 function reciteHasAudioYue(p){ return !!(typeof RECITE_AUDIO_YUE!=='undefined' && p && RECITE_AUDIO_YUE[p.id]); }
 function reciteToggle(){ if(recReciting){recPaused?reciteResume():recitePause();}else reciteStart(); }
@@ -4988,13 +4995,22 @@ function recitePlayAudio(p, track){
     var d=recAudioEl.duration; if(!d||!isFinite(d))return;
     var t=recAudioEl.currentTime+REC_AUDIO_HI_ADVANCE, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
     for(var i=0;i<segs.length;i++){ acc+=segs[i]/_tot*d; if(t<acc){idx=i;break;} }
-    var newLn=idx-1, changed=(newLn!==recHiIdx);
-    _hiLn(newLn); /* idx 0=报题段→不点亮;之后顺延到第 idx-1 句 */
-    if(changed&&newLn>=0&&reciteMode==='follow'){
-      recAudioEl.pause();
+    var newLn=idx-1, prevLn=recHiIdx, changed=(newLn!==prevLn);
+    _hiLn(newLn); /* idx 0=报题段→不点亮;之后顺延到第 idx-1 句;高亮沿用上面提前量算出的 idx，观感不变 */
+    if(changed&&prevLn>=0&&newLn>=0&&reciteMode==='follow'&&!reciteFollowT){
+      /* prevLn>=0 排除"报题段(-1)→第一句诗(0)"这次跳变——报题刚说完不该停，
+         得等真的读完一整句诗(上一次高亮也是>=0的真实诗句)才触发跟读停顿 */
+      /* 换行判定用了提前0.75s的估算(为了高亮好看)，直接拿来触发暂停会切断还没说完的话。
+         这里改成再等一段时间(抵消提前量+安全余量)才真正暂停，宁晚勿早 */
       reciteFollowT=setTimeout(function(){
-        if(recReciting&&recMode==='audio'&&!recPaused){var pr=recAudioEl.play();if(pr&&pr.catch)pr.catch(function(){});}
-      }, RECITE_MODES.follow.pause);
+        reciteFollowT=null;
+        if(!recReciting||recMode!=='audio'||recPaused||reciteMode!=='follow')return;
+        recAudioEl.pause();
+        reciteFollowT=setTimeout(function(){
+          reciteFollowT=null;
+          if(recReciting&&recMode==='audio'&&!recPaused){var pr=recAudioEl.play();if(pr&&pr.catch)pr.catch(function(){});}
+        }, RECITE_MODES.follow.pause);
+      }, (REC_AUDIO_HI_ADVANCE+REC_AUDIO_PAUSE_MARGIN)*1000);
     }
   };
   recAudioEl.onended=function(){ reciteStop(); };
@@ -5036,6 +5052,7 @@ window.addEventListener('scroll', function(){
 
 /* ══════ 听诗入眠 · 夜读电台（连播内嵌音频 + 古琴垫底 + 睡眠定时渐弱 + 锁屏 MediaSession）══════ */
 var sleepOn=false, sleepList=[], sleepIdx=0, sleepAudio=null, sleepStopAt=0, sleepTimerMin=30, sleepFadeT=null, sleepGapT=null, sleepLnEls=[], sleepLnW=[], sleepLnTot=1, sleepPreW=1, sleepHiIdx=-99, sleepAmbOn=true;
+var sleepFollowT=null, SLEEP_PAUSE_MS=1000, SLEEP_PAUSE_MARGIN=0.3; /* "舒缓"档句间停顿:计时器句柄+停顿时长+暂停前安全余量(无提前偏移,只防估算误差) */
 try{ sleepAmbOn=localStorage.getItem('pg_sleep_amb')!=='0'; }catch(e){}
 function sleepTrack(){ return (recLang==='cantonese'&&typeof RECITE_AUDIO_YUE!=='undefined')?RECITE_AUDIO_YUE:RECITE_AUDIO; }
 function renderSleepAmbBtn(){
@@ -5128,6 +5145,7 @@ function openSleep(mode){
 }
 function sleepPlayCurrent(){
   if(!sleepOn)return;
+  if(sleepFollowT){clearTimeout(sleepFollowT);sleepFollowT=null;}
   var tr=sleepTrack(), id=sleepList[sleepIdx], p=POEMS.find(function(x){return x.id===id;});
   sleepUpdateUI(p); sleepSetMedia(p);
   try{ sleepAudio.volume=1; sleepAudio.src=tr[id]; sleepAudio.playbackRate=sleepSpeed; var pr=sleepAudio.play(); if(pr&&pr.catch)pr.catch(function(){}); }catch(e){}
@@ -5137,7 +5155,21 @@ function sleepPlayCurrent(){
     var d=sleepAudio.duration; if(!d||!isFinite(d))return;
     var t=sleepAudio.currentTime, segs=[sleepPreW].concat(sleepLnW), acc=0, idx=segs.length-1;
     for(var i=0;i<segs.length;i++){ acc+=segs[i]/sleepLnTot*d; if(t<acc){idx=i;break;} }
-    sleepHiLn(idx-1); /* idx 0=报题段→不点亮诗句;之后顺延到第 idx-1 句 */
+    var newLn=idx-1, prevLn=sleepHiIdx, changed=(newLn!==prevLn);
+    sleepHiLn(newLn); /* idx 0=报题段→不点亮诗句;之后顺延到第 idx-1 句 */
+    if(changed&&prevLn>=0&&newLn>=0&&sleepSpeed===0.65&&!sleepFollowT){
+      /* prevLn>=0 排除"报题段→第一句"这次跳变,报题刚说完不该停,读完一整句诗才停顿；
+         "舒缓"档句间停顿1秒,给个小安全余量再暂停,避免切到还没说完的字 */
+      sleepFollowT=setTimeout(function(){
+        sleepFollowT=null;
+        if(!sleepOn||sleepSpeed!==0.65||sleepAudio.paused)return;
+        sleepAudio.pause();
+        sleepFollowT=setTimeout(function(){
+          sleepFollowT=null;
+          if(sleepOn&&sleepSpeed===0.65){var pr=sleepAudio.play();if(pr&&pr.catch)pr.catch(function(){});}
+        }, SLEEP_PAUSE_MS);
+      }, SLEEP_PAUSE_MARGIN*1000);
+    }
   };
   sleepSetPlayBtn(); renderSleepList();
 }
@@ -5149,6 +5181,7 @@ function sleepOnEnded(){
 function sleepSkip(d){ if(!sleepOn)return; clearTimeout(sleepGapT); sleepIdx=(sleepIdx+d+sleepList.length)%sleepList.length; sleepPlayCurrent(); }
 function sleepTogglePlay(){
   if(!sleepOn||!sleepAudio)return;
+  if(sleepFollowT){clearTimeout(sleepFollowT);sleepFollowT=null;} /* 用户手动点了播放/暂停，"舒缓"自动停顿的计时器不能再插手 */
   if(sleepAudio.paused){
     try{ var pr=sleepAudio.play(); if(pr&&pr.catch)pr.catch(function(){}); }catch(e){}
     sleepSyncAmb();
@@ -5176,6 +5209,7 @@ function sleepFadeStop(){
 function closeSleep(){
   sleepOn=false;
   if(sleepFadeT){clearTimeout(sleepFadeT);sleepFadeT=null;} clearTimeout(sleepGapT);
+  if(sleepFollowT){clearTimeout(sleepFollowT);sleepFollowT=null;}
   if(sleepAudio){try{sleepAudio.pause();sleepAudio.currentTime=0;}catch(e){}}
   try{ ambStop(); }catch(e){}
   sleepCloseList();
