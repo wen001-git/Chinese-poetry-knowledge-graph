@@ -5068,6 +5068,7 @@ window.addEventListener('scroll', function(){
 
 /* ══════ 听诗入眠 · 夜读电台（连播内嵌音频 + 古琴垫底 + 睡眠定时渐弱 + 锁屏 MediaSession）══════ */
 var sleepOn=false, sleepList=[], sleepIdx=0, sleepAudio=null, sleepStopAt=0, sleepTimerMin=30, sleepFadeT=null, sleepGapT=null, sleepLnEls=[], sleepLnW=[], sleepLnTot=1, sleepPreW=1, sleepHiIdx=-99, sleepAmbOn=true;
+var sleepFollowT=null, SLEEP_PAUSE_MS=500, SLEEP_PAUSE_MARGIN=0.3; /* 句间停顿:计时器句柄+停顿时长+暂停前安全余量(此处currentTime无提前偏移,只是防估算误差的余量) */
 try{ sleepAmbOn=localStorage.getItem('pg_sleep_amb')!=='0'; }catch(e){}
 function sleepTrack(){ return (recLang==='cantonese'&&typeof RECITE_AUDIO_YUE!=='undefined')?RECITE_AUDIO_YUE:RECITE_AUDIO; }
 function renderSleepAmbBtn(){
@@ -5160,6 +5161,7 @@ function openSleep(mode){
 }
 function sleepPlayCurrent(){
   if(!sleepOn)return;
+  if(sleepFollowT){clearTimeout(sleepFollowT);sleepFollowT=null;}
   var tr=sleepTrack(), id=sleepList[sleepIdx], p=POEMS.find(function(x){return x.id===id;});
   sleepUpdateUI(p); sleepSetMedia(p);
   try{ sleepAudio.volume=1; sleepAudio.src=tr[id]; sleepAudio.playbackRate=sleepSpeed; var pr=sleepAudio.play(); if(pr&&pr.catch)pr.catch(function(){}); }catch(e){}
@@ -5169,7 +5171,30 @@ function sleepPlayCurrent(){
     var d=sleepAudio.duration; if(!d||!isFinite(d))return;
     var t=sleepAudio.currentTime, segs=[sleepPreW].concat(sleepLnW), acc=0, idx=segs.length-1;
     for(var i=0;i<segs.length;i++){ acc+=segs[i]/sleepLnTot*d; if(t<acc){idx=i;break;} }
-    sleepHiLn(idx-1); /* idx 0=报题段→不点亮诗句;之后顺延到第 idx-1 句 */
+    var newLn=idx-1, prevLn=sleepHiIdx, changed=(newLn!==prevLn);
+    if(changed&&prevLn>=0&&newLn>=0){
+      /* 句间停顿0.5s，让听感不那么赶：跟详情页"跟读"同样的教训——读完一句不立即高亮下一句
+         (那样看着像还没停顿就跳走了)，而是保持当前句高亮，等停顿快结束(下一句开始前150ms)才切换。
+         prevLn>=0 排除"报题段→第一句"这次跳变，报题结束不停顿 */
+      if(sleepFollowT)return; /* 已在停顿流程里,防止重复排队 */
+      sleepFollowT=setTimeout(function(){
+        sleepFollowT=null;
+        if(!sleepOn||sleepAudio.paused)return;
+        sleepAudio.pause();
+        var pauseMs=SLEEP_PAUSE_MS, preHiMs=Math.min(150,pauseMs);
+        sleepFollowT=setTimeout(function(){
+          sleepFollowT=null;
+          if(!sleepOn)return;
+          sleepHiLn(newLn);
+          sleepFollowT=setTimeout(function(){
+            sleepFollowT=null;
+            if(sleepOn){var pr=sleepAudio.play();if(pr&&pr.catch)pr.catch(function(){});}
+          }, preHiMs);
+        }, Math.max(0,pauseMs-preHiMs));
+      }, SLEEP_PAUSE_MARGIN*1000);
+    }else{
+      sleepHiLn(newLn); /* idx 0=报题段→不点亮诗句;之后顺延到第 idx-1 句;报题段换行/无变化的tick立即高亮,行为不变 */
+    }
   };
   sleepSetPlayBtn(); renderSleepList();
 }
@@ -5181,6 +5206,7 @@ function sleepOnEnded(){
 function sleepSkip(d){ if(!sleepOn)return; clearTimeout(sleepGapT); sleepIdx=(sleepIdx+d+sleepList.length)%sleepList.length; sleepPlayCurrent(); }
 function sleepTogglePlay(){
   if(!sleepOn||!sleepAudio)return;
+  if(sleepFollowT){clearTimeout(sleepFollowT);sleepFollowT=null;} /* 用户手动点了播放/暂停，句间停顿的自动计时器不能再插手 */
   if(sleepAudio.paused){
     try{ var pr=sleepAudio.play(); if(pr&&pr.catch)pr.catch(function(){}); }catch(e){}
     sleepSyncAmb();
@@ -5208,6 +5234,7 @@ function sleepFadeStop(){
 function closeSleep(){
   sleepOn=false;
   if(sleepFadeT){clearTimeout(sleepFadeT);sleepFadeT=null;} clearTimeout(sleepGapT);
+  if(sleepFollowT){clearTimeout(sleepFollowT);sleepFollowT=null;}
   if(sleepAudio){try{sleepAudio.pause();sleepAudio.currentTime=0;}catch(e){}}
   try{ ambStop(); }catch(e){}
   sleepCloseList();
