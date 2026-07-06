@@ -981,9 +981,9 @@ body.sleep-open{overflow:hidden}
           <button data-lang="cantonese" onclick="setRecLang('cantonese')">粤语</button>
         </div>
         <div class="rec-lang" id="rec-speed" title="朗读速度">
-          <button data-speed="0.75" onclick="setRecSpeed(0.75)">慢速</button>
-          <button data-speed="1" class="on" onclick="setRecSpeed(1)">正常</button>
-          <button data-speed="1.25" onclick="setRecSpeed(1.25)">快速</button>
+          <button data-mode="follow" onclick="setReciteMode('follow')">跟读</button>
+          <button data-mode="standard" class="on" onclick="setReciteMode('standard')">标准</button>
+          <button data-mode="fluent" onclick="setReciteMode('fluent')">熟读</button>
         </div>
         <div class="rec-lang" id="rec-voice" title="朗读音色：语舒为离线内嵌(手机/小米等无TTS引擎也能读)；美嘉、Li-Mu 用浏览器系统语音(不支持会提示)">
           <button data-rv="yushu" onclick="setRecVoice('yushu')">语舒·离线</button>
@@ -1070,9 +1070,9 @@ body.sleep-open{overflow:hidden}
   </div>
   <div class="sleep-timer" id="sleep-speed">
     <span class="sleep-lab">朗读速度</span>
-    <button data-speed="0.75" onclick="setRecSpeed(0.75)">慢速</button>
-    <button data-speed="1" class="on" onclick="setRecSpeed(1)">正常</button>
-    <button data-speed="1.25" onclick="setRecSpeed(1.25)">快速</button>
+    <button data-speed="0.65" onclick="setSleepSpeed(0.65)">舒缓</button>
+    <button data-speed="0.8" onclick="setSleepSpeed(0.8)">慢读</button>
+    <button data-speed="1" class="on" onclick="setSleepSpeed(1)">标准</button>
   </div>
   <div class="sleep-hint">闭眼听诗 · 一首接一首 · 到点自动渐弱停止 · 锁屏也能播</div>
   <div class="sleep-drawer" id="sleep-drawer" onclick="if(event.target===this)sleepCloseList()">
@@ -2610,7 +2610,7 @@ function openDetail(id){
   updateReciteFloatShow();
   reciteStop();
   recApplyLangAvail();
-  recApplySpeedUI();
+  reciteApplyModeUI();
   recApplyVoiceUI();
   // tabs
   const quizIdx=D_TABS.findIndex(t=>t[1]==='quiz');
@@ -4670,7 +4670,9 @@ var _reciteWaitT=null;
 var recVoice=null,recReciting=false,recQueue=[],recIdx=0; /* var：避免 boot 期 showView→reciteStop 的 TDZ */
 var recVoiceChoice=(function(){var v=localStorage.getItem('pg_recvoice');return (v==='meijia'||v==='limu')?v:'yushu';})(); /* 朗读音色:语舒(离线内嵌·默认,全设备可用)/美嘉(浏览器TTS)/Li-Mu(浏览器TTS),存 pg_recvoice */
 var recLang=(localStorage.getItem('pg_reclang')==='cantonese')?'cantonese':'mandarin'; /* 默认普通话 */
-var recSpeed=(function(){var v=parseFloat(localStorage.getItem('pg_recspeed'));return (v===0.75||v===1.25)?v:1;})(); /* 朗读语速倍率:慢速0.75/正常1(默认)/快速1.25,详情页朗读与听诗入眠共用 */
+var RECITE_MODES={follow:{rate:0.85,pause:2500},standard:{rate:1,pause:0},fluent:{rate:1.18,pause:0}}; /* 详情页朗读三档:跟读(慢+句间停顿供模仿)/标准/熟读(稍快供复习) */
+var reciteMode=(function(){var v=localStorage.getItem('pg_recitemode');return RECITE_MODES[v]?v:'standard';})();
+var reciteFollowT=null; /* 跟读模式"读完一句→停顿→自动继续"的计时器句柄,中途打断需清掉防止多余触发 */
 /* 趣味/颤音音色，诵读不用 */
 const REC_NOVELTY=/Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley|Bells|Bubbles|Jester|Trinoids|Wobble|Boing|Bahh|Albert|Zarvox|Whisper|Organ/i;
 /* 通用选音：以语言代码为锚（不写死某系统专有名字），离线(localService)优先，
@@ -4786,15 +4788,28 @@ function setRecLang(l){
   document.querySelectorAll('#rec-lang button').forEach(b=>b.classList.toggle('on',b.dataset.lang===recLang));
   if(recReciting){reciteStop();reciteStart();}
 }
-function recApplySpeedUI(){
-  document.querySelectorAll('#rec-speed button,#sleep-speed button').forEach(function(b){b.classList.toggle('on',+b.dataset.speed===recSpeed);});
+function reciteApplyModeUI(){
+  document.querySelectorAll('#rec-speed button').forEach(function(b){b.classList.toggle('on',b.dataset.mode===reciteMode);});
 }
-function setRecSpeed(s){
-  recSpeed=(s===0.75||s===1.25)?s:1;
-  try{localStorage.setItem('pg_recspeed',recSpeed);}catch(e){}
-  recApplySpeedUI();
-  if(recAudioEl)recAudioEl.playbackRate=recSpeed;   /* 详情页正在播放时立即生效 */
-  if(sleepAudio)sleepAudio.playbackRate=recSpeed;   /* 听诗入眠正在播放时立即生效 */
+function setReciteMode(m){
+  if(!RECITE_MODES[m])m='standard';
+  var prevFollow=(reciteMode==='follow'); reciteMode=m;
+  try{localStorage.setItem('pg_recitemode',reciteMode);}catch(e){}
+  reciteApplyModeUI();
+  if(reciteFollowT){clearTimeout(reciteFollowT);reciteFollowT=null;}
+  if(recAudioEl)recAudioEl.playbackRate=RECITE_MODES[reciteMode].rate;
+  /* 从跟读切到别的模式时，如果正卡在句间停顿里，别再傻等旧的停顿时长，直接续播 */
+  if(prevFollow&&m!=='follow'&&recReciting&&recMode==='audio'&&recAudioEl&&recAudioEl.paused&&!recPaused){
+    var pr=recAudioEl.play(); if(pr&&pr.catch)pr.catch(function(){});
+  }
+}
+var sleepSpeed=(function(){var v=parseFloat(localStorage.getItem('pg_sleepspeed'));return (v===0.65||v===0.8)?v:1;})(); /* 听诗入眠三档:舒缓/慢读/标准,与详情页朗读速度完全独立,不停顿 */
+function sleepApplySpeedUI(){document.querySelectorAll('#sleep-speed button').forEach(function(b){b.classList.toggle('on',+b.dataset.speed===sleepSpeed);});}
+function setSleepSpeed(s){
+  sleepSpeed=(s===0.65||s===0.8)?s:1;
+  try{localStorage.setItem('pg_sleepspeed',sleepSpeed);}catch(e){}
+  sleepApplySpeedUI();
+  if(sleepAudio)sleepAudio.playbackRate=sleepSpeed;
 }
 if('speechSynthesis' in window){const _prev=speechSynthesis.onvoiceschanged;speechSynthesis.onvoiceschanged=function(){recApplyLangAvail();};}
 /* 跨平台保活：部分浏览器(尤其 Chrome 桌面/失焦时)会让 speechSynthesis 自动暂停→朗读中途停。
@@ -4852,6 +4867,7 @@ function reciteAudioSeekLine(i,playAfter){
 function recitePickLine(ev,i){
   if(ev&&ev.target&&ev.target.closest&&ev.target.closest('.annoword'))return;
   if(ev&&ev.stopPropagation)ev.stopPropagation();
+  if(reciteFollowT){clearTimeout(reciteFollowT);reciteFollowT=null;}
   recStartIdx=reciteClampLine(i);
   if(recReciting&&recMode==='audio'){reciteAudioSeekLine(recStartIdx,true);return;}
   if(recReciting&&recMode==='tts'){
@@ -4868,6 +4884,7 @@ function recitePause(){
   if(!recReciting)return;
   recPaused=true; _ttsKeep(false);
   if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;}
+  if(reciteFollowT){clearTimeout(reciteFollowT);reciteFollowT=null;}
   if(recMode==='audio'&&recAudioEl){try{recAudioEl.pause();}catch(e){}}
   else if(recMode==='tts'&&'speechSynthesis' in window){try{speechSynthesis.pause();}catch(e){}}
   setReciteBtn(true);
@@ -4936,11 +4953,13 @@ function reciteLine(){
   const u=new SpeechSynthesisUtterance(recQueue[recIdx].replace(/[，。？！、；：]/g,'，'));
   u.lang=(recLang==='cantonese')?'zh-HK':'zh-CN';
   if(recVoice)u.voice=recVoice;
-  u.rate=0.84*recSpeed; u.pitch=1.0; /* 统一、自然、放慢的诵读节奏，recSpeed 为用户可调语速倍率 */
+  u.rate=0.84*RECITE_MODES[reciteMode].rate; u.pitch=1.0; /* 统一、自然、放慢的诵读节奏，按当前朗读模式再乘一个倍率 */
   u.onstart=()=>{ if(run!==recRunId)return; recStarted=true; if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;} };
-  u.onend=()=>{ if(run!==recRunId||!recReciting||recMode!=='tts'||recPaused)return; recIdx++; setTimeout(reciteLine,360); };
-  u.onerror=(ev)=>{ if(run===recRunId&&recReciting&&recMode==='tts'&&!recPaused){recIdx++;setTimeout(reciteLine,360);} };
-  try{speechSynthesis.speak(u);}catch(e){ recIdx++; setTimeout(reciteLine,360); }
+  u.onend=()=>{ if(run!==recRunId||!recReciting||recMode!=='tts'||recPaused)return; recIdx++;
+    reciteFollowT=setTimeout(reciteLine, RECITE_MODES[reciteMode].pause||360); };
+  u.onerror=(ev)=>{ if(run===recRunId&&recReciting&&recMode==='tts'&&!recPaused){recIdx++;
+    reciteFollowT=setTimeout(reciteLine, RECITE_MODES[reciteMode].pause||360);} };
+  try{speechSynthesis.speak(u);}catch(e){ recIdx++; reciteFollowT=setTimeout(reciteLine, RECITE_MODES[reciteMode].pause||360); }
 }
 /* 内嵌音频朗读：整首播放 + 整体高亮(无逐句时间戳),任何浏览器都支持 <audio> */
 function recitePlayAudio(p, track){
@@ -4962,14 +4981,21 @@ function recitePlayAudio(p, track){
   if(recStartIdx>0)_hiLn(recStartIdx); else _hiLn(-1);
   if(!recAudioEl)recAudioEl=new Audio();
   recAudioEl.src=((track==='yue'&&typeof RECITE_AUDIO_YUE!=='undefined')?RECITE_AUDIO_YUE:RECITE_AUDIO)[p.id];
-  recAudioEl.playbackRate=recSpeed;
+  recAudioEl.playbackRate=RECITE_MODES[reciteMode].rate;
   recAudioEl.onloadedmetadata=function(){ if(recStartIdx>0)reciteAudioSeekLine(recStartIdx,false); };
   recAudioEl.ontimeupdate=function(){
     if(!recReciting||recMode!=='audio'||recPaused)return;
     var d=recAudioEl.duration; if(!d||!isFinite(d))return;
     var t=recAudioEl.currentTime+REC_AUDIO_HI_ADVANCE, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
     for(var i=0;i<segs.length;i++){ acc+=segs[i]/_tot*d; if(t<acc){idx=i;break;} }
-    _hiLn(idx-1); /* idx 0=报题段→不点亮;之后顺延到第 idx-1 句 */
+    var newLn=idx-1, changed=(newLn!==recHiIdx);
+    _hiLn(newLn); /* idx 0=报题段→不点亮;之后顺延到第 idx-1 句 */
+    if(changed&&newLn>=0&&reciteMode==='follow'){
+      recAudioEl.pause();
+      reciteFollowT=setTimeout(function(){
+        if(recReciting&&recMode==='audio'&&!recPaused){var pr=recAudioEl.play();if(pr&&pr.catch)pr.catch(function(){});}
+      }, RECITE_MODES.follow.pause);
+    }
   };
   recAudioEl.onended=function(){ reciteStop(); };
   recAudioEl.onerror=function(){ reciteStop(); };
@@ -4978,6 +5004,7 @@ function recitePlayAudio(p, track){
 function reciteStop(){
   recReciting=false; recPaused=false; recMode=null; recHiIdx=-99; recStartIdx=0; recAudioMeta=null; recRunId++; _ttsKeep(false);
   if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;}
+  if(reciteFollowT){clearTimeout(reciteFollowT);reciteFollowT=null;}
   if('speechSynthesis' in window)speechSynthesis.cancel();
   if(recAudioEl){ try{recAudioEl.pause();recAudioEl.currentTime=0;}catch(e){} }
   document.querySelectorAll('#d-verse .ln.reciting').forEach(el=>el.classList.remove('reciting'));
@@ -5095,7 +5122,7 @@ function openSleep(mode){
   renderSleepPicker();
   renderSleepList();
   renderSleepAmbBtn();
-  recApplySpeedUI();
+  sleepApplySpeedUI();
   sleepSetTimer(sleepTimerMin);
   sleepPlayCurrent();
 }
@@ -5103,7 +5130,7 @@ function sleepPlayCurrent(){
   if(!sleepOn)return;
   var tr=sleepTrack(), id=sleepList[sleepIdx], p=POEMS.find(function(x){return x.id===id;});
   sleepUpdateUI(p); sleepSetMedia(p);
-  try{ sleepAudio.volume=1; sleepAudio.src=tr[id]; sleepAudio.playbackRate=recSpeed; var pr=sleepAudio.play(); if(pr&&pr.catch)pr.catch(function(){}); }catch(e){}
+  try{ sleepAudio.volume=1; sleepAudio.src=tr[id]; sleepAudio.playbackRate=sleepSpeed; var pr=sleepAudio.play(); if(pr&&pr.catch)pr.catch(function(){}); }catch(e){}
   sleepSyncAmb();
   sleepAudio.ontimeupdate=function(){
     if(!sleepOn)return;
