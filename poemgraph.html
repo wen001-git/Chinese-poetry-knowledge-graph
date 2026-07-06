@@ -359,6 +359,8 @@ body.theme-zhumo select.chip#grade-chip{
 /* ══════════ 详情页 ══════════ */
 #v-detail{max-width:860px;margin:0 auto}
 .d-back{color:var(--ink2);font-size:14px;margin-bottom:16px;display:inline-flex;gap:6px;align-items:center}
+.d-nav{display:flex;justify-content:space-between;margin-bottom:8px}
+.d-nav .d-back{margin-bottom:0}
 .d-back:hover{color:var(--teal)}
 .d-hero{background:linear-gradient(158deg,#fbf8f1 0%,#f1ece0 100%);border:1px solid var(--border);border-radius:var(--r2);
   padding:40px 32px 34px;text-align:center;box-shadow:var(--shadow);margin-bottom:18px;position:relative;overflow:hidden}
@@ -973,6 +975,7 @@ body.sleep-open{overflow:hidden}
       <div class="d-seal">詩</div>
       <div class="d-meta" id="d-meta"></div>
       <h1 class="serif" id="d-title"></h1>
+      <div class="d-nav" id="d-nav"></div>
       <div class="d-verse serif" id="d-verse"></div>
       <div class="d-recite-row">
         <button class="d-recite" id="d-recite" onclick="reciteToggle()">🔊 朗读</button>
@@ -1073,6 +1076,11 @@ body.sleep-open{overflow:hidden}
     <button data-speed="0.55" onclick="setSleepSpeed(0.55)">舒缓</button>
     <button data-speed="0.65" onclick="setSleepSpeed(0.65)">慢读</button>
     <button data-speed="0.75" class="on" onclick="setSleepSpeed(0.75)">正常</button>
+  </div>
+  <div class="sleep-timer" id="sleep-loop">
+    <span class="sleep-lab">播放方式</span>
+    <button data-loop="seq" class="on" onclick="setSleepLoopMode('seq')">顺序播放</button>
+    <button data-loop="single" onclick="setSleepLoopMode('single')">单曲循环</button>
   </div>
   <div class="sleep-hint">闭眼听诗 · 一首接一首 · 到点自动渐弱停止 · 锁屏也能播</div>
   <div class="sleep-drawer" id="sleep-drawer" onclick="if(event.target===this)sleepCloseList()">
@@ -2530,6 +2538,24 @@ function showView(v){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function visiblePoems(){return POEMS.filter(p=>!ST.grade||p.grade<=ST.grade);}
+function gotoAdjacentPoem(dir){
+  var list=visiblePoems();
+  var idx=list.findIndex(function(p){return p.id===ST.poem.id;});
+  if(idx<0)return;
+  var newIdx=idx+dir;
+  if(newIdx<0||newIdx>=list.length)return;
+  openDetail(list[newIdx].id);
+}
+function renderDetailNav(p, questMode){
+  var list=visiblePoems();
+  var idx=list.findIndex(function(x){return x.id===p.id;});
+  var box=document.getElementById('d-nav');
+  if(!box)return;
+  if(questMode||idx<0){ box.innerHTML=''; return; }
+  var prevBtn=(idx>0)?'<button class="d-back" onclick="gotoAdjacentPoem(-1)">‹ 上一首</button>':'<span></span>';
+  var nextBtn=(idx<list.length-1)?'<button class="d-back" onclick="gotoAdjacentPoem(1)">下一首 ›</button>':'<span></span>';
+  box.innerHTML=prevBtn+nextBtn;
+}
 function starsOf(id){return ST.prog[id]||0;}
 function starStr(n){return '★'.repeat(n)+'☆'.repeat(3-n);}
 
@@ -2605,6 +2631,7 @@ function openDetail(id){
   // hero
   document.getElementById('d-meta').innerHTML='<span class="dyn">'+p.dyn+'代</span> · '+POETS[p.poet].name+' · '+p.volume;
   document.getElementById('d-title').textContent=p.title;
+  renderDetailNav(p, fromPath);
   document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'" onclick="recitePickLine(event,'+i+')">'+rubyLine(l,p.anno)+lineScene(l.t)+'</span>').join('');
   bindAnnoPop();
   updateReciteFloatShow();
@@ -4811,6 +4838,13 @@ function setSleepSpeed(s){
   sleepApplySpeedUI();
   if(sleepAudio)sleepAudio.playbackRate=sleepSpeed;
 }
+var sleepLoopMode=(localStorage.getItem('pg_sleeploop')==='single')?'single':'seq'; /* seq=按诗单顺序(默认,即改动前行为)/single=单曲循环 */
+function sleepApplyLoopUI(){document.querySelectorAll('#sleep-loop button').forEach(function(b){b.classList.toggle('on',b.dataset.loop===sleepLoopMode);});}
+function setSleepLoopMode(m){
+  sleepLoopMode=(m==='single')?'single':'seq';
+  try{localStorage.setItem('pg_sleeploop',sleepLoopMode);}catch(e){}
+  sleepApplyLoopUI();
+}
 if('speechSynthesis' in window){const _prev=speechSynthesis.onvoiceschanged;speechSynthesis.onvoiceschanged=function(){recApplyLangAvail();};}
 /* 跨平台保活：部分浏览器(尤其 Chrome 桌面/失焦时)会让 speechSynthesis 自动暂停→朗读中途停。
    定时 resume() 是无害空操作(正常播放时不影响)，能在被暂停时自动续上，保证一口气读完。 */
@@ -5177,6 +5211,7 @@ function openSleep(mode){
   renderSleepList();
   renderSleepAmbBtn();
   sleepApplySpeedUI();
+  sleepApplyLoopUI();
   sleepSetTimer(sleepTimerMin);
   sleepPlayCurrent();
 }
@@ -5231,7 +5266,7 @@ function sleepPlayCurrent(){
 function sleepOnEnded(){
   if(!sleepOn)return;
   if(sleepStopAt && Date.now()>=sleepStopAt){ sleepFadeStop(); return; }   /* 墙钟到点→渐弱停 */
-  sleepGapT=setTimeout(function(){ if(!sleepOn)return; sleepIdx=(sleepIdx+1)%sleepList.length; sleepPlayCurrent(); }, 800); /* 诗间留白:与句间停顿相近,保持连贯一致的节奏 */
+  sleepGapT=setTimeout(function(){ if(!sleepOn)return; if(sleepLoopMode!=='single')sleepIdx=(sleepIdx+1)%sleepList.length; sleepPlayCurrent(); }, 800); /* 诗间留白:与句间停顿相近,保持连贯一致的节奏;单曲循环模式下不推进,原地重播 */
 }
 function sleepSkip(d){ if(!sleepOn)return; clearTimeout(sleepGapT); sleepIdx=(sleepIdx+d+sleepList.length)%sleepList.length; sleepPlayCurrent(); }
 function sleepTogglePlay(){
