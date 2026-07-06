@@ -4829,7 +4829,7 @@ var REC_AUDIO_HI_ADVANCE=0.75; /* 内嵌整首音频无逐句时间戳：高亮�
 var REC_AUDIO_HI_ADVANCE_YUE=0.35; /* 粤语(善怡)整体语速节奏跟普通话不同，同样的提前量在粤语录音上高亮明显跑到人声前面，用更小的提前量 */
 var REC_AUDIO_PAUSE_MARGIN=0.1; /* 跟读物理暂停延迟=抵消上面的提前量(现已按语速换算为真实秒,与语速无关)+安全余量 */
 var REC_AUDIO_PAUSE_MARGIN_YUE_EXTRA=0.2; /* 粤语高亮提前量校准好了(0.35)，但跟读暂停仍会切到上一句尾音，说明暂停本身还需要额外余量(不影响高亮，只加在暂停判定上) */
-var REC_AUDIO_YUE_PRE_SCALE=1.2; /* 粤语(善怡)录音报题段实际耗时比按字数估算的更长，放大报题段权重把首两句的估计边界往后推一点 */
+var REC_AUDIO_YUE_PRE_SCALE=1.4; /* 粤语(善怡)录音报题段实际耗时比按字数估算的更长，放大报题段权重把首两句的估计边界往后推一点 */
 function reciteHasAudio(p){ return !!(typeof RECITE_AUDIO!=='undefined' && p && RECITE_AUDIO[p.id]); }
 function reciteHasAudioYue(p){ return !!(typeof RECITE_AUDIO_YUE!=='undefined' && p && RECITE_AUDIO_YUE[p.id]); }
 function reciteToggle(){ if(recReciting){recPaused?reciteResume():recitePause();}else reciteStart(); }
