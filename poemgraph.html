@@ -4827,6 +4827,7 @@ function _ttsKeep(on){
 var recAudioEl=null, recWatchdog=null, recStarted=false, recMode=null, recHiIdx=-99, recPaused=false, recStartIdx=0, recAudioMeta=null, recRunId=0;
 var REC_AUDIO_HI_ADVANCE=0.75; /* 内嵌整首音频无逐句时间戳：高亮略提前，贴近实际声音 */
 var REC_AUDIO_PAUSE_MARGIN=0.1; /* 跟读物理暂停延迟=抵消上面的提前量(现已按语速换算为真实秒,与语速无关)+安全余量 */
+var REC_AUDIO_YUE_PRE_SCALE=1.2; /* 粤语(善怡)录音报题段实际耗时比按字数估算的更长，放大报题段权重把首两句的估计边界往后推一点 */
 function reciteHasAudio(p){ return !!(typeof RECITE_AUDIO!=='undefined' && p && RECITE_AUDIO[p.id]); }
 function reciteHasAudioYue(p){ return !!(typeof RECITE_AUDIO_YUE!=='undefined' && p && RECITE_AUDIO_YUE[p.id]); }
 function reciteToggle(){ if(recReciting){recPaused?reciteResume():recitePause();}else reciteStart(); }
@@ -4976,6 +4977,11 @@ function recitePlayAudio(p, track){
   // 音频开头先报「标题。朝代·作者。」——按其字数估时长,这段不点亮诗句
   var _author=(POETS[p.poet]&&POETS[p.poet].name)||'';
   var _pmm=(p.title+(p.dyn||'')+_author).match(/[一-鿿]/g); var _pre=Math.max(1,_pmm?_pmm.length:1);
+  /* 按字数比例估算每句边界，假设"报题(标题·朝代·作者)"和"正文"语速一致——但普通话(语舒)/粤语(善怡)是两个人的
+     独立录音，各自"报完题、正式进正文"前的实际停顿/节奏并不一样，同一套比例估算对两条音轨的准度不同。
+     粤语实测第一、二句偏早(报题段的实际时长比字数比例估的更长)，用 REC_AUDIO_YUE_PRE_SCALE 把粤语报题段
+     的估算权重适当放大，把"正文起点"的估计往后推——这仍是一次性估计，可能还需按听感再调 */
+  if(track==='yue')_pre=_pre*REC_AUDIO_YUE_PRE_SCALE;
   var _tot=_pre+_w.reduce(function(a,b){return a+b;},0)||1;
   recAudioMeta={lns:_lns,w:_w,pre:_pre,total:_tot};
   function _hiLn(i){reciteHighlightLine(i,_lns);}
