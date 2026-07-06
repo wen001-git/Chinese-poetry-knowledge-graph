@@ -4825,7 +4825,8 @@ function _ttsKeep(on){
 }
 /* 朗读：系统 TTS 优先(逐句高亮);若设备无可用语音/不发声→自动回退「内嵌音频」(RECITE_AUDIO，覆盖国产安卓如小米 Chrome 无 TTS 引擎的情况) */
 var recAudioEl=null, recWatchdog=null, recStarted=false, recMode=null, recHiIdx=-99, recPaused=false, recStartIdx=0, recAudioMeta=null, recRunId=0;
-var REC_AUDIO_HI_ADVANCE=0.75; /* 内嵌整首音频无逐句时间戳：高亮略提前，贴近实际声音 */
+var REC_AUDIO_HI_ADVANCE=0.75; /* 内嵌整首音频无逐句时间戳：高亮略提前，贴近实际声音(普通话/语舒专属值) */
+var REC_AUDIO_HI_ADVANCE_YUE=0.35; /* 粤语(善怡)整体语速节奏跟普通话不同，同样的提前量在粤语录音上高亮明显跑到人声前面，用更小的提前量 */
 var REC_AUDIO_PAUSE_MARGIN=0.1; /* 跟读物理暂停延迟=抵消上面的提前量(现已按语速换算为真实秒,与语速无关)+安全余量 */
 var REC_AUDIO_YUE_PRE_SCALE=1.2; /* 粤语(善怡)录音报题段实际耗时比按字数估算的更长，放大报题段权重把首两句的估计边界往后推一点 */
 function reciteHasAudio(p){ return !!(typeof RECITE_AUDIO!=='undefined' && p && RECITE_AUDIO[p.id]); }
@@ -4990,13 +4991,14 @@ function recitePlayAudio(p, track){
   recAudioEl.src=((track==='yue'&&typeof RECITE_AUDIO_YUE!=='undefined')?RECITE_AUDIO_YUE:RECITE_AUDIO)[p.id];
   recAudioEl.playbackRate=RECITE_MODES[reciteMode].rate;
   recAudioEl.onloadedmetadata=function(){ if(recStartIdx>0)reciteAudioSeekLine(recStartIdx,false); };
+  var _hiAdvance=(track==='yue')?REC_AUDIO_HI_ADVANCE_YUE:REC_AUDIO_HI_ADVANCE; /* 粤语/普通话录音节奏不同，提前量分开校准 */
   recAudioEl.ontimeupdate=function(){
     if(!recReciting||recMode!=='audio'||recPaused)return;
     var d=recAudioEl.duration; if(!d||!isFinite(d))return;
-    /* REC_AUDIO_HI_ADVANCE 是"提前多少真实秒"，但 currentTime 走的是音频原始时间轴(不受播速影响)——
+    /* _hiAdvance 是"提前多少真实秒"，但 currentTime 走的是音频原始时间轴(不受播速影响)——
        慢速播放时同样的原始时间轴跨度要更久的真实时间才走完，所以要按当前语速把它换算回原始时间轴单位，
        否则语速越慢，高亮实际提前的真实秒数就越多(之前没换算，跟读0.65倍速下高亮明显超前于人声) */
-    var t=recAudioEl.currentTime+REC_AUDIO_HI_ADVANCE*RECITE_MODES[reciteMode].rate, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
+    var t=recAudioEl.currentTime+_hiAdvance*RECITE_MODES[reciteMode].rate, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
     for(var i=0;i<segs.length;i++){ acc+=segs[i]/_tot*d; if(t<acc){idx=i;break;} }
     var newLn=idx-1, prevLn=recHiIdx, changed=(newLn!==prevLn);
     _hiLn(newLn); /* idx 0=报题段→不点亮;之后顺延到第 idx-1 句;高亮沿用上面提前量算出的 idx，观感不变 */
@@ -5013,7 +5015,7 @@ function recitePlayAudio(p, track){
           reciteFollowT=null;
           if(recReciting&&recMode==='audio'&&!recPaused){var pr=recAudioEl.play();if(pr&&pr.catch)pr.catch(function(){});}
         }, RECITE_MODES.follow.pause);
-      }, (REC_AUDIO_HI_ADVANCE+REC_AUDIO_PAUSE_MARGIN)*1000);
+      }, (_hiAdvance+REC_AUDIO_PAUSE_MARGIN)*1000);
     }
   };
   recAudioEl.onended=function(){ reciteStop(); };
