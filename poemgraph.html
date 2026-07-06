@@ -5068,7 +5068,7 @@ window.addEventListener('scroll', function(){
 
 /* ══════ 听诗入眠 · 夜读电台（连播内嵌音频 + 古琴垫底 + 睡眠定时渐弱 + 锁屏 MediaSession）══════ */
 var sleepOn=false, sleepList=[], sleepIdx=0, sleepAudio=null, sleepStopAt=0, sleepTimerMin=30, sleepFadeT=null, sleepGapT=null, sleepLnEls=[], sleepLnW=[], sleepLnTot=1, sleepPreW=1, sleepHiIdx=-99, sleepAmbOn=true;
-var sleepFollowT=null, SLEEP_PAUSE_MS=500, SLEEP_PAUSE_MARGIN=0.3; /* 句间停顿:计时器句柄+停顿时长+暂停前安全余量(此处currentTime无提前偏移,只是防估算误差的余量) */
+var sleepFollowT=null, SLEEP_PAUSE_MS=500, SLEEP_PAUSE_MARGIN=0.05; /* 句间停顿:计时器句柄+停顿时长+暂停前安全余量(此处currentTime无提前偏移,只是防估算误差的余量) */
 try{ sleepAmbOn=localStorage.getItem('pg_sleep_amb')!=='0'; }catch(e){}
 function sleepTrack(){ return (recLang==='cantonese'&&typeof RECITE_AUDIO_YUE!=='undefined')?RECITE_AUDIO_YUE:RECITE_AUDIO; }
 function renderSleepAmbBtn(){
