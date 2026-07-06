@@ -5002,21 +5002,31 @@ function recitePlayAudio(p, track){
     var t=recAudioEl.currentTime+_hiAdvance*RECITE_MODES[reciteMode].rate, segs=[_pre].concat(_w), acc=0, idx=segs.length-1;
     for(var i=0;i<segs.length;i++){ acc+=segs[i]/_tot*d; if(t<acc){idx=i;break;} }
     var newLn=idx-1, prevLn=recHiIdx, changed=(newLn!==prevLn);
-    _hiLn(newLn); /* idx 0=报题段→不点亮;之后顺延到第 idx-1 句;高亮沿用上面提前量算出的 idx，观感不变 */
-    if(changed&&prevLn>=0&&newLn>=0&&reciteMode==='follow'&&!reciteFollowT){
-      /* prevLn>=0 排除"报题段(-1)→第一句诗(0)"这次跳变——报题刚说完不该停，
-         得等真的读完一整句诗(上一次高亮也是>=0的真实诗句)才触发跟读停顿 */
-      /* 换行判定用了提前 REC_AUDIO_HI_ADVANCE 真实秒的估算(为了高亮好看)，直接拿来触发暂停会切断还没说完的话。
+    if(reciteMode==='follow'&&changed&&prevLn>=0&&newLn>=0){
+      /* 跟读模式：读完一句不立即高亮下一句(那样看着像"还没停顿就跳到下一句")，
+         而是保持当前句高亮，等停顿快结束、下一句要开始念之前 0.2s 才切换高亮，
+         做到"先停顿完，再高亮下一句"。recHiIdx 在此期间不更新，_hiLn 留到延时里再调用。
+         prevLn>=0 排除"报题段(-1)→第一句诗(0)"这次跳变——报题刚说完不该停 */
+      if(reciteFollowT)return; /* 已经在停顿流程里(recHiIdx还没变,changed会持续为true)，靠这个防止重复排队 */
+      /* 换行判定用了提前的估算(为了原本高亮好看)，直接拿来触发暂停会切断还没说完的话。
          这里改成再等一段真实时间(抵消提前量+安全余量)才真正暂停，宁晚勿早 */
       reciteFollowT=setTimeout(function(){
         reciteFollowT=null;
         if(!recReciting||recMode!=='audio'||recPaused||reciteMode!=='follow')return;
         recAudioEl.pause();
+        var pauseMs=RECITE_MODES.follow.pause, preHiMs=Math.min(200,pauseMs); /* 下一句开始前0.2s才切高亮 */
         reciteFollowT=setTimeout(function(){
           reciteFollowT=null;
-          if(recReciting&&recMode==='audio'&&!recPaused){var pr=recAudioEl.play();if(pr&&pr.catch)pr.catch(function(){});}
-        }, RECITE_MODES.follow.pause);
+          if(!recReciting||recMode!=='audio'||recPaused||reciteMode!=='follow')return;
+          _hiLn(newLn);
+          reciteFollowT=setTimeout(function(){
+            reciteFollowT=null;
+            if(recReciting&&recMode==='audio'&&!recPaused){var pr=recAudioEl.play();if(pr&&pr.catch)pr.catch(function(){});}
+          }, preHiMs);
+        }, Math.max(0,pauseMs-preHiMs));
       }, (_hiAdvance+REC_AUDIO_PAUSE_MARGIN+(track==='yue'?REC_AUDIO_PAUSE_MARGIN_YUE_EXTRA:0))*1000);
+    }else{
+      _hiLn(newLn); /* 非跟读模式(慢读/正常)，或跟读模式下未触发停顿的换行(如报题段)：立即高亮，保持原行为 */
     }
   };
   recAudioEl.onended=function(){ reciteStop(); };
