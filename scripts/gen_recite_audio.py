@@ -4,10 +4,13 @@
 
 用途：国产安卓(小米等)Chrome 常无 TTS 引擎 → speechSynthesis 不发声；
      本脚本把内容预渲染成 mp3(base64)内嵌作离线兜底(全设备可播)：
-       · RECITE_AUDIO     = 语舒·普通话·诗词朗读（默认音色，见 reciteStart）
-       · RECITE_AUDIO_YUE = 善怡·粤语·诗词朗读（recLang=cantonese 时用）
-       · EVENT_AUDIO      = 语舒·历史故事旁白（openEvent/eventNarrate 时用）
+       · cmn(RECITE_AUDIO_IDS)     = 语舒·普通话·诗词朗读（默认音色，见 reciteStart）
+       · yue(RECITE_AUDIO_YUE_IDS) = 善怡·粤语·诗词朗读（recLang=cantonese 时用）
+       · evt(EVENT_AUDIO_IDS)      = 语舒·历史故事旁白（openEvent/eventNarrate 时用）
      另两个浏览器音色(美嘉/Li-Mu/事件男声)仍走系统 TTS(零字节)。
+     每首诗/每条音轨的实际音频数据以 <script type="text/plain" id="aud-{track}-{id}">惰性数据块
+     形式内嵌(不是JS对象字面量，浏览器不会当JS解析编译——手机首次打开慢~30秒的根因修复，
+     见 poemgraph.html 里 getAudioData/audioClipReady)；{track}IDS 只是小体积的"有没有"索引数组。
 
 引擎：macOS AVSpeechSynthesis(/tmp/synth_batch.swift) → ffmpeg 22k 单声道 → base64。
      已存在 /tmp/rec3/*.caf 则复用，不重合成(省时)。
@@ -16,7 +19,7 @@
 扩覆盖面：诗加进 MID_PICK（小学 grade<=6 自动全包含）；事件自动全包含(EVENTS)。
 订正误读：TONE_FIX 登记「原字→正确声调同音字」(仅改音频文本，不改显示)。
 """
-import re, pathlib, subprocess, base64, os
+import re, pathlib, subprocess, base64, os, json
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 HTML = ROOT / 'poemgraph.html'
@@ -80,13 +83,33 @@ def mp3_b64(caf, mp3):
     return 'data:audio/mpeg;base64,' + base64.b64encode(pathlib.Path(mp3).read_bytes()).decode()
 
 
-def embed(html, varname, mapping):
-    block = 'const ' + varname + '={' + ','.join('%s:"%s"' % (k, v) for k, v in mapping.items()) + '};\n'
-    if 'const ' + varname + '={' in html:
-        return re.sub(r'const ' + varname + r'=\{.*?\};\n', block, html, count=1, flags=re.S)
+def embed_ids(html, varname, keys):
+    """更新/插入轻量ID数组常量(数据集里有没有这首诗音频的静态事实，体积小，非惰性)。"""
+    block = 'const ' + varname + '=' + json.dumps(list(keys)) + ';\n'
+    pat = re.compile(r'const ' + varname + r'=\[.*?\];\n', re.S)
+    if pat.search(html):
+        return pat.sub(lambda _m: block, html, count=1)
     anchor = html.index('F · 朗读')
     i = html.rfind('/*', 0, html.rfind('\n', 0, anchor) + 1)
     return html[:i] + block + html[i:]
+
+
+def embed_clips(html, track, mapping):
+    """整体替换某条音轨(cmn/yue/evt)全部 <script type="text/plain" id="aud-{track}-*">惰性数据块
+    (不是JS对象字面量,浏览器不会当JS解析编译,只有真正播放时才惰性读取——见 poemgraph.html 里
+    getAudioData/audioClipReady)。mapping 每次都是该轨完整的当前诗词集合,故整体替换而非增量patch。"""
+    tag_pat = re.compile(r'<script type="text/plain" id="aud-' + track + r'-[^"]*">.*?</script>\n?', re.S)
+    matches = list(tag_pat.finditer(html))
+    new_block = ''.join(
+        '<script type="text/plain" id="aud-%s-%s">%s</script>\n' % (track, k, v)
+        for k, v in mapping.items()
+    )
+    if matches:
+        start, end = matches[0].start(), matches[-1].end()
+        return html[:start] + new_block + html[end:]
+    anchor = html.index('F · 朗读')
+    i = html.rfind('/*', 0, html.rfind('\n', 0, anchor) + 1)
+    return html[:i] + new_block + html[i:]
 
 
 def main():
@@ -126,9 +149,12 @@ def main():
     synth([(V_YUSHU, f'{REC_DIR}/evt_{e[0]}__yushu.caf', etext(*e)) for e in events])
     evt = {e[0]: mp3_b64(f'{REC_DIR}/evt_{e[0]}__yushu.caf', f'{REC_DIR}/evt_{e[0]}__yushu.mp3') for e in events}
 
-    html = embed(html, 'RECITE_AUDIO', rec)
-    html = embed(html, 'RECITE_AUDIO_YUE', yue)
-    html = embed(html, 'EVENT_AUDIO', evt)
+    html = embed_clips(html, 'cmn', rec)
+    html = embed_clips(html, 'yue', yue)
+    html = embed_clips(html, 'evt', evt)
+    html = embed_ids(html, 'RECITE_AUDIO_IDS', rec.keys())
+    html = embed_ids(html, 'RECITE_AUDIO_YUE_IDS', yue.keys())
+    html = embed_ids(html, 'EVENT_AUDIO_IDS', evt.keys())
     HTML.write_text(html)
 
     mb = lambda d: sum(len(v) for v in d.values()) / 1024 / 1024
