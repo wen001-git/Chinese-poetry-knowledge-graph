@@ -427,8 +427,10 @@ body.theme-zhumo .d-recite-float.on{background:var(--qing)}
 .panel-bar .pb-x:hover{color:var(--cinnabar,#c1352b)}
 .panel-bar .pb-unsup{color:var(--ink3);font-size:12px;padding:0 6px}
 [data-read-section].reading{background:var(--cinnabar-l,#f3dfdb);border-radius:6px;transition:background .15s;box-shadow:inset 0 0 0 2px rgba(193,53,43,.18)}
-.sec-read-btn{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:0;background:transparent;color:var(--ink3);font-size:13px;cursor:pointer;margin-left:8px;vertical-align:middle;transition:.15s}
+.sec-read-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:0;background:transparent;color:var(--ink2);cursor:pointer;margin-left:10px;vertical-align:middle;transition:.18s;padding:0}
+.sec-read-btn svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:.18s}
 .sec-read-btn:hover{background:var(--cinnabar-l,#f3dfdb);color:var(--cinnabar,#c1352b)}
+.sec-read-btn:active{transform:scale(0.92)}
 .sec-read-btn.on{background:var(--cinnabar,#c1352b);color:#fff}
 @media(max-width:560px){.panel-bar{left:8px;right:8px;transform:none;flex-wrap:wrap;padding:8px 10px;gap:6px}.panel-bar .pb-meta{display:none}}
 .rec-lang{display:inline-flex;border:1px solid var(--border);border-radius:16px;overflow:hidden}
@@ -2995,7 +2997,7 @@ function buildQuiz(p){
   if(quizPanel&&!quizPanel.querySelector('.sec-read-btn')){
     var btn=document.createElement('button');
     btn.className='sec-read-btn';
-    btn.innerHTML='🔊';
+    btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9.5c1 .8 1.5 1.6 1.5 2.5s-.5 1.7-1.5 2.5"/></svg>';
     btn.title='朗读所有题目';
     btn.style.cssText='position:relative;margin:0 0 12px 8px;display:inline-flex;';
     btn.onclick=function(e){
@@ -5322,7 +5324,7 @@ function panelAttachHeaderBtn(h3, tabKey){
   var btn=document.createElement('button');
   btn.className='sec-read-btn';
   btn.type='button';
-  btn.innerHTML='🔊';
+  btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9.5c1 .8 1.5 1.6 1.5 2.5s-.5 1.7-1.5 2.5"/></svg>';
   btn.title='朗读整个'+h3.textContent.trim().replace(/^[^一-龥]*/,'')+'段落';
   btn.setAttribute('aria-label','朗读');
   btn.onclick=function(e){

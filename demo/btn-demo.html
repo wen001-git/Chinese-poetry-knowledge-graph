@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>朗读按钮·4 方案对比 · PoemGraph</title>
+<style>
+  /* === 水墨基础变量(直接抄 poemgraph.html) === */
+  :root{
+    --paper:#f7f5f0;
+    --paper2:#efece4;
+    --paper3:#d8d4c8;
+    --ink:#1c1c1e;
+    --ink2:#5c5c6e;
+    --ink3:#8a8a98;
+    --qing:#2d5a6b;
+    --ochre:#a0603a;
+    --cinnabar:#c1352b;
+    --cinnabar-l:#f3dfdb;
+    --border:#d8d4c8;
+    --border2:#c8c4b4;
+    --shadow:0 2px 12px rgba(28,28,30,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Songti SC","STSong","Noto Serif SC",serif;line-height:1.6;padding:32px 24px;max-width:980px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 8px;color:var(--ink);letter-spacing:1px}
+  h1 .sub{font-size:13px;color:var(--ink3);font-weight:400;margin-left:12px;letter-spacing:0}
+  .intro{color:var(--ink2);font-size:13px;margin-bottom:32px;max-width:680px}
+  .grid{display:grid;grid-template-columns:130px 1fr 130px;gap:12px 18px;align-items:center;margin-bottom:14px}
+  .label{font-size:13px;color:var(--ink2);text-align:right;font-weight:600}
+  .label small{display:block;font-weight:400;color:var(--ink3);font-size:11px;margin-top:2px}
+  .stage{background:var(--paper2);border:1px solid var(--border);border-radius:8px;padding:18px 20px;box-shadow:var(--shadow)}
+  .stage h3{display:inline-flex;align-items:center;font-size:17px;color:var(--ink);margin:0;font-weight:600;line-height:1.4}
+  .stage h3 .bar{display:inline-block;width:3px;height:16px;background:var(--cinnabar);border-radius:2px;margin-right:8px;vertical-align:middle}
+  .stage p.anno{color:var(--ink2);font-size:14px;margin:10px 0 0;padding-left:11px}
+  .stage p.anno b{color:var(--ink);margin-right:4px}
+  .note{font-size:11px;color:var(--ink3);text-align:left;line-height:1.5}
+
+  /* === A: 线条状·喇叭+音波(微调版:22×22,1.8px,hover背景圈) === */
+  .btn-a{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:10px;background:transparent;border:0;border-radius:50%;cursor:pointer;vertical-align:middle;transition:.18s;padding:0;color:var(--ink2)}
+  .btn-a svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:.18s}
+  .btn-a:hover{background:var(--cinnabar-l);color:var(--cinnabar)}
+  .btn-a:active{transform:scale(0.92)}
+  .btn-a.on{background:var(--cinnabar);color:#fff}
+
+  /* === B: 立体·古印 === */
+  .btn-b{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin-left:10px;border:2px solid var(--cinnabar);border-radius:50%;background:#fff;color:var(--cinnabar);font-size:12px;font-weight:600;cursor:pointer;vertical-align:middle;transition:.15s;font-family:inherit;padding:0}
+  .btn-b:hover{background:var(--cinnabar);color:#fff;transform:scale(1.06)}
+  .btn-b:active{transform:scale(0.94)}
+  .btn-b.on{background:var(--cinnabar);color:#fff}
+
+  /* === C: mini 芯片 === */
+  .btn-c{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:3px 10px;margin-left:10px;background:#fff;border:1px solid var(--cinnabar);border-radius:12px;color:var(--cinnabar);font-size:12px;font-weight:600;cursor:pointer;vertical-align:middle;transition:.15s;font-family:inherit;min-height:24px;line-height:1}
+  .btn-c .tri{font-size:10px;line-height:1}
+  .btn-c:hover{background:var(--cinnabar-l);transform:translateY(-1px)}
+  .btn-c:active{transform:translateY(0)}
+  .btn-c.on{background:var(--cinnabar);color:#fff}
+
+  /* === D: 零按钮·hover 标题 === */
+  .h3-d{cursor:pointer;transition:.15s;position:relative;padding-right:24px;user-select:none}
+  .h3-d::after{content:"▸";position:absolute;right:0;top:50%;transform:translateY(-50%) translateX(-6px);opacity:0;color:var(--cinnabar);transition:.2s;font-size:14px}
+  .h3-d:hover{color:var(--cinnabar)}
+  .h3-d:hover::after{opacity:1;transform:translateY(-50%) translateX(0)}
+  .h3-d.on{color:var(--cinnabar)}
+  .h3-d.on::after{opacity:1;content:"▾";transform:translateY(-50%) translateX(0)}
+
+  /* === 触屏提示 === */
+  .touch-hint{margin-top:48px;padding:16px 18px;background:#fff8e8;border:1px solid #e8d8a0;border-radius:6px;color:#7a5a1a;font-size:13px}
+
+  /* === 对照表 === */
+  table.compare{margin-top:40px;width:100%;border-collapse:collapse;font-size:13px}
+  table.compare th,table.compare td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+  table.compare th{background:var(--paper2);color:var(--ink);font-weight:600;font-size:12px}
+  table.compare td:nth-child(2){text-align:center;width:130px}
+
+  /* === 停止态 === */
+  .stop-row{margin-top:32px;padding:18px 20px;background:var(--paper2);border:1px solid var(--border);border-radius:8px}
+  .stop-row h2{font-size:14px;color:var(--ink);margin:0 0 12px;font-weight:600}
+  .stop-row p{font-size:12px;color:var(--ink2);margin:0 0 8px}
+  .stop-row table{width:100%;font-size:13px;border-collapse:collapse}
+  .stop-row td{padding:6px 0;vertical-align:middle}
+
+  /* 当前(丑)的样式 */
+  .btn-now{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:0;background:transparent;color:var(--ink3);font-size:13px;cursor:pointer;margin-left:8px;vertical-align:middle;padding:0}
+  .btn-now:hover{background:var(--cinnabar-l);color:var(--cinnabar)}
+  .btn-now.on{background:var(--cinnabar);color:#fff}
+</style>
+</head>
+<body>
+
+<h1>「字词注释」朗读按钮 · 4 方案对比<span class="sub">PoemGraph 详情页 · 鼠标悬停/点击看效果</span></h1>
+<p class="intro">第 1 行是当前 (丑) 的 24px 透明 emoji 按钮，下面 4 行是 4 个候选方案 A/B/C/D。每个都可以悬停看 hover 态、点击看点中态 (变朱砂 + 图标变停止)。选好后告诉我字母即可。</p>
+
+<!-- 当前(丑) -->
+<div class="grid">
+  <div class="label">当前(丑)<small>transparent 🔊</small></div>
+  <div class="stage">
+    <h3><span class="bar"></span>字词注释 <button class="btn-now" title="朗读这段" aria-label="朗读">🔊</button></h3>
+    <p class="anno"><b>① 晓</b>天亮 &nbsp; <b>② 闻</b>听见 &nbsp; <b>③ 啼鸟</b>鸟叫</p>
+  </div>
+  <div class="note">24×24 · 透明 · 像误点<br>参考</div>
+</div>
+
+<!-- A 线条 -->
+<div class="grid">
+  <div class="label">A · 线条·喇叭<small>22×22 1.8px</small></div>
+  <div class="stage">
+    <h3><span class="bar"></span>字词注释
+      <button class="btn-a" title="朗读这段" aria-label="朗读" onclick="this.classList.toggle('on')">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 9v6h4l5 4V5L8 9H4z"/>
+          <path d="M16 9.5c1 .8 1.5 1.6 1.5 2.5s-.5 1.7-1.5 2.5"/>
+        </svg>
+      </button>
+    </h3>
+    <p class="anno"><b>① 晓</b>天亮 &nbsp; <b>② 闻</b>听见 &nbsp; <b>③ 啼鸟</b>鸟叫</p>
+  </div>
+  <div class="note">悬停淡朱砂底<br>+ 喇叭变朱砂</div>
+</div>
+
+<!-- B 古印 -->
+<div class="grid">
+  <div class="label">B · 立体·古印<small>朱砂红环</small></div>
+  <div class="stage">
+    <h3><span class="bar"></span>字词注释 <button class="btn-b" title="朗读这段" aria-label="朗读" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'■':'听'">听</button></h3>
+    <p class="anno"><b>① 晓</b>天亮 &nbsp; <b>② 闻</b>听见 &nbsp; <b>③ 啼鸟</b>鸟叫</p>
+  </div>
+  <div class="note">悬停放大填色<br>古典质感</div>
+</div>
+
+<!-- C mini 芯片 -->
+<div class="grid">
+  <div class="label">C · mini 芯片<small>朱砂边白底</small></div>
+  <div class="stage">
+    <h3><span class="bar"></span>字词注释 <button class="btn-c" title="朗读这段" aria-label="朗读" onclick="this.classList.toggle('on');var t=this.querySelector('.tri');var lbl=this.lastChild;if(this.classList.contains('on')){t.textContent='■';lbl.textContent=' 停'}else{t.textContent='▶';lbl.textContent=' 读'}"><span class="tri">▶</span> 读</button></h3>
+    <p class="anno"><b>① 晓</b>天亮 &nbsp; <b>② 闻</b>听见 &nbsp; <b>③ 啼鸟</b>鸟叫</p>
+  </div>
+  <div class="note">最直观<br>语义明确</div>
+</div>
+
+<!-- D 零按钮 -->
+<div class="grid">
+  <div class="label">D · 零按钮<small>hover 标题</small></div>
+  <div class="stage">
+    <h3 class="h3-d" onclick="this.classList.toggle('on')"><span class="bar"></span>字词注释</h3>
+    <p class="anno"><b>① 晓</b>天亮 &nbsp; <b>② 闻</b>听见 &nbsp; <b>③ 啼鸟</b>鸟叫</p>
+  </div>
+  <div class="note">悬停标题变朱砂<br>点标题朗读</div>
+</div>
+
+<!-- 停止态对比 -->
+<div class="stop-row">
+  <h2>点中态(正在朗读)· 点击上面任一行对比</h2>
+  <p style="margin-bottom:14px">每个按钮在朗读中的样子:</p>
+  <table>
+    <tr>
+      <td style="color:var(--ink2);width:90px">当前</td>
+      <td><button class="btn-now on">🔊</button></td>
+      <td style="color:var(--ink3);padding-left:14px">背景变朱砂,emoji 还是同一个</td>
+    </tr>
+    <tr>
+      <td style="color:var(--ink2)">A 线条</td>
+      <td><button class="btn-a on"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9.5c1 .8 1.5 1.6 1.5 2.5s-.5 1.7-1.5 2.5"/></svg></button></td>
+      <td style="color:var(--ink3);padding-left:14px">背景填朱砂,图标描边变白</td>
+    </tr>
+    <tr>
+      <td style="color:var(--ink2)">B 古印</td>
+      <td><button class="btn-b on">■</button></td>
+      <td style="color:var(--ink3);padding-left:14px">填实朱砂,中间显示停止方块</td>
+    </tr>
+    <tr>
+      <td style="color:var(--ink2)">C 芯片</td>
+      <td><button class="btn-c on"><span class="tri">■</span> 停</button></td>
+      <td style="color:var(--ink3);padding-left:14px">背景朱砂、字变白「停」</td>
+    </tr>
+    <tr>
+      <td style="color:var(--ink2)">D 零按钮</td>
+      <td><span style="color:var(--cinnabar);font-weight:600">字词注释 ▾</span></td>
+      <td style="color:var(--ink3);padding-left:14px">标题一直朱砂、再点一下结束</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 触屏目标 -->
+<div class="touch-hint">
+  ⚠️ <b>触屏目标</b>(HIG 推荐 ≥44×44)：A 实际只有 34×24 偏小；B 26×26 太小；C 32×24 文字补偿了一部分；D 整段标题都可点,最大。如果主要用户用 iPad/手机,<b>A 和 B 偏小</b>,建议选 C 或 D。
+</div>
+
+<!-- 对照表 -->
+<table class="compare">
+  <tr><th>方案</th><th>大小</th><th>视觉</th><th>语义清晰度</th><th>触屏友好</th><th>与水墨风契合</th></tr>
+  <tr><td><b>当前(丑)</b></td><td>24×24</td><td>⚪⚪⚪</td><td>⚪⚪</td><td>⚪</td><td>⚪⚪</td></tr>
+  <tr><td><b>A 线条</b></td><td>22×22</td><td>⚪⚪⚪⚪⚪</td><td>⚪⚪⚪⚪⚪</td><td>⚪⚪⚪</td><td>⚪⚪⚪⚪⚪</td></tr>
+  <tr><td><b>B 古印</b></td><td>26×26</td><td>⚪⚪⚪⚪</td><td>⚪⚪⚪⚪</td><td>⚪</td><td>⚪⚪⚪⚪</td></tr>
+  <tr><td><b>C 芯片</b></td><td>32×24</td><td>⚪⚪⚪⚪</td><td>⚪⚪⚪⚪⚪</td><td>⚪⚪⚪</td><td>⚪⚪⚪</td></tr>
+  <tr><td><b>D 零按钮</b></td><td>整段标题</td><td>⚪⚪⚪⚪⚪</td><td>⚪⚪</td><td>⚪⚪⚪⚪⚪</td><td>⚪⚪⚪⚪⚪</td></tr>
+</table>
+
+<p style="margin-top:32px;font-size:12px;color:var(--ink3);text-align:center">— 选好后告诉我 A / B / C / D(或组合),我改 poemgraph.html —</p>
+
+</body>
+</html>
