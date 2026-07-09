@@ -404,33 +404,6 @@ body.theme-zhumo select.chip#grade-chip{
 .d-recite-float:hover{filter:brightness(1.08)}
 .d-recite-float.on{background:linear-gradient(135deg,var(--ochre),#854d2e)}
 body.theme-zhumo .d-recite-float.on{background:var(--qing)}
-/* 详情页"非原文"panel 朗读条（与原文 #d-recite-float 并存不冲突） */
-.panel-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:89;display:none;align-items:center;gap:10px;
-  padding:10px 14px;border-radius:24px;background:rgba(247,245,240,.94);border:1px solid var(--border);
-  box-shadow:0 4px 18px rgba(28,28,30,.18);backdrop-filter:blur(6px);font-size:13px;color:var(--ink)}
-.panel-bar.show{display:inline-flex}
-.panel-bar .pb-btn{padding:7px 14px;border-radius:18px;border:1px solid var(--qing);background:#fff;color:var(--qing);font-weight:600;font-size:13px;cursor:pointer;transition:.15s;min-width:64px}
-.panel-bar .pb-btn:hover:not(:disabled){background:var(--qing);color:#fff}
-.panel-bar .pb-btn.on{background:linear-gradient(135deg,var(--cinnabar,#c1352b),#9a3026);color:#fff;border-color:transparent}
-.panel-bar .pb-btn:disabled{opacity:.4;cursor:not-allowed;background:#eee;color:#999;border-color:#ccc}
-.panel-bar .pb-ico{padding:7px 11px;border-radius:50%;border:1px solid var(--border2);background:#fff;color:var(--ink2);font-size:14px;cursor:pointer;min-width:34px}
-.panel-bar .pb-ico:hover:not(:disabled){background:var(--paper2,#efece4);color:var(--ink)}
-.panel-bar .pb-ico:disabled{opacity:.3;cursor:not-allowed}
-.panel-bar .pb-progress{display:inline-flex;gap:4px;align-items:center}
-.panel-bar .pb-dot{width:8px;height:8px;border-radius:50%;background:var(--paper3,#d8d4c8);transition:.18s}
-.panel-bar .pb-dot.cur{background:var(--cinnabar,#c1352b);transform:scale(1.3)}
-.panel-bar .pb-meta{font-size:12px;color:var(--ink2);min-width:56px;text-align:center}
-.panel-bar .pb-rate{display:inline-flex;border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.panel-bar .pb-rate button{padding:5px 10px;font-size:11px;color:var(--ink2);background:var(--paper);border:0;cursor:pointer;transition:.15s;font-family:inherit}
-.panel-bar .pb-rate button.on{background:var(--qing);color:#fff}
-.panel-bar .pb-x{padding:5px 9px;border-radius:50%;border:0;background:transparent;color:var(--ink3);font-size:16px;cursor:pointer;line-height:1}
-.panel-bar .pb-x:hover{color:var(--cinnabar,#c1352b)}
-.panel-bar .pb-unsup{color:var(--ink3);font-size:12px;padding:0 6px}
-[data-read-section].reading{background:var(--cinnabar-l,#f3dfdb);border-radius:6px;transition:background .15s;box-shadow:inset 0 0 0 2px rgba(193,53,43,.18)}
-.sec-read-btn{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:0;background:transparent;color:var(--ink3);font-size:13px;cursor:pointer;margin-left:8px;vertical-align:middle;transition:.15s}
-.sec-read-btn:hover{background:var(--cinnabar-l,#f3dfdb);color:var(--cinnabar,#c1352b)}
-.sec-read-btn.on{background:var(--cinnabar,#c1352b);color:#fff}
-@media(max-width:560px){.panel-bar{left:8px;right:8px;transform:none;flex-wrap:wrap;padding:8px 10px;gap:6px}.panel-bar .pb-meta{display:none}}
 .rec-lang{display:inline-flex;border:1px solid var(--border);border-radius:16px;overflow:hidden}
 .rec-lang button{padding:5px 13px;font-size:12px;color:var(--ink2);background:var(--paper);transition:.15s}
 .rec-lang button.on{background:var(--teal);color:#fff}
@@ -1046,22 +1019,6 @@ body.sleep-open{overflow:hidden}
   </section>
 
   <button class="d-recite-float" id="d-recite-float" onclick="reciteToggle()" aria-label="朗读">🔊 朗读</button>
-
-  <!-- 非原文 panel 朗读条 v2：与 d-recite-float 并存不冲突;▶/⏹ + ⏮⏭ + 调速 + 关闭 -->
-  <div class="panel-bar" id="panel-bar" role="region" aria-label="面板朗读">
-    <button class="pb-btn" id="pb-play" onclick="panelBarToggle()" disabled>▶ 朗读</button>
-    <button class="pb-ico" id="pb-prev" onclick="panelGotoRel(-1)" aria-label="上一段" title="上一段">⏮</button>
-    <button class="pb-ico" id="pb-next" onclick="panelGotoRel(1)" aria-label="下一段" title="下一段">⏭</button>
-    <span class="pb-progress" id="pb-dots"></span>
-    <span class="pb-meta" id="pb-meta">0/0</span>
-    <span class="pb-rate" id="pb-rate">
-      <button data-rate="0.8" onclick="setPanelRate(0.8)">慢</button>
-      <button data-rate="1" class="on" onclick="setPanelRate(1)">正常</button>
-      <button data-rate="1.2" onclick="setPanelRate(1.2)">快</button>
-    </span>
-    <span class="pb-unsup" id="pb-unsup" style="display:none">🚫 当前浏览器不支持语音朗读</span>
-    <button class="pb-x" onclick="panelClose()" aria-label="关闭朗读条" title="关闭朗读条">✕</button>
-  </div>
 
   <!-- 打印学习单 -->
   <div id="print-sheet"></div>
@@ -2583,7 +2540,7 @@ function showView(v){
   const vt=document.getElementById('v-'+v); if(vt)vt.classList.add('on');
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   const tb=document.getElementById('t-'+v); if(tb)tb.classList.add('on');
-  stopGraph(); tlPause(); if(v!=='detail'){reciteStop(); const f=document.getElementById('d-recite-float'); if(f)f.classList.remove('show'); panelClose();}
+  stopGraph(); tlPause(); if(v!=='detail'){reciteStop(); const f=document.getElementById('d-recite-float'); if(f)f.classList.remove('show');}
   if(v==='grade')renderGradeList();
   else if(v==='cards')renderCards();
   else if(v==='graph')renderGraph();
@@ -2626,12 +2583,6 @@ function starStr(n){return '★'.repeat(n)+'☆'.repeat(3-n);}
 const GRADE_CN=['','一','二','三','四','五','六','七','八','九'];
 function renderGradeList(){
   const box=document.getElementById('grade-list');let h='';
-  /* 防御：万一 POEMS 缺失/损坏,给出明确提示而不是空白 */
-  if(typeof POEMS==='undefined'||!Array.isArray(POEMS)||POEMS.length===0){
-    box.innerHTML='<p style="color:var(--ink3);padding:20px;text-align:center">诗词数据加载中…（如持续空白，请强刷页面：'+(navigator.platform.indexOf('Mac')>=0?'⌘+Shift+R':'Ctrl+F5')+'）</p>';
-    console.warn('[PoemGraph] renderGradeList: POEMS missing or empty. typeof=',typeof POEMS,',len=',(POEMS&&POEMS.length));
-    return;
-  }
   for(let g=1;g<=9;g++){
     const ps=POEMS.filter(p=>p.grade===g);
     if(!ps.length)continue;
@@ -2646,7 +2597,6 @@ function renderGradeList(){
     });
     h+='</div></div>';
   }
-  if(!h)h='<p style="color:var(--ink3);padding:20px;text-align:center">暂无诗词数据</p>';
   box.innerHTML=h;
 }
 
@@ -2703,7 +2653,7 @@ function openDetail(id){
   document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'" onclick="recitePickLine(event,'+i+')">'+rubyLine(l,p.anno)+lineScene(l.t)+'</span>').join('');
   bindAnnoPop();
   updateReciteFloatShow();
-  reciteStop();panelClose();
+  reciteStop();
   recApplyLangAvail();
   reciteApplyModeUI();
   recApplyVoiceUI();
@@ -2767,7 +2717,6 @@ function bindAnnoPop(){ if(window._annoBound)return; window._annoBound=true;
 }
 function dTab(i){
   ST.tab=i;
-  panelStop();   /* 切 tab → panelRunId++ 让旧链失效,旧 utterance 自然播完 */
   document.querySelectorAll('#dtabs .dtab').forEach((b,bi)=>b.classList.toggle('on',bi===i));
   document.querySelectorAll('#dpanels .dpanel').forEach((b,bi)=>b.classList.toggle('on',bi===i));
   if(D_TABS[i][1]==='graph')renderMiniGraph(ST.poem);
@@ -2779,152 +2728,51 @@ function fillDetail(p){
   const pb=document.getElementById('d-print');
   if(pb)pb.textContent=ST.role==='student'?'📝 打印自测单':'🖨 打印学习单';
   printModeSync();
-  /* 清掉上一首诗的 panel 朗读残留状态 */
-  panelClose();
-  delete window._panelSections_mean;delete window._panelSections_poet;
-  delete window._panelSections_hist;delete window._panelSections_map;
-  delete window._panelSections_graph;delete window._panelSections_rel;
   let H='';
   // 0 原文（注释 + 意象，均可缺省）
-  H+='<div class="dpanel dpanel-verse">';
-  /* 诗意 · 短朗读段(语舒/男声读的是顶部 d-verse,这里只读下面的注释/意象/lianzi) */
-  var verseSecs=[];
-  if(p.anno&&p.anno.length){H+='<div class="sec sec-read-anno"><h3><span class="bar"></span>字词注释</h3><div class="annos">'+p.anno.map((a,i)=>'<span class="anno"><b>'+circledNum(i+1)+' '+a.w+'</b>'+a.m+'</span>').join('')+'</div></div>';
-    var annoTxt=p.anno.map(function(a){return a.w+'：'+a.m;}).join('；');
-    if(annoTxt)verseSecs.push({txt:'字词注释：'+annoTxt,fragId:'verse-anno'});}
-  if(p.imagery&&p.imagery.length){H+='<div class="sec sec-read-imagery"><h3><span class="bar"></span>诗中意象</h3><div class="imagery">'+p.imagery.map(im=>'<span class="imk">'+im+'</span>').join('')+'</div></div>';
-    verseSecs.push({txt:'诗中意象：'+p.imagery.join('、'),fragId:'verse-imagery'});}
-  if(typeof LIANZI!=='undefined'&&LIANZI[p.id]){H+='<div class="sec sec-read-lianzi"><h3><span class="bar" style="background:var(--ochre)"></span>炼字赏析 · 品一个字</h3><div class="annos">'+LIANZI[p.id].map(z=>'<span class="anno lz"><b>'+z.w+'</b>'+z.m+'</span>').join('')+'</div></div>';
-    verseSecs.push({txt:'炼字赏析：'+LIANZI[p.id].map(function(z){return z.w+'，'+z.m;}).join('；'),fragId:'verse-lianzi'});}
+  H+='<div class="dpanel">';
+  if(p.anno&&p.anno.length)H+='<div class="sec"><h3><span class="bar"></span>字词注释</h3><div class="annos">'+p.anno.map((a,i)=>'<span class="anno"><b>'+circledNum(i+1)+' '+a.w+'</b>'+a.m+'</span>').join('')+'</div></div>';
+  if(p.imagery&&p.imagery.length)H+='<div class="sec"><h3><span class="bar"></span>诗中意象</h3><div class="imagery">'+p.imagery.map(im=>'<span class="imk">'+im+'</span>').join('')+'</div></div>';
+  if(typeof LIANZI!=='undefined'&&LIANZI[p.id])H+='<div class="sec"><h3><span class="bar" style="background:var(--ochre)"></span>炼字赏析 · 品一个字</h3><div class="annos">'+LIANZI[p.id].map(z=>'<span class="anno lz"><b>'+z.w+'</b>'+z.m+'</span>').join('')+'</div></div>';
   if(!(p.anno&&p.anno.length)&&!(p.imagery&&p.imagery.length))H+='<div class="sec"><p style="color:var(--ink3)">原文与拼音见上方。</p></div>';
   H+='</div>';
-  window._panelSections_verse=verseSecs;
   // 1 诗意
-  H+='<div class="dpanel dpanel-mean">';
-  var meanSecs=[];
-  H+='<div class="sec sec-read-trans"><h3><span class="bar"></span>白话译文</h3><p>'+(p.trans||'（译文待补充）')+'</p>';
-  H+='<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">展开深度赏析 ▾</button><div class="teacher-box sec-read-deeper'+(teacher?' on':'')+'"><b>教师赏析：</b>'+(p.transT||'')+'</div>';
-  if(parent)H+='<div class="parent-tip on"><span>💡</span><span>陪读建议：可以问问孩子——"诗里你最喜欢哪一句？为什么？"引导他用自己的话说说画面。</span></div>';
-  H+='</div>';
-  if(p.trans)meanSecs.push({txt:'白话译文：'+p.trans,fragId:'mean-trans'});
-  if(p.transT)meanSecs.push({txt:'深度赏析：'+p.transT,fragId:'mean-deeper'});
-  H+='<div class="sec sec-read-emo"><h3><span class="bar"></span>情感主题</h3><p>这首诗的情感是 <b style="color:var(--teal)">'+(p.emo||'—')+'</b>，风格为 <b style="color:var(--teal)">'+(p.style||'—')+'</b>。</p></div>';
-  H+='</div>';
-  if(p.emo||p.style)meanSecs.push({txt:'这首诗的情感是 '+(p.emo||'')+'，风格是 '+(p.style||'')+'。',fragId:'mean-emo'});
-  window._panelSections_mean=meanSecs;
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>白话译文</h3><p>'+(p.trans||'（译文待补充）')+'</p>'+
+     (p.transT?(teacher?'<div class="teacher-box on"><b>教师赏析：</b>'+p.transT+'</div>':'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">展开深度赏析 ▾</button><div class="teacher-box">'+p.transT+'</div>'):'')+
+     (parent?'<div class="parent-tip on"><span>💡</span><span>陪读建议：可以问问孩子——"诗里你最喜欢哪一句？为什么？"引导他用自己的话说说画面。</span></div>':'')+
+     '</div>'+
+     '<div class="sec"><h3><span class="bar"></span>情感主题</h3><p>这首诗的情感是 <b style="color:var(--teal)">'+(p.emo||'—')+'</b>，风格为 <b style="color:var(--teal)">'+(p.style||'—')+'</b>。</p></div></div>';
   // 2 诗人
-  H+='<div class="dpanel dpanel-poet">';
-  var poetSecs=[];
-  H+='<div class="sec sec-read-pmeta"><h3><span class="bar"></span>诗人故事 · '+poet.name+'</h3>'+
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>诗人故事 · '+poet.name+'</h3>'+
      '<p style="color:var(--ink2);font-size:14px;margin-bottom:8px">'+poet.dyn+'代 · '+poet.years+'</p>'+
      '<p>'+(p.story||poet.intro||'')+'</p>'+
-     (p.storyT?'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">了解更多 ▾</button><div class="teacher-box sec-read-pdeep'+(teacher?' on':'')+'"><b>延伸：</b>'+p.storyT+'</div>':'')+
-     '</div>';
-  poetSecs.push({txt:poet.name+'，'+poet.dyn+'代，'+poet.years+'。',fragId:'poet-meta'});
-  if(p.story||poet.intro)poetSecs.push({txt:(p.story||poet.intro),fragId:'poet-story'});
-  if(p.storyT)poetSecs.push({txt:'延伸：'+p.storyT,fragId:'poet-pdeep'});
-  H+='<div class="sec sec-read-pintro"><h3><span class="bar"></span>诗人简介</h3><p>'+poet.intro+'</p>'+
+     (p.storyT?(teacher?'<div class="teacher-box on"><b>延伸：</b>'+p.storyT+'</div>':'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">了解更多 ▾</button><div class="teacher-box">'+p.storyT+'</div>'):'')+
+     '</div>'+
+     '<div class="sec"><h3><span class="bar"></span>诗人简介</h3><p>'+poet.intro+'</p>'+
      (POET_STORY[p.poet]?'<button class="toggle-btn" onclick="poetSel=\''+p.poet+'\';showView(\'poets\')">📜 查看 '+poet.name+' 完整传奇人生 →</button>':'')+
-     '</div>';
-  H+='</div>';
-  if(poet.intro)poetSecs.push({txt:'诗人简介：'+poet.intro,fragId:'poet-pintro'});
-  window._panelSections_poet=poetSecs;
+     '</div></div>';
   // 3 历史
-  H+='<div class="dpanel dpanel-hist">';
-  var histSecs=[];
-  H+='<div class="sec sec-read-hhead"><h3><span class="bar"></span>历史背景 · '+(p.createdYear||'')+'</h3>';
-  if(p.history&&p.history.length){
-    H+='<div class="minihist">'+p.history.map(function(e,i){return '<div class="mh-item'+(e.hi?' hi':'')+'" data-evt-i="'+i+'"><span class="mdot"></span><div class="my">'+e.y+'</div><div class="mt">'+e.t+'</div></div>';}).join('')+'</div>';
-    histSecs.push({txt:'历史背景：'+(p.createdYear||(poet.dyn+'代')),fragId:'hist-hhead'});
-    p.history.forEach(function(e,i){
-      histSecs.push({txt:e.y+'，'+e.t+'。',fragId:'hist-evt-'+i});
-      H=H; /* noop */
-    });
-  }else{
-    H+='<p style="color:var(--ink3)">'+poet.dyn+'代 · '+poet.years+'</p>';
-    histSecs.push({txt:poet.dyn+'代，'+poet.years+'。',fragId:'hist-hhead'});
-  }
-  H+='</div></div>';
-  window._panelSections_hist=histSecs;
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>历史背景 · '+(p.createdYear||'')+'</h3>'+
+     ((p.history&&p.history.length)?'<div class="minihist">'+p.history.map(e=>'<div class="mh-item'+(e.hi?' hi':'')+'"><span class="mdot"></span><div class="my">'+e.y+'</div><div class="mt">'+e.t+'</div></div>').join('')+'</div>':'<p style="color:var(--ink3)">'+poet.dyn+'代 · '+poet.years+'</p>')+
+     '</div></div></div>';
   // 4 地图
-  H+='<div class="dpanel dpanel-map"><div class="sec sec-read-map"><h3><span class="bar"></span>创作地点</h3>'+
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>创作地点</h3>'+
      '<p>这首诗与 <b style="color:var(--teal)">'+p.place+'</b>（'+p.placeModern+'）有关。</p>'+
      '<div style="margin-top:12px">'+miniMapSVG(p)+'</div>'+
      '<button class="toggle-btn" onclick="showView(\'map\')">在大地图中查看 →</button></div></div>';
-  window._panelSections_map=[{txt:'《'+p.title+'》写于'+(p.createdYear||'')+'，创作地点：'+p.place+'，位于今天的'+p.placeModern+'。',fragId:'map-place'}];
   // 5 图谱
-  H+='<div class="dpanel dpanel-graph"><div class="sec"><h3><span class="bar"></span>关系图谱</h3>'+
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>关系图谱</h3>'+
      '<p style="color:var(--ink2);font-size:13px;margin-bottom:10px">这首诗与诗人、朝代、地点、意象的关系</p>'+
      '<div class="canvas-wrap" style="background:var(--paper3)"><canvas id="mgcanvas" style="display:block;width:100%;height:360px;touch-action:none"></canvas></div></div></div>';
-  var graphSecs=[{txt:'《'+p.title+'》是这张图谱的中心。',fragId:'graph-0'}];
-  graphSecs.push({txt:'作者'+poet.name+'，'+p.dyn+'代。',fragId:'graph-1'});
-  if(p.emo&&p.style)graphSecs.push({txt:'情感主题：'+p.emo+'，风格：'+p.style+'。',fragId:'graph-2'});
-  if(p.placeModern)graphSecs.push({txt:'创作地点：'+p.placeModern+'。',fragId:'graph-3'});
-  (p.imagery||[]).slice(0,3).forEach(function(im,i){graphSecs.push({txt:'意象：'+im+'。',fragId:'graph-i'+i});});
-  window._panelSections_graph=graphSecs;
-  // 6 练习（题目朗读·答题反馈在 buildQuiz 里用 panelQuizPlan 注册）
-  H+='<div class="dpanel dpanel-quiz" id="dp-quiz"></div>';
+  // 6 练习
+  H+='<div class="dpanel" id="dp-quiz"></div>';
   // 7 相关
-  H+='<div class="dpanel dpanel-rel"><div class="sec sec-read-relh"><h3><span class="bar"></span>相关诗词推荐</h3><div class="rel-grid">'+
-     (p.related||[]).map(function(rid,i){
-       const r=POEMS.find(x=>x.id===rid);if(!r)return '';
-       return '<div class="rel-card" data-rel-i="'+i+'" onclick="openDetail(\''+r.id+'\')"><b>'+r.title+'</b><span>'+r.dyn+'·'+POETS[r.poet].name+'</span></div>';
-     }).join('')+
+  H+='<div class="dpanel"><div class="sec"><h3><span class="bar"></span>相关诗词推荐</h3><div class="rel-grid">'+
+     (p.related||[]).map(rid=>{const r=POEMS.find(x=>x.id===rid);return r?
+       '<div class="rel-card" onclick="openDetail(\''+r.id+'\')"><b>'+r.title+'</b><span>'+r.dyn+'·'+POETS[r.poet].name+'</span></div>':''}).join('')+
      '</div></div></div>';
   document.getElementById('dpanels').innerHTML=H;
-  /* 相关 tab sections —— 动态合成推荐语(零数据改动) */
-  var relSecs=[];
-  if(p.related&&p.related.length){
-    relSecs.push({txt:'为你推荐 '+(p.related.length)+' 首相关诗词。',fragId:'rel-0'});
-    p.related.forEach(function(rid,i){
-      const r=POEMS.find(x=>x.id===rid);if(!r)return;
-      relSecs.push({txt:'第'+(i+1)+'首，《'+r.title+'》，'+r.dyn+'代，'+POETS[r.poet].name+'。'+genReciteReason(rid,p),fragId:'rel-'+(i+1)});
-    });
-  }else{
-    relSecs.push({txt:'暂无相关诗词推荐。',fragId:'rel-0'});
-  }
-  window._panelSections_rel=relSecs;
-  /* 打 data-read-section 钩子 + 注入 🔊 按钮 */
-  ['verse','mean','poet','hist','map','graph','rel'].forEach(function(tk){
-    var sects=window['_panelSections_'+tk];
-    if(!sects)return;
-    var panel=document.querySelector('.dpanel-'+tk);
-    if(!panel)return;
-    sects.forEach(function(s,i){
-      if(!s.fragId)return;
-      var sel='[data-read-section="'+tk+'-'+i+'"]';
-      var el=panel.querySelector(sel);
-      if(!el){
-        /* 找不到已存在的钩子位置：包一层 <span data-read-section> 给朗读高亮用 */
-        var span=document.createElement('span');
-        span.setAttribute('data-read-section', tk+'-'+i);
-        /* 锚到第一个 .sec(空 section 时整段作朗读段) */
-        var sec=panel.querySelector('.sec')||panel;
-        sec.insertBefore(span, sec.firstChild);
-        el=span;
-      }
-    });
-    /* 给每个有内容的 .sec 的 h3 注入 🔊 一次性"读整个 tab"小按钮
-       注:仅在有 sections 的 tab 上加,quiz 单独走 panelQuiz* 流程 */
-    var secHeads=panel.querySelectorAll('.sec h3');
-    secHeads.forEach(function(h3){
-      if(h3.querySelector('.sec-read-btn'))return;
-      panelAttachHeaderBtn(h3, tk);
-    });
-  });
   buildQuiz(p);
-  /* 兜底 TTS 不可用提示 */
-  if(!('speechSynthesis' in window))panelTtsUnsupported();
-}
-/* 相关 tab 推荐语动态合成(零数据改动)
-   优先级:同一作者 > 同朝代 > 共享意象 > 题材相近 */
-function genReciteReason(rid, p){
-  var r=POEMS.find(function(x){return x.id===rid;}); if(!r) return '相关诗作';
-  if(r.poet===p.poet) return '同一作者之作';
-  if(r.dyn===p.dyn)  return '同为'+r.dyn+'代作品';
-  var shared=(r.imagery||[]).find(function(im){return (p.imagery||[]).indexOf(im)>=0;});
-  if(shared) return '共享意象「'+shared+'」';
-  return '题材相近';
 }
 function backFromDetail(){showView(ST.questMode?'path':(prevView||'cards'));}
 
@@ -2951,17 +2799,17 @@ function buildQuiz(p){
   ST.quiz.forEach((q,qi)=>{
     h+='<div class="quiz-q" id="q'+qi+'">';
     if(q.type==='choice'){
-      h+='<span class="qtype">选择题</span><div class="qt sec-read-quiz" data-read-section="quiz-q-'+qi+'">'+(qi+1)+'. '+q.q+'</div><div class="opts">'+
+      h+='<span class="qtype">选择题</span><div class="qt">'+(qi+1)+'. '+q.q+'</div><div class="opts">'+
          q.o.map((o,oi)=>'<button class="opt" onclick="pickChoice('+qi+','+oi+')">'+o+'</button>').join('')+'</div>'+
          '<div class="q-explain"></div>';
     }else if(q.type==='emotion'){
-      h+='<span class="qtype">情感选择</span><div class="qt sec-read-quiz" data-read-section="quiz-q-'+qi+'">'+(qi+1)+'. '+q.q+'</div><div class="emo-opts">'+
+      h+='<span class="qtype">情感选择</span><div class="qt">'+(qi+1)+'. '+q.q+'</div><div class="emo-opts">'+
          q.o.map((o,oi)=>'<button class="emo-opt" onclick="pickChoice('+qi+','+oi+')"><span class="ee">'+o.e+'</span>'+o.t+'</button>').join('')+'</div>'+
          '<div class="q-explain"></div>';
     }else if(q.type==='match'){
       const lefts=q.pairs.map((pr,i)=>({t:pr[0],i}));
       const rights=q.pairs.map((pr,i)=>({t:pr[1],i})).sort(()=>Math.random()-0.5);
-      h+='<span class="qtype">连线配对</span><div class="qt sec-read-quiz" data-read-section="quiz-q-'+qi+'">'+(qi+1)+'. '+q.q+'</div>'+
+      h+='<span class="qtype">连线配对</span><div class="qt">'+(qi+1)+'. '+q.q+'</div>'+
          '<div class="match-wrap" id="match'+qi+'"><svg class="match-svg"></svg>'+
          '<div class="match-col">'+lefts.map(l=>'<button class="match-item" data-side="L" data-i="'+l.i+'" onclick="pickMatch('+qi+',this)">'+l.t+'</button>').join('')+'</div>'+
          '<div class="match-col">'+rights.map(r=>'<button class="match-item" data-side="R" data-i="'+r.i+'" onclick="pickMatch('+qi+',this)">'+r.t+'</button>').join('')+'</div>'+
@@ -2973,53 +2821,11 @@ function buildQuiz(p){
      '<span class="quiz-result" id="quiz-result"></span></div>';
   box.innerHTML=h;
   ST.qa={};ST.qmatch={};
-  /* 练习 tab 朗读计划:每题一段(题目+选项),共 len 题+1 段"提交结果"最终段。
-     用户点选项后立即播"答对啦!"/"差一点,正确答案是 X"(短反馈);
-     提交后播总分+每题解析.题目朗读时眼睛跟着高亮(qt 段). */
-  var qs=ST.quiz;
-  var quizSecs=[];
-  qs.forEach(function(q,qi){
-    var optLine='';
-    if(q.o&&q.o.length){
-      optLine=q.o.map(function(o,i){return '第'+(i+1)+'项，'+(typeof o==='string'?o:o.t);}).join('；');
-    }else if(q.pairs){
-      optLine=q.pairs.length+'组连线，请把同义或相关的词配对';
-    }
-    quizSecs.push({txt:'第'+(qi+1)+'题：'+q.q+'。'+optLine+'。',fragId:'quiz-q-'+qi});
-  });
-  /* 最终反馈段预注册为空,等 submitQuiz 后填充 */
-  quizSecs.push({txt:'',fragId:'quiz-final'});
-  window._panelSections_quiz=quizSecs;
-  /* 给"练习"段(整 panel)追加 🔊 总入口 */
-  var quizPanel=document.querySelector('.dpanel-quiz');
-  if(quizPanel&&!quizPanel.querySelector('.sec-read-btn')){
-    var btn=document.createElement('button');
-    btn.className='sec-read-btn';
-    btn.innerHTML='🔊';
-    btn.title='朗读所有题目';
-    btn.style.cssText='position:relative;margin:0 0 12px 8px;display:inline-flex;';
-    btn.onclick=function(e){
-      e.stopPropagation();
-      if(!('speechSynthesis' in window)){panelTtsUnsupported();return;}
-      /* 同 tab 还在播 → 忽略 click,防快速连击 */
-      if(panelSpeaking && panelTabKey==='quiz')return;
-      if(panelSpeaking)panelStop();
-      document.querySelectorAll('.sec-read-btn.on').forEach(function(b){b.classList.remove('on');});
-      btn.classList.add('on');
-      /* 反馈段填空 + 朗读(用户未提交时,跳过最终段) */
-      var secs=(window._panelSections_quiz||[]).filter(function(s){return s.txt;});
-      panelNarrate('quiz', secs.map(function(s){return s.txt;}), 0);
-    };
-    quizPanel.insertBefore(btn, quizPanel.firstChild);
-  }
-  if(!('speechSynthesis' in window)){var b2=quizPanel&&quizPanel.querySelector('.sec-read-btn');if(b2)b2.disabled=true;}
 }
 function pickChoice(qi,oi){
   ST.qa[qi]=oi;
   const q=document.getElementById('q'+qi);
   q.querySelectorAll('.opt,.emo-opt').forEach((b,bi)=>b.classList.toggle('sel',bi===oi));
-  /* 短反馈 TTS(不打断其他朗读:仅当 panel 未在播时插入) */
-  try{panelQuizShortFeedback(qi,oi);}catch(_){}
 }
 let matchSel=null;
 function pickMatch(qi,el){
@@ -3031,8 +2837,7 @@ function pickMatch(qi,el){
   // 一左一右
   const a=matchSel.el,b=el;
   matchSel.el.classList.remove('sel');matchSel=null;
-  var correctPair=a.dataset.i===b.dataset.i;
-  if(correctPair){
+  if(a.dataset.i===b.dataset.i){
     a.classList.add('done');b.classList.add('done');a.classList.remove('sel');
     ST.qmatch[qi]=(ST.qmatch[qi]||0)+1;
     drawMatchLine(qi,a,b);
@@ -3040,7 +2845,6 @@ function pickMatch(qi,el){
     a.classList.add('wrong');b.classList.add('wrong');
     setTimeout(()=>{a.classList.remove('wrong');b.classList.remove('wrong');},500);
   }
-  try{panelQuizMatchFeedback(qi,correctPair);}catch(_){}
 }
 function drawMatchLine(qi,a,b){
   const wrap=document.getElementById('match'+qi);
@@ -3056,7 +2860,6 @@ function drawMatchLine(qi,a,b){
 }
 function submitQuiz(){
   const p=ST.poem;let correct=0,gradable=0;
-  var wrongExplain=[];   /* [{qi, q, ex}] */
   (ST.quiz||p.quiz).forEach((q,qi)=>{
     const qel=document.getElementById('q'+qi);
     if(q.type==='choice'||q.type==='emotion'){
@@ -3067,7 +2870,6 @@ function submitQuiz(){
         if(bi===q.a)b.classList.add('right');
         else if(bi===sel)b.classList.add('wrong');});
       if(sel===q.a)correct++;
-      else if(q.ex)wrongExplain.push({qi:qi,text:'第'+(qi+1)+'题：'+q.ex});
       const ex=qel.querySelector('.q-explain');
       if(ex&&q.ex){ex.textContent='💡 '+q.ex;ex.classList.add('on');}
     }else if(q.type==='match'){
@@ -3084,39 +2886,6 @@ function submitQuiz(){
   res.innerHTML='答对 '+correct+'/'+gradable+' 题 · 获得 '+'★'.repeat(stars)+' '+
     (correct===gradable?'太棒了！🎉':'继续加油！')+
     (ST.questMode&&passed?'<br><button class="toggle-btn" onclick="showView(\'path\')">🚩 返回闯关，继续下一关 →</button>':'');
-  /* 把最终反馈段塞到练习 sections 并播 */
-  try{panelQuizFinal(correct,gradable,wrongExplain);}catch(_){}
-}
-
-/* 练习 tab 三段反馈:选项命中 → 短反馈;submit → 总分+逐题解析 */
-function panelQuizShortFeedback(qi,oi){
-  var q=ST.quiz[qi]; if(!q||q.type==='match')return;
-  var tts=('speechSynthesis' in window); if(!tts)return;
-  /* 不调全局 cancel(会打断 panel/原文/事件 TTS);短反馈直接 speak 入队,浏览器按顺序拼接在背景朗读后面 */
-  var correct=(oi===q.a);
-  var optTxt=q.o[oi]; if(typeof optTxt!=='string')optTxt=optTxt.t;
-  var msg=correct?('答对啦！'):('还差一点，正确答案是'+(typeof q.o[q.a]==='string'?q.o[q.a]:q.o[q.a].t)+'。');
-  var u=new SpeechSynthesisUtterance(msg);
-  u.lang='zh-CN'; var v=pickNarratorVoice(); if(v)u.voice=v; u.rate=panelRate;
-  try{speechSynthesis.speak(u);}catch(_){}
-}
-function panelQuizMatchFeedback(qi,correct){
-  if(!('speechSynthesis' in window))return;
-  /* 不调全局 cancel:同上,短反馈叠加在背景朗读后面 */
-  var u=new SpeechSynthesisUtterance(correct?'配对成功！':'配错了，再想想。');
-  u.lang='zh-CN'; var v=pickNarratorVoice(); if(v)u.voice=v; u.rate=panelRate;
-  try{speechSynthesis.speak(u);}catch(_){}
-}
-function panelQuizFinal(correct,gradable,wrongExplain){
-  var secs=window._panelSections_quiz;
-  if(!secs)return;
-  var total='你答对 '+correct+' 题，共 '+gradable+' 题。';
-  var exLines=wrongExplain.map(function(e){return e.text;}).join(' ');
-  var finalTxt=total+(wrongExplain.length?('错题解析：'+exLines):'全部正确，太棒了！');
-  secs[secs.length-1].txt=finalTxt;
-  if(!('speechSynthesis' in window))return;
-  if(panelSpeaking)panelStop();
-  panelNarrate('quiz', secs.filter(function(s){return s.txt;}).map(function(s){return s.txt;}), 0);
 }
 
 /* ══════════════════════════════════════════
@@ -4877,21 +4646,7 @@ function plainSheet(p,role,X){
     '<p style="text-align:center;color:#555;margin-bottom:16px">'+p.dyn+'代 · '+POETS[p.poet].name+' · '+p.volume+'　　'+X.idLine+'</p>'+
     secs.map((s,i)=>'<div class="sec"><h3>'+CN[i]+'、'+s[0]+'</h3>'+s[1]+'</div>').join('')+'</div>';
 }
-function printSheet(){if(ST.poem){buildPrintSheet(ST.poem, ST.role);window.print();}
-}
-
-/* panel 朗读引擎状态——必须在 boot() 之前声明(此段在 boot() 前面执行),
-   避免 boot→showView→panelStop() 在原 var 赋值前跑致 panelQueue.length TDZ */
-/* Panel 朗读引擎 v2 — 完全重写于 2026-07-08
-   设计原则:
-   1. 永远不调 speechSynthesis.cancel()(全局副作用会误杀原文/事件 TTS)
-   2. 用 panelRunId 让所有旧 utterance 的 onend 失效,新链用新 runId
-   3. 切 tab → 增 runId → 旧 onend 自动失效,不需要清 queue(浏览器自然播完旧链)
-   4. voice 每次启动都重选,避免残留 en-US 引擎
-   5. ⏮⏭ 删除(它们是 bug 温床);只保留 ▶/⏹ + 调速 + 关闭 */
-var panelSpeaking=false, panelQueue=[], panelIdx=0, panelVoice=null, panelRunId=0;
-var panelRate=1, panelTabKey='', panelTotal=0;
-var panelLastSpeak=0;   /* panel 上一次 speak 时间戳——给 panelGotoRel 判断是否在播 panel 自己的 */
+function printSheet(){if(ST.poem){buildPrintSheet(ST.poem, ST.role);window.print();}}
 
 /* ══════════════════════════════════════════
    启动
@@ -5013,9 +4768,7 @@ var evtSpeaking=false, evtQueue=[], evtIdx=0, evtVoice=null, _curEvtId=null;
 const NARRATOR_MALE=['Kangkang','康康','Yunxi','云希','Yunjian','云健','Yunyang','云扬','Yunye','云野','Yunfeng','云枫','Yunhao','云皓'];
 function pickNarratorVoice(){
   var vs=(('speechSynthesis' in window)?speechSynthesis.getVoices():[])||[];
-  /* 兜底 lang 标签:zh-CN/zh_CN/zh-Hans/zh_HANS/cmn 全要;否则 Linux Chrome / 国产安卓
-     把中文 voice 标成 zh_HANS 时就被过滤掉,fallback 到浏览器默认(英文)→ 中文被英文引擎念 */
-  var cn=vs.filter(function(v){return /^zh/i.test(v.lang||'');});
+  var cn=vs.filter(function(v){return /^(zh[-_]?CN|cmn)/i.test(v.lang||'');});
   // ① 离线清晰男声优先
   for(var i=0;i<NARRATOR_MALE.length;i++){var m=cn.find(function(v){return v.localService!==false&&(v.name||'').includes(NARRATOR_MALE[i]);});if(m)return m;}
   // ② 退而求其次：网络清晰男声(如云希)
@@ -5117,227 +4870,14 @@ function setSleepLoopMode(m){
 if('speechSynthesis' in window){const _prev=speechSynthesis.onvoiceschanged;speechSynthesis.onvoiceschanged=function(){recApplyLangAvail();};}
 /* 跨平台保活：部分浏览器(尤其 Chrome 桌面/失焦时)会让 speechSynthesis 自动暂停→朗读中途停。
    定时 resume() 是无害空操作(正常播放时不影响)，能在被暂停时自动续上，保证一口气读完。 */
-/* 三引擎独立 keep-alive timer:rec/evt/panel 各管各的,互不干扰,
-   避免 7s resume() 在 panel 已 cancel 时复活浏览器内部残留 utterance
-   (Chrome 实现里 resume 是全局的,会唤醒任何 paused utterance,
-   包括已 cancel 但浏览器未来得及清理的那一条) */
-var _recKeepT=null, _evtKeepT=null, _panelKeepT=null;
-function _startKeep(pred, refName){
-  return setInterval(function(){
-    if(!pred()){
-      clearInterval(window[refName]); window[refName]=null; return;
-    }
-    /* 只在"还有本引擎的 utterance 真在说话"时才 resume,
-       加 speaking 检查避免对空队列瞎 resume 复活旧 utterance */
-    try{ if(speechSynthesis.speaking && speechSynthesis.paused)speechSynthesis.resume(); }catch(e){}
-  },10000);
-}
+var _ttsKeepT=null;
 function _ttsKeep(on){
-  if(!('speechSynthesis' in window))return;
-  if(on){
-    /* 每个引擎独立判断:还在说话 → 开 timer;已停 → 清 timer */
-    if(recReciting && !_recKeepT)_recKeepT=_startKeep(function(){return recReciting;},'_recKeepT');
-    if(evtSpeaking && !_evtKeepT)_evtKeepT=_startKeep(function(){return evtSpeaking;},'_evtKeepT');
-    if(panelSpeaking && !_panelKeepT)_panelKeepT=_startKeep(function(){return panelSpeaking;},'_panelKeepT');
-  }else{
-    /* 关掉所有:每个引擎 stop 时都调 _ttsKeep(false) 统一清 */
-    if(_recKeepT){clearInterval(_recKeepT);_recKeepT=null;}
-    if(_evtKeepT){clearInterval(_evtKeepT);_evtKeepT=null;}
-    if(_panelKeepT){clearInterval(_panelKeepT);_panelKeepT=null;}
-  }
-}
-/* ══════ 详情页"非原文" panel 朗读 v2（语音合成 TTS·幼儿园/不识字小孩友好）══════
-   重写于 2026-07-08,完全抛弃 v1 的 runId 守护 + cancel 全局 + 各种短路。
-   新设计:
-   - 不调任何 speechSynthesis.cancel()(全局副作用)
-   - panelRunId 标记本轮启动,所有 utterance 闭包捕获 run;onstart/onend 用 runId 校验
-   - 切 tab / 切诗 / 用户主动停 → 增 runId + 旧 onend 自动失效;浏览器自然播完旧 utterance
-   - voice 每次启动重选 (panelVoice=null → 重新 pickNarratorVoice)
-   - 只保留 ▶/⏹/调速/关闭,删除 ⏮⏭(bug 温床)
-   - 不再调 _ttsKeep(panel 文本短不会触发 Chrome 暂停) */
-
-/* 主入口:启动一段朗读 (传入已过滤的 sections 数组 + 起始 idx)
-   sections 格式:[{txt:'...'},{txt:'...'}],tabKey 用于高亮定位 */
-function panelNarrate(tabKey, sections, startIdx){
-  if(!('speechSynthesis' in window)){panelTtsUnsupported();return;}
-  if(!sections||!sections.length)return;
-  /* 关键:增 runId 让所有旧的 onend/onstart 失效 (浏览器内部旧 utterance 还会自然播完,
-     但它们的回调里 runId 校验不过,不会再触发下一段) */
-  panelRunId++;
-  var run=panelRunId;
-  panelTabKey=tabKey;
-  panelQueue=sections.slice();   /* 复制一份,避免外部 sections 被改时影响朗读 */
-  panelIdx=Math.max(0,Math.min(startIdx||0, panelQueue.length-1));
-  panelTotal=panelQueue.length;
-  /* 强制重新选 voice,避免残留 en-US 引擎 */
-  if(!speechSynthesis.getVoices().length){try{speechSynthesis.getVoices();}catch(_){}}
-  panelVoice=pickNarratorVoice();
-  /* 状态同步 */
-  panelSpeaking=true;
-  panelRenderDots();
-  panelMetaUpdate(panelIdx+1);
-  panelBarShow();
-  setPanelBarBtn(true);
-  panelClearHighlight();
-  document.querySelectorAll('.sec-read-btn.on').forEach(function(b){b.classList.remove('on');});
-  /* 立即 speak 当前 idx;不 setTimeout——旧的还在飞 setTimeout 已经失效了 */
-  panelSpeakOne(run);
-}
-/* speak 单段;runId 校验防止旧链触发下一段 */
-function panelSpeakOne(run){
-  if(!panelSpeaking || run!==panelRunId)return;
-  if(panelIdx>=panelQueue.length){panelStop();return;}
-  var txt=panelQueue[panelIdx];
-  if(!txt){panelIdx++;setTimeout(function(){panelSpeakOne(run);},50);return;}
-  var u=new SpeechSynthesisUtterance(txt);
-  u.lang='zh-CN';
-  if(panelVoice)u.voice=panelVoice;
-  u.rate=panelRate; u.pitch=1.0;
-  u.onstart=function(){if(run!==panelRunId)return;panelApplyHighlight(panelIdx);panelMetaUpdate(panelIdx+1);panelDotUpdate(panelIdx);};
-  u.onend=function(){if(run!==panelRunId||!panelSpeaking)return;panelIdx++;setTimeout(function(){panelSpeakOne(run);},200);};
-  u.onerror=function(){if(run!==panelRunId||!panelSpeaking)return;panelIdx++;setTimeout(function(){panelSpeakOne(run);},200);};
-  try{speechSynthesis.speak(u);panelLastSpeak=Date.now();}
-  catch(e){if(run!==panelRunId||!panelSpeaking)return;panelIdx++;setTimeout(function(){panelSpeakOne(run);},200);}
-}
-/* 用户主动停 / 切 tab / 切诗 → 增 runId 让旧链失效;
-   同时如果 5s 内 panel 刚 speak 过(speaking 极可能是 panel 自己的)→ cancel 立即停,
-   否则不 cancel(怕误杀同时在听的原文 TTS) */
-function panelStop(){
-  if(!panelSpeaking && !panelQueue.length){panelClearHighlight();setPanelBarBtn(false);return;}
-  panelRunId++;
-  panelSpeaking=false;   /* 先设 false 防止旧 utterance 的 onerror/onend 续排 */
-  panelQueue=[];
-  panelIdx=0;
-  panelTotal=0;
-  panelVoice=null;
-  panelTabKey='';
-  panelClearHighlight();
-  setPanelBarBtn(false);
-  if(speechSynthesis.speaking && (Date.now() - panelLastSpeak) < 5000){
-    try{speechSynthesis.cancel();}catch(_){}
-  }
-}
-/* 用户主动关闭 panel-bar (X 按钮) — 与 panelStop 一致 */
-function panelClose(){
-  panelStop();
-  var bar=document.getElementById('panel-bar'); if(bar)bar.classList.remove('show');
-}
-/* ▶ / ⏹ 按钮切换 */
-function panelBarToggle(){
-  if(panelSpeaking){panelStop();return;}
-  var tk=currentTabKey();
-  var sects=tk && window['_panelSections_'+tk];
-  if(!tk || !sects || !sects.length)return;
-  panelNarrate(tk, sects.filter(function(s){return s&&s.txt;}).map(function(s){return s.txt;}), 0);
-}
-/* ⏮ / ⏭:相对跳转;空闲时点也允许(自动从对应段开始朗读)
-   - 正在读:5s 内 panel 刚 speak 过 → cancel + 立即 speak 新段;否则只 runId++ 等播完
-   - 空闲:从头开始(d=-1 → 最后一段,d=+1 → 第 1 段)启动朗读 */
-function panelGotoRel(d){
-  var tk=currentTabKey();
-  var sects=tk && window['_panelSections_'+tk];
-  /* 空闲状态:从对应段开始整段朗读(用户习惯了"先点 ⏮ 再点 ▶"的连续操作) */
-  if(!panelSpeaking){
-    if(!tk || !sects || !sects.length)return;
-    var startIdx = d>0 ? 1 : Math.max(0, sects.length-1);
-    panelNarrate(tk, sects.filter(function(s){return s&&s.txt;}).map(function(s){return s.txt;}), startIdx);
-    return;
-  }
-  if(!panelQueue.length)return;
-  var newIdx=Math.max(0,Math.min(panelQueue.length-1, panelIdx+d));
-  if(newIdx===panelIdx)return;
-  panelRunId++;
-  var run=panelRunId;
-  panelIdx=newIdx;
-  panelMetaUpdate(panelIdx+1);
-  panelDotUpdate(panelIdx);
-  if(speechSynthesis.speaking && (Date.now() - panelLastSpeak) < 5000){
-    var savedSpeaking=panelSpeaking; panelSpeaking=false;
-    try{speechSynthesis.cancel();}catch(_){}
-    setTimeout(function(){
-      panelSpeaking=savedSpeaking;
-      panelSpeakOne(run);
-    },0);
-  }else{
-    panelSpeakOne(run);
-  }
-}
-/* 调速 */
-function setPanelRate(r){
-  panelRate=r;
-  document.querySelectorAll('#pb-rate button').forEach(function(b){b.classList.toggle('on',parseFloat(b.dataset.rate)===r);});
-}
-/* 高亮当前段 + 滚到可见区 */
-function panelApplyHighlight(idx){
-  document.querySelectorAll('[data-read-section].reading').forEach(function(el){el.classList.remove('reading');});
-  var sel='[data-read-section="'+panelTabKey+'-'+idx+'"]';
-  var cur=document.querySelector(sel);
-  if(cur){
-    cur.classList.add('reading');
-    try{var r=cur.getBoundingClientRect();if(r.top>window.innerHeight-160||r.bottom<100){cur.scrollIntoView({block:'center',behavior:'smooth'});}}catch(_){}
-  }
-}
-function panelClearHighlight(){
-  document.querySelectorAll('[data-read-section].reading').forEach(function(el){el.classList.remove('reading');});
-}
-/* 进度条 */
-function panelMetaUpdate(n){var m=document.getElementById('pb-meta');if(m)m.textContent=n+' / '+panelTotal;}
-function panelDotUpdate(idx){
-  var dots=document.querySelectorAll('#pb-dots .pb-dot');
-  dots.forEach(function(d,i){d.classList.toggle('cur',i===idx);});
-}
-function panelRenderDots(){
-  var box=document.getElementById('pb-dots'); if(!box)return;
-  var html='';
-  for(var i=0;i<panelTotal;i++){html+='<span class="pb-dot'+(i===0?' cur':'')+'"></span>';}
-  box.innerHTML=html;
-}
-function panelBarShow(){
-  var bar=document.getElementById('panel-bar'); if(!bar)return;
-  bar.classList.add('show');
-  var ttsAvail=('speechSynthesis' in window);
-  ['pb-play','pb-prev','pb-next'].forEach(function(id){var x=document.getElementById(id);if(x)x.disabled=!ttsAvail;});
-  document.getElementById('pb-unsup').style.display=ttsAvail?'none':'inline';
-}
-function setPanelBarBtn(on){
-  var b=document.getElementById('pb-play'); if(!b)return;
-  if(on){b.textContent='⏹ 停止';b.classList.add('on');}
-  else{b.textContent='▶ 朗读';b.classList.remove('on');}
-}
-function panelTtsUnsupported(){
-  var bar=document.getElementById('panel-bar'); if(bar){bar.classList.add('show');}
-  var u=document.getElementById('pb-unsup'); if(u)u.style.display='inline';
-  ['pb-play','pb-prev','pb-next'].forEach(function(id){var x=document.getElementById(id);if(x)x.disabled=true;});
-  document.querySelectorAll('.sec-read-btn').forEach(function(b){b.disabled=true;});
-}
-function currentTabKey(){return (D_TABS[ST.tab]&&D_TABS[ST.tab][1])||'';}
-/* 给某个 DOM 元素打朗读钩子 */
-function panelAttachHook(el, tabKey, sectionIdx){
-  if(!el)return;
-  el.setAttribute('data-read-section', tabKey+'-'+sectionIdx);
-}
-/* 给 .sec 标题(h3)后追加 🔊 按钮;点击即朗读整 tab 的 sections */
-function panelAttachHeaderBtn(h3, tabKey){
-  if(!h3)return;
-  var btn=document.createElement('button');
-  btn.className='sec-read-btn';
-  btn.type='button';
-  btn.innerHTML='🔊';
-  btn.title='朗读整个'+h3.textContent.trim().replace(/^[^一-龥]*/,'')+'段落';
-  btn.setAttribute('aria-label','朗读');
-  btn.onclick=function(e){
-    e.stopPropagation();
-    if(!('speechSynthesis' in window)){panelTtsUnsupported();return;}
-    var sects=window['_panelSections_'+tabKey];
-    if(!sects||!sects.length){alert('该段落暂时没有可朗读内容。');return;}
-    /* 旧链自然失效 (增 runId),不 cancel 全局 */
-    if(panelSpeaking)panelStop();
-    document.querySelectorAll('.sec-read-btn.on').forEach(function(b){b.classList.remove('on');});
-    btn.classList.add('on');
-    panelNarrate(tabKey, sects.filter(function(s){return s&&s.txt;}).map(function(s){return s.txt;}), 0);
-  };
-  h3.appendChild(btn);
-  if(!('speechSynthesis' in window))btn.disabled=true;
+  if(_ttsKeepT){clearInterval(_ttsKeepT);_ttsKeepT=null;}
+  if(!on||!('speechSynthesis' in window))return;
+  _ttsKeepT=setInterval(function(){
+    if(!recReciting&&!evtSpeaking){clearInterval(_ttsKeepT);_ttsKeepT=null;return;}
+    try{ if(speechSynthesis.paused)speechSynthesis.resume(); }catch(e){}
+  },7000);
 }
 /* 朗读：系统 TTS 优先(逐句高亮);若设备无可用语音/不发声→自动回退「内嵌音频」(RECITE_AUDIO，覆盖国产安卓如小米 Chrome 无 TTS 引擎的情况) */
 var recAudioEl=null, recWatchdog=null, recStarted=false, recMode=null, recHiIdx=-99, recPaused=false, recStartIdx=0, recAudioMeta=null, recRunId=0;
