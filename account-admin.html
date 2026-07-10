@@ -2,12 +2,14 @@
 <!--
   PoemGraph Pro · 账号管理工具
   仅作者本人使用，输入用户名+明文密码即可生成 accounts.json 哈希。
-  完全离线：纯前端 SHA-256，无网络请求。
+  纯前端 SHA-256；可按 x-account-url 自动拉取 accounts.json，失败时仍可手动粘贴。
 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 优先 poem.leewen.work；本机调试可改成 http://127.0.0.1:8765/accounts.json 或留空让用户手动加载 -->
+<meta name="x-account-url" content="https://poem.leewen.work/accounts.json">
 <title>账号管理 · PoemGraph Pro</title>
 <style>
 :root{
@@ -133,16 +135,21 @@ textarea{height:120px;line-height:1.5}
       <button class="btn ghost" id="a-clear">清空所有（localStorage）</button>
     </div>
 
-    <label class="lab" style="margin-top:18px">明文账号清单（本地保存·<b>不要上传到 GitHub</b>）</label>
-    <div class="out empty" id="a-plain">点击「生成」后这里会显示用户名 + 明文密码，可一键复制或下载</div>
+    <label class="lab" style="margin-top:18px">明文账号清单（本地保存·<b>不要上传到 GitHub</b>·可手动编辑）</label>
+    <textarea id="a-plain" placeholder="点击「🎲 生成账号」自动填充。
+也可手动编辑：每行「用户名  密码」（中间隔 2 个空格）。
+例：
+user202607101  qingzhao
+user202607102  mingyue"></textarea>
     <div class="btn-row">
       <button class="btn ghost" id="a-copy-plain">📋 复制明文</button>
       <button class="btn ghost" id="a-download-plain">⬇ 下载 accounts-明文.txt</button>
+      <button class="btn cinnabar" id="a-sync-json">🔄 同步到 JSON（重算哈希）</button>
     </div>
   </div>
 
   <div class="card">
-    <label class="lab">📋 粘贴现有 accounts.json <span class="hint">服务器上当前的内容</span></label>
+    <label class="lab">📋 现有 accounts.json <span class="hint" id="a-existing-status">等待自动拉取…</span></label>
     <textarea id="a-existing" placeholder='{
   "version": 1,
   "salt": "pg-pro-salt-v1",
@@ -153,6 +160,9 @@ textarea{height:120px;line-height:1.5}
 
     <div class="btn-row">
       <button class="btn cinnabar" id="a-append">🔗 追加到现有 JSON</button>
+      <button class="btn ghost" id="a-load-file">📁 从本地文件加载</button>
+      <input type="file" id="a-file-input" accept=".json,application/json" style="display:none">
+      <button class="btn ghost" id="a-refresh">🔄 重新拉取</button>
     </div>
 
     <label class="lab" style="margin-top:18px">输出（追加后的完整 JSON）</label>
@@ -488,19 +498,34 @@ $('#a-gen').onclick = async () => {
   bumpSerial(date, cnt);
   savePlainLog([...existing, ...newOnes]);
 
-  // 显示明文（含汉字提示，方便作者记住「密码对应哪个汉字」）
-  const out = $('#a-plain');
-  out.className = 'out';
-  const chMap = Object.fromEntries(PW_CHARS.map(w => [w.py, w.ch]));
-  const list = newOnes.map(x => {
-    const ch = chMap[x.p.replace(/\d+$/,'')];
-    return ch ? `${x.u}  ${x.p}  （${ch}）` : `${x.u}  ${x.p}`;
-  }).join('\n');
-  out.innerHTML = `<b>新生成 ${newOnes.length} 个账号（${todayStamp()}）：</b>\n\n${list}\n\n<i style="color:var(--ink3)">↓ 也保存到了 localStorage（即使关掉页面也不丢） ↓</i>`;
-
+  // 把所有 localStorage 明文账号同步到 textarea（含汉字提示）
+  renderPlainTextarea();
   // 暂存待追加的新账号
   window.__pg_newAccounts = newOnes;
 };
+
+/* ── 同步到 JSON：解析 textarea + 重算哈希 → 输出到下方 JSON ── */
+function parsePlainTextarea(){
+  const raw = $('#a-plain').value.trim();
+  if(!raw) return [];
+  const chMap = Object.fromEntries(PW_CHARS.map(w => [w.py, w.ch]));
+  return raw.split('\n').map(line => {
+    const m = line.match(/^(\S+)\s{2,}(\S+)/);
+    if(!m) return null;
+    return { u: m[1], p: m[2], ch: chMap[m[2].replace(/\d+$/,'')] || '' };
+  }).filter(Boolean);
+}
+
+/* 渲染 localStorage 明文到 textarea（每行：用户名  密码  （汉字）） */
+function renderPlainTextarea(){
+  const log = loadPlainLog();
+  const chMap = Object.fromEntries(PW_CHARS.map(w => [w.py, w.ch]));
+  const text = log.map(e => {
+    const ch = chMap[e.p.replace(/\d+$/,'')] || '';
+    return ch ? `${e.u}  ${e.p}  （${ch}）` : `${e.u}  ${e.p}`;
+  }).join('\n');
+  $('#a-plain').value = text;
+}
 
 $('#a-copy-plain').onclick = () => {
   const log = loadPlainLog();
@@ -529,24 +554,61 @@ $('#a-download-plain').onclick = () => {
 $('#a-clear').onclick = () => {
   if(!confirm('确定清空 localStorage 中保存的所有明文账号？此操作不可恢复！')) return;
   localStorage.removeItem(LS_KEY);
-  $('#a-plain').className='out empty';
-  $('#a-plain').textContent='已清空。重新点击「🎲 生成账号」即可。';
+  $('#a-plain').value = '';
   window.__pg_newAccounts = null;
 };
 
 $('#a-append').onclick = async () => {
-  const existing = window.__pg_newAccounts;
-  if(!existing || !existing.length){ alert('先点「🎲 生成账号」'); return; }
+  /* 优先用 textarea 解析结果（兼容手动编辑场景）；没有再用自动生成暂存 */
+  const parsedPlain = parsePlainTextarea();
+  const autoGen = window.__pg_newAccounts;
+  const items = parsedPlain.length
+    ? parsedPlain
+    : autoGen;
+  if(!items || !items.length){ alert('先点「🎲 生成账号」或在明文清单里编辑'); return; }
   const raw = $('#a-existing').value.trim();
   if(!raw){ alert('先粘贴现有 accounts.json'); return; }
   let parsed;
   try { parsed = JSON.parse(raw); } catch(e){ alert('现有 JSON 格式错：'+e.message); return; }
   if(!parsed.accounts) parsed.accounts = [];
-  existing.forEach(a => parsed.accounts.push({u:a.u, h:a.h}));
+  /* 如果来自 textarea，需重算哈希 */
+  const salt = $('#a-salt').value.trim();
+  for(const it of items){
+    if(it.h) { parsed.accounts.push({u:it.u, h:it.h}); continue; }
+    const h = await sha256(salt + it.p);
+    parsed.accounts.push({u:it.u, h});
+  }
   const out = $('#a-json');
   out.className='out';
   out.textContent = JSON.stringify(parsed, null, 2);
   window.__pg_finalJson = parsed;
+};
+
+/* 「🔄 同步到 JSON（重算哈希）」：解析 textarea → 算哈希 → 输出 JSON（不需要现有 JSON） */
+$('#a-sync-json').onclick = async () => {
+  const items = parsePlainTextarea();
+  if(!items.length){ alert('明文清单为空，请先生成或编辑'); return; }
+  const salt = $('#a-salt').value.trim();
+  if(!salt){ alert('请填写盐值'); return; }
+  const accounts = [];
+  for(const it of items){
+    const h = await sha256(salt + it.p);
+    accounts.push({u: it.u, h});
+  }
+  /* 同步更新 localStorage 明文（让 textarea → LS 一致） */
+  const existingLog = loadPlainLog();
+  const seen = new Set(existingLog.map(e => e.u));
+  for(const it of items){
+    if(!seen.has(it.u)){
+      existingLog.push({u: it.u, p: it.p, h: '', date: todayStamp()});
+    }
+  }
+  savePlainLog(existingLog);
+
+  const out = $('#a-json');
+  out.className='out';
+  out.textContent = JSON.stringify({version: 1, salt, accounts}, null, 2);
+  window.__pg_finalJson = {version: 1, salt, accounts};
 };
 
 $('#a-copy-json').onclick = () => {
@@ -597,6 +659,74 @@ $('#p-go').onclick = () => {
     out.className = 'out';
     out.innerHTML = `<span class="tag err">✗ 解析失败</span> ${e.message}<br><br>请检查 JSON 是否有效（注意引号、逗号、括号）。`;
   }
+};
+
+/* 页面加载时：如果 localStorage 已有明文，渲染到 textarea */
+(function initPlainTextarea(){
+  if(loadPlainLog().length){ renderPlainTextarea(); }
+})();
+
+/* ── 自动加载 accounts.json（复用 poemgraph-pro.html 的 x-account-url） ── */
+var ACCOUNT_URL = ((document.querySelector('meta[name="x-account-url"]')||{}).content || '').trim();
+/* URL 参数 ?accountUrl=... 可临时覆盖（本地调试用） */
+var _u; try{ _u = new URL(location.href).searchParams.get('accountUrl'); }catch(_e){}
+if(_u) ACCOUNT_URL = _u;
+function loadExistingJson(){
+  var ta = document.getElementById('a-existing');
+  var status = document.getElementById('a-existing-status');
+  if(!ta) return;
+  if(!ACCOUNT_URL){
+    ta.value = '';
+    status.innerHTML = '未配置 <code>x-account-url</code>，可手动粘贴或点击「📁 从本地文件加载」';
+    status.style.color = 'var(--ink3)';
+    return;
+  }
+  if(location.protocol === 'file:'){
+    ta.value = '';
+    status.innerHTML = '本地 file:// 页面不自动拉取，可点击「📁 从本地文件加载」或手动粘贴';
+    status.style.color = 'var(--ink3)';
+    return;
+  }
+  status.textContent = '正在从 '+ACCOUNT_URL+' 拉取…';
+  status.style.color = 'var(--ink3)';
+  fetch(ACCOUNT_URL, {cache: 'no-store'}).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(j){
+    ta.value = JSON.stringify(j, null, 2);
+    var count = (j.accounts||[]).length;
+    status.textContent = '✓ 已自动加载（'+count+' 个账号）·'+ACCOUNT_URL;
+    status.style.color = 'var(--teal)';
+  }).catch(function(err){
+    ta.value = '';
+    /* CORS 失败的典型 message 是 "Failed to fetch"（TypeError），给个一目了然的提示 */
+    var hint = (err && err.message && /fetch|network|cors/i.test(err.message))
+      ? '<br><small>· 多半是远端 <code>accounts.json</code> 没配 CORS 响应头，详见仓库根 <code>_headers</code></small>'
+      : '';
+    status.innerHTML = '⚠️ 自动加载失败：'+(err && err.message || err)+'（<b>点击「📁 从本地文件加载」</b>或手动粘贴）'+hint;
+    status.style.color = 'var(--cinnabar)';
+  });
+}
+loadExistingJson();
+$('#a-refresh').onclick = loadExistingJson;
+
+/* ── 从本地文件加载 accounts.json ── */
+$('#a-load-file').onclick = () => document.getElementById('a-file-input').click();
+$('#a-file-input').onchange = (e) => {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const j = JSON.parse(ev.target.result);
+      document.getElementById('a-existing').value = JSON.stringify(j, null, 2);
+      const status = document.getElementById('a-existing-status');
+      status.textContent = '✓ 已从本地文件加载（'+((j.accounts||[]).length)+' 个账号）';
+      status.style.color = 'var(--teal)';
+    } catch(err){
+      alert('文件不是有效 JSON：'+err.message);
+    }
+  };
+  reader.readAsText(file);
 };
 </script>
 

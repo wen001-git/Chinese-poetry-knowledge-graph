@@ -1,0 +1,11 @@
+# Cloudflare Pages _headers
+# 文档：https://developers.cloudflare.com/pages/configuration/headers/
+#
+# /accounts.json 不带 CORS 头 → 浏览器跨源 fetch 必失败
+# 放开 ACAO:* 是因为：账号哈希+用户名本来就是公开清单（poemgraph-pro.html
+# 内置登录逻辑期望任何访客都能读），poemgraph-pro.html 同源部署不受影响。
+# 若未来要做付费墙/白名单，把 * 改成具体 origin 或换 Worker 鉴权。
+
+/accounts.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, s-maxage=300
