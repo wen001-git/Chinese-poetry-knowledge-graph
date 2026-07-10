@@ -504,16 +504,33 @@ $('#a-gen').onclick = async () => {
   window.__pg_newAccounts = newOnes;
 };
 
-/* ── 同步到 JSON：解析 textarea + 重算哈希 → 输出到下方 JSON ── */
+/* ── 解析 textarea：兼容 3 种行格式（自动生成带汉字 / 手加 2 空格 / 手加单字段）──
+ * 返回数组元素形如 {u, p, ch}，手加单字段时 p=''，下游（🔄 同步到 JSON）需跳过；
+ * 注释行（# / // / 开头明示含"备注"/"说明"）和中文标点连用的整行静默丢弃。
+ */
 function parsePlainTextarea(){
   const raw = $('#a-plain').value.trim();
   if(!raw) return [];
   const chMap = Object.fromEntries(PW_CHARS.map(w => [w.py, w.ch]));
-  return raw.split('\n').map(line => {
-    const m = line.match(/^(\S+)\s{2,}(\S+)/);
-    if(!m) return null;
-    return { u: m[1], p: m[2], ch: chMap[m[2].replace(/\d+$/,'')] || '' };
-  }).filter(Boolean);
+  const lines = [];
+  for(const line of raw.split('\n')){
+    const trimmed = line.trim();
+    if(!trimmed) continue;
+    // 形式 1：用户名  密码 [（汉字）]——2+ 空格分隔
+    const m = trimmed.match(/^(\S+)\s{2,}(\S+?)(?:\s*[（(](.+?)[)）])?\s*$/);
+    if(m){
+      const [, u, p, ch] = m;
+      if(/[，。！？；：、]{2,}/.test(u)) continue;   // 看起来像小纸条/注释就丢
+      lines.push({u, p, ch: ch || chMap[p.replace(/\d+$/,'')] || ''});
+      continue;
+    }
+    // 形式 2：单字段行——整行当用户名、密码留空
+    if(/^\S+$/.test(trimmed) && !/^(#|\/\/|备注|说明)/.test(trimmed)){
+      lines.push({u: trimmed, p: '', ch: ''});
+    }
+    // 其它（注释 / 多余空白 / 中文整段）静默跳过
+  }
+  return lines;
 }
 
 /* 渲染 localStorage 明文到 textarea（每行：用户名  密码  （汉字）） */
@@ -528,25 +545,27 @@ function renderPlainTextarea(){
 }
 
 $('#a-copy-plain').onclick = () => {
-  const log = loadPlainLog();
-  if(!log.length){ alert('还没有账号可复制'); return; }
-  const text = log.map(e => `${e.date}  ${e.u}  ${e.p}`).join('\n');
+  const items = parsePlainTextarea();
+  if(!items.length){ alert('还没有账号可复制'); return; }
+  const date = todayStamp();
+  const text = items.map(it => `${date}  ${it.u}  ${it.p || '(空)'}`).join('\n');
   navigator.clipboard.writeText(text).then(() => {
-    $('#a-copy-plain').textContent='✓ 已复制 '+log.length+' 个';
+    $('#a-copy-plain').textContent='✓ 已复制 '+items.length+' 个';
     setTimeout(()=>$('#a-copy-plain').textContent='📋 复制明文',1500);
   });
 };
 
 $('#a-download-plain').onclick = () => {
-  const log = loadPlainLog();
-  if(!log.length){ alert('还没有账号可下载'); return; }
-  const header = `PoemGraph Pro · 客户账号清单\n生成时间：${new Date().toLocaleString('zh-CN')}\n账号数：${log.length}\n\n⚠️ 警告：本文件含明文密码，请勿上传到 GitHub 或公开分享！\n\n`;
-  const text = header + log.map(e => `${e.date}  ${e.u}  ${e.p}`).join('\n') + '\n';
+  const items = parsePlainTextarea();
+  if(!items.length){ alert('还没有账号可下载'); return; }
+  const date = todayStamp();
+  const header = `PoemGraph Pro · 客户账号清单\n生成时间：${new Date().toLocaleString('zh-CN')}\n账号数：${items.length}\n\n⚠️ 警告：本文件含明文密码，请勿上传到 GitHub 或公开分享！\n\n`;
+  const text = header + items.map(it => `${date}  ${it.u}  ${it.p || '(空)'}`).join('\n') + '\n';
   const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `poemgraph-accounts-${todayStamp()}.txt`;
+  a.download = `poemgraph-accounts-${date}.txt`;
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 };
@@ -591,23 +610,26 @@ $('#a-sync-json').onclick = async () => {
   const salt = $('#a-salt').value.trim();
   if(!salt){ alert('请填写盐值'); return; }
   const accounts = [];
+  let skipped = 0;
   for(const it of items){
+    if(!it.p){ skipped++; continue; }   // 单字段无密码 → 不能登录，跳过
     const h = await sha256(salt + it.p);
     accounts.push({u: it.u, h});
   }
-  /* 同步更新 localStorage 明文（让 textarea → LS 一致） */
+  /* 把解析结果全量 sync 到 LS：已有同名 → 更新密码；新用户 → 追加；空密码 → 不入 LS */
   const existingLog = loadPlainLog();
-  const seen = new Set(existingLog.map(e => e.u));
+  const byUser = new Map(existingLog.map(e => [e.u, e]));
   for(const it of items){
-    if(!seen.has(it.u)){
-      existingLog.push({u: it.u, p: it.p, h: '', date: todayStamp()});
-    }
+    if(!it.p) continue;
+    if(byUser.has(it.u)){ byUser.get(it.u).p = it.p; }
+    else { existingLog.push({u: it.u, p: it.p, h: '', date: todayStamp()}); byUser.set(it.u, existingLog[existingLog.length-1]); }
   }
   savePlainLog(existingLog);
 
   const out = $('#a-json');
   out.className='out';
-  out.textContent = JSON.stringify({version: 1, salt, accounts}, null, 2);
+  const json = JSON.stringify({version: 1, salt, accounts}, null, 2);
+  out.textContent = json + (skipped ? `\n\n（已跳过 ${skipped} 条无密码行，不进 JSON）` : '');
   window.__pg_finalJson = {version: 1, salt, accounts};
 };
 
@@ -671,7 +693,9 @@ var ACCOUNT_URL = ((document.querySelector('meta[name="x-account-url"]')||{}).co
 /* URL 参数 ?accountUrl=... 可临时覆盖（本地调试用） */
 var _u; try{ _u = new URL(location.href).searchParams.get('accountUrl'); }catch(_e){}
 if(_u) ACCOUNT_URL = _u;
-function loadExistingJson(){
+function loadExistingJson(opts){
+  opts = opts || {};
+  /* opts.manual=true → 用户主动点「🔄 重新拉取」，file:// 也至少试一次 fetch（看到 CORS 报错比静默好） */
   var ta = document.getElementById('a-existing');
   var status = document.getElementById('a-existing-status');
   if(!ta) return;
@@ -681,9 +705,9 @@ function loadExistingJson(){
     status.style.color = 'var(--ink3)';
     return;
   }
-  if(location.protocol === 'file:'){
+  if(location.protocol === 'file:' && !opts.manual){
     ta.value = '';
-    status.innerHTML = '本地 file:// 页面不自动拉取，可点击「📁 从本地文件加载」或手动粘贴';
+    status.innerHTML = '本地 file:// 页面不自动拉取，可点击「📁 从本地文件加载」或手动粘贴（点「🔄 重新拉取」可强制尝试）';
     status.style.color = 'var(--ink3)';
     return;
   }
@@ -708,7 +732,7 @@ function loadExistingJson(){
   });
 }
 loadExistingJson();
-$('#a-refresh').onclick = loadExistingJson;
+$('#a-refresh').onclick = function(){ loadExistingJson({manual:true}); };
 
 /* ── 从本地文件加载 accounts.json ── */
 $('#a-load-file').onclick = () => document.getElementById('a-file-input').click();
