@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "salt": "pg-pro-salt-v1",
+  "accounts": [
+    { "u": "demo1", "h": "1e3471c5b2851c55e22a8c1fdc86ff9ad4be17a03326fc0b98aaced500ec66c2" },
+    { "u": "demo2", "h": "9bac877b0aff099cec7167e8e8aded5f9379739b67bb21c6efe8e770c10aa5bd" }
+  ]
+}
