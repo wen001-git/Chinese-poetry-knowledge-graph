@@ -18,9 +18,12 @@ export async function onRequestPost({request, env}){
     let cursor = null;
     let guard = 0;
     do{
-      const listResult = await env.KV.list({prefix: 'account:', cursor, limit: 1000});
+      const listResult = await kv.list({prefix: 'account:', cursor, limit: 1000});
       for(const key of listResult.keys || []){
-        const raw = await kv.get(key.name);
+        // EdgeOne Pages KV 返回 { key, name?, metadata? }；取 key 或 name
+        const keyName = key.name || key.key;
+        if(!keyName) continue;
+        const raw = await kv.get(keyName);
         if(!raw) continue;
         try{
           const acc = JSON.parse(raw);
@@ -33,6 +36,7 @@ export async function onRequestPost({request, env}){
         } catch(_){ /* skip malformed */ }
       }
       cursor = listResult.cursor || listResult.next_cursor || null;
+      if(listResult.complete) break;
       if(++guard > 100) break; // 安全护栏
     } while(cursor);
 

@@ -22,7 +22,9 @@ node-functions/
 EdgeOne Pages 控制台：
 1. 左侧菜单 → **存储** → **KV**
 2. 点 **新建 Namespace**，名称：`pg-accounts`
-3. 创建后点 **绑定到项目** → 选你的 `poemgraph` 项目 → 变量名 `KV`（**这个名很重要**，代码里读 `env.KV`）
+3. 创建后点 **绑定到项目** → 选你的 `poemgraph` 项目 → 变量名 **`PG_ACCOUNTS`**（代码里读 `env.PG_ACCOUNTS`，**这个名很重要**）
+
+**变量名必须叫 `PG_ACCOUNTS`**——如果起别的名，要么改代码 `_kv.js` 里的 fallback 列表，要么保留 `KV` 也行（代码已同时支持两个名字）。
 
 ## 部署
 
@@ -120,6 +122,23 @@ EdgeOne Pages KV 控制台通常**有"调试"或"数据浏览"标签**，里面�
 - maxDevices > 1 时"踢掉最旧设备"逻辑（现在直接拒）
 - admin-config API（远程改 maxDevices / enabled / salt）
 - 用户自助踢设备（"我换了电脑"按钮）—— 现在仍要联系作者
+
+## EdgeOne Pages KV 文档关键限制（影响你的实现）
+
+来源：[KV Storage 文档](https://pages.edgeone.ai/zh/document/kv-storage#d186a6cb-e61f-4a41-929e-fb000bfab548)
+
+| 项 | 限制 / 行为 | 影响 |
+|---|---|---|
+| **Key 命名** | 只允许数字/字母/下划线，≤512 B | `account:` 含 `:` 实际可能不被允许（建议改成 `account_` 或纯 `_`） |
+| **Value 大小** | ≤25 MB | 我们存账号 JSON 远小于此 |
+| **一致性** | 中心化存储 + 边缘缓存，**最终一致**，**边缘缓存最多 60s** | 写入 KV 后最多 60s 才传播到所有边缘——作者添加设备 / reset 后用户等 1 分钟左右才生效 |
+| **绑定名** | 用户自定义（如 `PG_ACCOUNTS`），代码用 `env.<绑定名>` 访问 | 必须按上面"前置"步骤起这个名 |
+| **KV.get() 类型** | 默认返回 string，要 JSON 需传 `{type: 'json'}` | 我们代码用 string + JSON.parse，OK |
+| **KV.list() 返回** | `{keys: [{name, metadata}], cursor, complete}` | 文档示例用 `.name`，我们代码两种都取（fallback `.name || .key`） |
+
+**实测未知**：EdgeOne Pages 文档明确说"当前仅支持在 Edge Functions 中使用"，**Node Functions 是否真的能用还没经官方测试**。如果部署后 API 报 `KV binding not available`，可能需要：
+1. 改用 Edge Functions（不同运行时，语法差异大）
+2. 或用 Neon/Supabase PostgreSQL 替代 KV（参考 [Node Functions 演示](https://cloud.tencent.com/developer/article/2571620)）
 
 ## 变更记录
 

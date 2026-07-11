@@ -3,10 +3,14 @@
 // 部署前请确保：EdgeOne Pages 控制台 → 存储 → KV → 新建 namespace "pg-accounts" 并绑定到项目
 
 export function getKV(env){
-  if(!env || !env.KV){
-    throw new Error('KV binding not available. EdgeOne Pages 控制台 → 存储 → KV → 绑定 namespace: pg-accounts');
+  // 绑定名约定：作者在 EdgeOne Pages 控制台绑定 KV namespace 时
+  // 把"运行时环境变量名"填为 PG_ACCOUNTS（注意大小写敏感）。
+  // 若实际填了其他名字，可在此改；或部署后跑 [GET /api/login] 看 err 信息。
+  const binding = (env && (env.PG_ACCOUNTS || env.KV)) || null;
+  if(!binding){
+    throw new Error('KV binding not available. 请在 EdgeOne Pages → 存储 → KV 绑定 namespace "pg-accounts" 时把运行时环境变量名填为 PG_ACCOUNTS');
   }
-  return env.KV;
+  return binding;
 }
 
 export function corsHeaders(){
