@@ -939,7 +939,7 @@ body.sleep-open{overflow:hidden}
   <div class="vtabs">
     <button class="vtab" id="t-grade" onclick="showView('grade')">📖 年级</button>
     <button class="vtab" id="t-cards" onclick="showView('cards')">🀄 卡片墙</button>
-    <button class="vtab" id="t-graph" onclick="showView('graph')">🕸 知识图谱</button>
+    <button class="vtab" id="t-graph" onclick="if(window.PRO_MODE && window.PRO_MODE.guardGraph())return;showView('graph')">🕸 知识图谱</button>
     <button class="vtab" id="t-map" onclick="showView('map')">🗺 诗词地图</button>
     <button class="vtab" id="t-timeline" onclick="showView('timeline')">⏳ 时间轴</button>
     <button class="vtab" id="t-poets" onclick="showView('poets')">✍ 诗人</button>
@@ -1388,6 +1388,21 @@ body.sleep-open{overflow:hidden}
     return true;
   }
   PRO.guardTTS = guardTTS;
+
+  // ── 守卫函数：知识图谱入口前置调用（2026-07-11 新增）──
+  // 规则：已登录 → 放行；未登录 + 1 年级诗 → 放行；未登录 + 2~9 年级诗 → 拦截弹支付墙
+  // 顶栏「🕸 知识图谱」/详情页「图谱」tab 都走这个守卫
+  // 参数 grade 可选：传入具体诗的 grade；不传（顶栏入口）则按全局 ST.poem.grade 取
+  function guardGraph(grade){
+    if(PRO.logged) return false;
+    if(grade===undefined || grade===null){
+      grade = (typeof ST!=='undefined' && ST && ST.poem) ? ST.poem.grade : null;
+    }
+    if(grade===1 || grade==='1') return false;
+    showPaywall();
+    return true;
+  }
+  PRO.guardGraph = guardGraph;
 
   // ── 限制可见诗 = 仅 1 年级 ──
   function applyProVisibility(){
@@ -3174,7 +3189,11 @@ function dTab(i){
   panelStop();   /* 切 tab → panelRunId++ 让旧链失效,旧 utterance 自然播完 */
   document.querySelectorAll('#dtabs .dtab').forEach((b,bi)=>b.classList.toggle('on',bi===i));
   document.querySelectorAll('#dpanels .dpanel').forEach((b,bi)=>b.classList.toggle('on',bi===i));
-  if(D_TABS[i][1]==='graph')renderMiniGraph(ST.poem);
+  if(D_TABS[i][1]==='graph'){
+    /* 未登录 + 2~9 年级诗 → 拦截弹付费墙；1 年级诗仍可看图谱 */
+    if(window.PRO_MODE && window.PRO_MODE.guardGraph(ST.poem && ST.poem.grade)) return;
+    renderMiniGraph(ST.poem);
+  }
 }
 function fillDetail(p){
   const poet=POETS[p.poet];
