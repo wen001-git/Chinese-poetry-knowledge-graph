@@ -78,6 +78,27 @@
 - **3D模式**：Canvas 伪 3D（球形节点透视旋转），不内联 Three.js，控制文件体积
 - **响应式**：支持 iPad（768px+）和桌面（1024px+）
 
+### 双 HTML + 共享基础设施（2026-07-11 增加 · 重要）
+
+仓库两个主 HTML 共享根目录的 `sw.js` 和 `version.json`：
+
+| 文件 | 谁用 | scope / 作用 |
+|---|---|---|
+| `poemgraph.html` | 标准版（包含年级/卡片墙/图谱/地图/时间轴/诗人长廊/听诗入眠等所有 metro 主页功能） | 被 SW 接管秒开 + 后台 ETag 校验 |
+| `poemgraph-pro.html` | 商业版（含账号登录、付费墙、POETS/ACCOUNTS 数据） | 同 SW + 额外 fetch `accounts.json` |
+| `sw.js` | 两个 HTML 共用 | 注册到 `./` scope，对 `poemgraph.html` 接管 + 任意外部资源（`accounts.json` 等）按 fetch handler 规则 |
+| `version.json` | 两个 HTML 共用 | 在线版本哨兵（pgCheckVersion） |
+
+**改动时强制规则**：
+
+1. **改 `sw.js`**：必须同时考虑两个 HTML 的影响——bump 缓存名（如 `poemgraph-cache-v4→v5`）**会清掉两个页面的旧缓存**，用户首次访问要重新下载 12.9MB HTML；新增 fetch handler 接管某 URL（如 `/accounts.json`）只影响真实访问该 URL 的页面，**写前先 grep 两个 HTML 谁访问它**
+2. **改 `poemgraph-pro.html`**：它**复用** `poemgraph.html` 的 `POEMS`/`POETS`/`ST`/`sha256` 等公共数据与函数——改 Pro 专属逻辑（PRO 块、`boot()` 的 PRO 部分、登录/付费墙）时，要确认改动点不与 `poemgraph.html` 同名变量/函数冲突
+3. **改 `version.json` 或 SW cache 名**：必须在 `AGENTS.md` 当前状态记录新版本号，方便排查"用户卡在旧缓存"类问题
+4. **公共资源改 filename**（如 sw.js → service-worker.js）：必须**两个 HTML 同时改** + 同步 `AGENTS.md`
+5. **不要因为"两个 HTML 都叫 poemgraph"就假设它们代码独立**——尤其账号、付费墙、Pro 配置相关的 fetch/meta/LocalStorage key 必须按文件名路由
+
+验证：改前 `grep -l "x-pro-mode\|pg_pro_user\|ACCOUNT_URL" poemgraph.html` 应**无结果**；这两个标识符只属于 Pro 版。
+
 ## 内容规范
 
 - 诗词数据与**统编版**小学语文课本对齐（1–6年级）
