@@ -3,10 +3,6 @@
   "salt": "pg-pro-salt-v1",
   "accounts": [
     {
-      "u": "demo2",
-      "h": "9bac877b0aff099cec7167e8e8aded5f9379739b67bb21c6efe8e770c10aa5bd"
-    },
-    {
       "u": "admin",
       "h": "1cd8058c5198d91a85ed8ca94cdddfe5c5c6a53359caf673c7a9bf64ad5c0ff8"
     },
