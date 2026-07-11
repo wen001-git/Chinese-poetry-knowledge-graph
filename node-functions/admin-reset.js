@@ -34,4 +34,4 @@ export async function onRequestPost({request, env}){
   }
 }
 
-export const onRequestOptions = onRequestOptions;
+export {onRequestOptions};
