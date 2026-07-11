@@ -1425,8 +1425,18 @@ body.sleep-open{overflow:hidden}
     try{
       var saved=JSON.parse(localStorage.getItem('pg_pro_user')||'null');
       if(saved && saved.u){
-        loadAccounts().then(function(){
-          var found=PRO.accounts.find(function(a){return a.u===saved.u;});
+        /* 不能复用 loadAccounts()——它有 sessionStorage 缓存（pg_acc_cache），
+         * 缓存里仍是上次登录时的账号列表，已被删除的账号不会消失 →
+         * 作者手动撤销账号后用户仍能用。
+         * 这里直接裸 fetch ACCOUNT_URL，绕过 sessionStorage 缓存。
+         * fetch 失败（断网/CORS）→ 保留登录态不误退；下轮重试 */
+        fetch(ACCOUNT_URL, { cache: 'no-store' }).then(function(r){
+          if(!r || !r.ok) return null;
+          return r.json();
+        }).then(function(j){
+          if(!j) return;   // 网络失败保留登录态（保守策略：宁可放过一次也别误退）
+          var accounts = (j && j.accounts) || [];
+          var found = accounts.find(function(a){ return a.u === saved.u; });
           if(found){ PRO.logged=true; PRO.user=found; onLoginSuccess(); }
           else{
             /* 账号已从 accounts.json 删除（作者手动撤销/未续费）→ 自动退出 */
@@ -1437,7 +1447,7 @@ body.sleep-open{overflow:hidden}
             if(typeof updateChips==='function') updateChips();
             showProToast('账号已被注销，请重新登录');
           }
-        });
+        }).catch(function(){ /* fetch 抛异常（如 CORS）→ 保留登录态 */ });
       }
     }catch(e){}
   }
