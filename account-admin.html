@@ -90,6 +90,7 @@ textarea{height:120px;line-height:1.5}
   <button class="tab" data-tab="single">单条哈希</button>
   <button class="tab" data-tab="verify">验证（哈希 + 明文）</button>
   <button class="tab" data-tab="parse">从 accounts.json 提取</button>
+  <button class="tab" data-tab="devices">📱 设备管理</button>
 </div>
 
 <!-- 自动生成 -->
@@ -292,6 +293,45 @@ user001:pass_abc_2026"></textarea>
     </div>
 
     <div class="out empty" id="p-out" style="margin-top:14px">等待粘贴...</div>
+  </div>
+</div>
+
+<!-- 设备管理（EdgeOne Pages Node Functions + KV 后端） -->
+<div class="panel" data-panel="devices">
+  <div class="card">
+    <div class="warn" style="background:var(--paper3);border-color:var(--border2);color:var(--ink2)">
+      <span>📱</span>
+      <div>
+        <b>设备管理（需 EdgeOne Pages KV + Node Functions 部署）</b><br>
+        每账号可绑定的设备数由 KV 的 <code>config:maxDevices</code> 控制（默认 1）。
+        Node Functions 后端 <code>/api/login</code> 校验；失败时自动回退纯前端（accounts.json）。
+      </div>
+    </div>
+
+    <label class="lab" style="margin-top:14px">管理员 Token（与 KV 里 <code>config:adminToken</code> 一致）</label>
+    <input id="dev-token" type="password" placeholder="在 EdgeOne KV 里 put config:adminToken=你的密码">
+
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn" id="dev-load">🔄 拉取账号列表</button>
+    </div>
+
+    <div id="dev-status" class="hint" style="margin-top:8px;font-size:12px;color:var(--ink3)"></div>
+
+    <div id="dev-list" class="list" style="margin-top:14px"></div>
+
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;color:var(--ink3);font-size:12px">手动添加设备（高级）</summary>
+      <div style="margin-top:8px;padding:10px;border:1px dashed var(--border2);border-radius:8px">
+        <label class="lab">账号名</label>
+        <input id="dev-add-u" type="text" placeholder="user001">
+        <label class="lab" style="margin-top:8px">设备 UUID（客户截图发你的）</label>
+        <input id="dev-add-id" type="text" placeholder="abc-123-...">
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn ghost" id="dev-add-go">➕ 添加</button>
+        </div>
+        <div id="dev-add-status" class="hint" style="margin-top:6px;font-size:12px"></div>
+      </div>
+    </details>
   </div>
 </div>
 
@@ -776,6 +816,134 @@ $('#a-file-input').onchange = (e) => {
   };
   reader.readAsText(file);
 };
+
+/* ════════════════════════════════════════
+   设备管理（Node Functions + KV 后端）
+   ════════════════════════════════════════ */
+const API_BASE = (function(){
+  // 与 admin 同源（EdgeOne Pages Node Functions 部署在本站）
+  // 与现有 loadExistingJson 同源优先策略一致：优先当前 origin
+  try{
+    var u = new URL(location.href).searchParams.get('api');
+    if(u) return u.trim().replace(/\/$/, '');
+  }catch(_e){}
+  return location.origin;
+})();
+
+function devApiUrl(path){
+  // path 形如 '/api/admin/list' 或 '/api/login'
+  return API_BASE + path;
+}
+
+async function devFetch(path, body){
+  const token = (document.getElementById('dev-token')||{}).value || '';
+  const headers = {'Content-Type': 'application/json'};
+  if(token) headers['Authorization'] = 'Bearer ' + token;
+  const r = await fetch(devApiUrl(path), {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body || {})
+  });
+  const j = await r.json().catch(() => ({}));
+  return {ok: r.ok, status: r.status, body: j};
+}
+
+function fmtTime(ts){
+  if(!ts) return '—';
+  var d = new Date(ts);
+  var pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+$('#dev-load').onclick = async () => {
+  const st = document.getElementById('dev-status');
+  const listEl = document.getElementById('dev-list');
+  st.textContent = '正在拉取…';
+  st.style.color = 'var(--ink3)';
+  listEl.innerHTML = '';
+  try{
+    const r = await devFetch('/api/admin/list', {});
+    if(!r.ok){
+      st.innerHTML = '❌ 失败：HTTP ' + r.status + ' · ' + (r.body.err || '');
+      st.style.color = 'var(--cinnabar)';
+      return;
+    }
+    const data = r.body;
+    st.textContent = '✓ 拉取成功（maxDevices=' + data.maxDevices + '，共 ' + data.accounts.length + ' 个账号）';
+    st.style.color = 'var(--teal)';
+    if(data.accounts.length === 0){
+      listEl.innerHTML = '<div class="hint">KV 里还没有账号数据。请先用「批量生成」生成账号后，手动 KV put 到 namespace pg-accounts（key 格式：account:用户名，value 为 JSON）</div>';
+      return;
+    }
+    listEl.innerHTML = data.accounts.map(a => {
+      const devicesHtml = a.devices.map((d, i) => '<code style="font-size:10px">' + d.slice(0, 8) + '…</code>').join(' · ');
+      const warn = a.deviceCount >= data.maxDevices ? ' <span class="tag err">满</span>' : '';
+      return '<div class="list-row" style="flex-wrap:wrap;gap:8px">' +
+        '<b>' + a.u + '</b>' +
+        '<span class="tag">' + a.deviceCount + '/' + data.maxDevices + ' 台</span>' + warn +
+        '<span style="color:var(--ink3);font-size:11px">最后登录：' + fmtTime(a.lastSeen) + '</span>' +
+        '<span style="color:var(--ink3);font-size:10px;width:100%">' + (a.devices.length ? 'UUIDs: ' + devicesHtml : '(无绑定)') + '</span>' +
+        '<button class="btn ghost" data-reset="' + a.u + '" style="margin-left:auto;padding:4px 10px;font-size:12px">🔄 重置</button>' +
+        '</div>';
+    }).join('');
+    // 绑定重置按钮
+    listEl.querySelectorAll('[data-reset]').forEach(btn => {
+      btn.onclick = async () => {
+        const u = btn.getAttribute('data-reset');
+        if(!confirm('确认重置账号「' + u + '」的所有设备绑定？该账号下次登录将自动绑定当前浏览器。')) return;
+        const r = await devFetch('/api/admin/reset', {u});
+        if(r.ok){
+          alert('✓ 已清空 ' + u + ' 的设备列表（旧 ' + r.body.clearedDevices + ' 台）');
+          $('#dev-load').click();
+        }else{
+          alert('❌ 重置失败：' + (r.body.err || ''));
+        }
+      };
+    });
+  } catch(err){
+    st.innerHTML = '❌ 网络错误：' + err.message;
+    st.style.color = 'var(--cinnabar)';
+  }
+};
+
+$('#dev-add-go').onclick = async () => {
+  const u = (document.getElementById('dev-add-u').value || '').trim();
+  const id = (document.getElementById('dev-add-id').value || '').trim();
+  const st = document.getElementById('dev-add-status');
+  if(!u || !id){
+    st.textContent = '❌ 账号名和设备 UUID 都要填';
+    st.style.color = 'var(--cinnabar)';
+    return;
+  }
+  st.textContent = '正在添加…';
+  st.style.color = 'var(--ink3)';
+  try{
+    const r = await devFetch('/api/admin/add-device', {u, deviceId: id});
+    if(r.ok){
+      st.textContent = '✓ ' + (r.body.added ? '已添加' : 'UUID 已在列表中（无需添加）') + '（当前 ' + r.body.devices.length + ' 台）';
+      st.style.color = 'var(--teal)';
+      document.getElementById('dev-add-id').value = '';
+      // 自动刷新列表
+      setTimeout(() => $('#dev-load').click(), 500);
+    }else{
+      st.textContent = '❌ 失败：HTTP ' + r.status + ' · ' + (r.body.err || '');
+      st.style.color = 'var(--cinnabar)';
+    }
+  } catch(err){
+    st.textContent = '❌ 网络错误：' + err.message;
+    st.style.color = 'var(--cinnabar)';
+  }
+};
+
+/* 切到设备管理 tab 时自动拉取一次（如果还没拉过） */
+const origDatasets = Array.from(document.querySelectorAll('.tab')).map(t => t.dataset.tab);
+document.querySelector('.tab[data-tab="devices"]').addEventListener('click', () => {
+  setTimeout(() => {
+    if(document.getElementById('dev-list').children.length === 0){
+      $('#dev-load').click();
+    }
+  }, 50);
+});
 </script>
 
 </body>

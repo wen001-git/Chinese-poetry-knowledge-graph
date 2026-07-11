@@ -1277,8 +1277,44 @@ body.sleep-open{overflow:hidden}
     }).catch(function(){ PRO.accounts=[]; });
   }
 
-  // ── 登录校验 ──
-  function doLogin(u,p){
+  // ── 设备 ID（首次访问生成，存 LS；用于后端校验设备数限制）──
+  function getDeviceId(){
+    var id = localStorage.getItem('pg_pro_device');
+    if(!id){
+      id = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'dev-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      try{ localStorage.setItem('pg_pro_device', id); }catch(_){}
+    }
+    return id;
+  }
+
+  // ── 后端登录（EdgeOne Pages Node Functions + KV）──
+  // 优先走远端校验；远端 5xx / fallback 标记 / fetch 失败 → 退回 doLoginLocal
+  function doLoginRemote(u, p, deviceId){
+    var url = (location.origin || 'https://poem.leewen.work') + '/api/login';
+    return fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({u: u, p: p, deviceId: deviceId})
+    })
+    .then(function(r){
+      var status = r.status;
+      return r.json().then(function(j){ return {status: status, json: j}; }).catch(function(){ return {status: status, json: null}; });
+    })
+    .then(function(res){
+      // 5xx 或后端主动返 fallback → 走 fallback
+      if(res.status >= 500 || !res.json || res.json.fallback){
+        throw new Error('REMOTE_FALLBACK');
+      }
+      if(res.json.err) throw new Error(res.json.err);
+      if(!res.json.token) throw new Error('未拿到登录令牌');
+      return res.json;
+    });
+  }
+
+  // ── 纯前端 fallback（accounts.json + SHA-256）──
+  function doLoginLocal(u, p){
     if(!u||!p) return Promise.reject(new Error('请输入用户名和密码'));
     return loadAccounts().then(function(){
       var found=PRO.accounts.find(function(a){return a.u===u;});
@@ -1286,8 +1322,27 @@ body.sleep-open{overflow:hidden}
       return sha256(PRO.salt+p).then(function(h){ return h===found.h ? found : Promise.reject(new Error('密码错误')); });
     }).then(function(found){
       PRO.logged=true; PRO.user=found;
-      localStorage.setItem('pg_pro_user',JSON.stringify({u:found.u,loginAt:Date.now()}));
+      localStorage.setItem('pg_pro_user',JSON.stringify({u:found.u, loginAt:Date.now(), deviceId: getDeviceId()}));
       onLoginSuccess();
+    });
+  }
+
+  // ── 登录入口：先远端后本地 ──
+  function doLogin(u, p){
+    if(!u||!p) return Promise.reject(new Error('请输入用户名和密码'));
+    var deviceId = getDeviceId();
+    return doLoginRemote(u, p, deviceId).then(function(j){
+      PRO.logged=true; PRO.user={u:u};
+      localStorage.setItem('pg_pro_user', JSON.stringify({u:u, loginAt:Date.now(), deviceId:deviceId, token:j.token, mode:'remote'}));
+      onLoginSuccess();
+      if(j.bound) showProToast('✓ 设备已自动绑定（设备 1/' + (j.maxDevices||1) + '）');
+      return j;
+    }).catch(function(err){
+      if(err.message === 'REMOTE_FALLBACK'){
+        try{ console.warn('[auth] 后端不可用，回退纯前端校验'); }catch(_){}
+        return doLoginLocal(u, p);
+      }
+      throw err;
     });
   }
 
@@ -1438,23 +1493,25 @@ body.sleep-open{overflow:hidden}
     updateBanner();
     bindBannerEvents();
     try{
+      /* 确保本机设备 ID 存在（首次访问也生成，存 LS）—— 后续 doLogin 才能带上 */
+      getDeviceId();
       var saved=JSON.parse(localStorage.getItem('pg_pro_user')||'null');
       if(saved && saved.u){
-        /* 不能复用 loadAccounts()——它有 sessionStorage 缓存（pg_acc_cache），
-         * 缓存里仍是上次登录时的账号列表，已被删除的账号不会消失 →
-         * 作者手动撤销账号后用户仍能用。
-         * 这里直接裸 fetch ACCOUNT_URL，绕过 sessionStorage 缓存。
-         * fetch 失败（断网/CORS）→ 保留登录态不误退；下轮重试 */
+        /* 优先信任 JWT（Node Functions 已校验过账号有效性 + 设备数限制）—— 直接信任，不再 fetch accounts.json */
+        if(saved.token){
+          PRO.logged=true; PRO.user={u:saved.u}; onLoginSuccess();
+          return;
+        }
+        /* 无 token（旧版 LS 数据，没经过 Node Functions）—— 走原 SWR 校验 */
         fetch(ACCOUNT_URL, { cache: 'no-store' }).then(function(r){
           if(!r || !r.ok) return null;
           return r.json();
         }).then(function(j){
-          if(!j) return;   // 网络失败保留登录态（保守策略：宁可放过一次也别误退）
+          if(!j) return;
           var accounts = (j && j.accounts) || [];
           var found = accounts.find(function(a){ return a.u === saved.u; });
           if(found){ PRO.logged=true; PRO.user=found; onLoginSuccess(); }
           else{
-            /* 账号已从 accounts.json 删除（作者手动撤销/未续费）→ 自动退出 */
             localStorage.removeItem('pg_pro_user');
             PRO.logged=false; PRO.user=null;
             applyProVisibility();
@@ -1462,7 +1519,7 @@ body.sleep-open{overflow:hidden}
             if(typeof updateChips==='function') updateChips();
             showProToast('账号已被注销，请重新登录');
           }
-        }).catch(function(){ /* fetch 抛异常（如 CORS）→ 保留登录态 */ });
+        }).catch(function(){ /* fetch 抛异常（CORS/断网）→ 保留登录态 */ });
       }
     }catch(e){}
   }
