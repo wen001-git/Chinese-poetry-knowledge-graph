@@ -2,7 +2,37 @@
   "version": 1,
   "salt": "pg-pro-salt-v1",
   "accounts": [
-    { "u": "demo1", "h": "1e3471c5b2851c55e22a8c1fdc86ff9ad4be17a03326fc0b98aaced500ec66c2" },
-    { "u": "demo2", "h": "9bac877b0aff099cec7167e8e8aded5f9379739b67bb21c6efe8e770c10aa5bd" }
+    {
+      "u": "demo1",
+      "h": "1e3471c5b2851c55e22a8c1fdc86ff9ad4be17a03326fc0b98aaced500ec66c2"
+    },
+    {
+      "u": "demo2",
+      "h": "9bac877b0aff099cec7167e8e8aded5f9379739b67bb21c6efe8e770c10aa5bd"
+    },
+    {
+      "u": "admin",
+      "h": "1cd8058c5198d91a85ed8ca94cdddfe5c5c6a53359caf673c7a9bf64ad5c0ff8"
+    },
+    {
+      "u": "wujin",
+      "h": "4ed539dbfac0c8b4e97092920deac7156113e25003d0b9858411255a8032e620"
+    },
+    {
+      "u": "heshujian",
+      "h": "dde58a919413f8d99d1020b01b72b534927c234ca9b6076910f0e573ddb3bee5"
+    },
+    {
+      "u": "user202607101",
+      "h": "0f094a563e5d7d27f64db2658c1cd43cc44afb61366e507bc0e2ac01da525df1"
+    },
+    {
+      "u": "user202607102",
+      "h": "b0bbd166c8a0d4e26e93f566b860dac848210530bd5fc234d1373dd4791b28ca"
+    },
+    {
+      "u": "user202607103",
+      "h": "30bee6b4b3f19099fe57958e5ed18fd455db90fa300183bbc04cf597edfc7fc5"
+    }
   ]
 }
