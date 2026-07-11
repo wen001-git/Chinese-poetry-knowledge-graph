@@ -12,11 +12,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2">
 <meta name="author" content="LiJiaWen">
 <title>诗词图谱 · 中国古诗词知识图谱</title>
-<!-- ══════════ PoemGraph Pro 配置区（仅 poemgraph-pro.html 保留） ══════════ -->
-<meta name="x-pro-mode" content="1">
-<meta name="x-account-url" content="https://poem.leewen.work/accounts.json">
-<meta name="x-wechat-id" content="leewen2017">
-<meta name="x-paywall-msg" content="创作不易，请加作者微信购买">
 <style>
 /* ══════════ 水墨设计系统 ══════════ */
 :root{
@@ -87,20 +82,11 @@ body[data-guide="1"] #nav{display:none}
 .vtab{padding:7px 14px;border-radius:20px;font-size:15px;color:var(--ink2);transition:.18s;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
 .vtab:hover{background:var(--paper2)}
 .vtab.on{background:var(--teal);color:#fff}
-.vtab-login{padding:7px 14px;border-radius:20px;font-size:15px;color:var(--ink2);
-  background:transparent;border:none;
-  transition:.18s;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;
-  box-sizing:border-box;cursor:pointer;font-family:inherit}
-.vtab-login:hover{background:var(--paper2)}
-.vtab-login.logged{background:var(--teal-l);color:var(--teal)}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--paper2);
   font-size:13px;color:var(--ink);transition:.18s;white-space:nowrap}
 .chip:hover{border-color:var(--teal);color:var(--teal)}
 .chip .ic{margin-right:4px}
-/* 仅图标 chip（如朱墨主题切换）—— 去文字、SVG 居中 */
-.chip-icon{padding:6px 10px;display:inline-flex;align-items:center;justify-content:center}
-.chip-icon .ic{margin-right:0;display:inline-flex}
 /* 顶栏年级下拉：全局年级筛选器（驱动所有视图的 visiblePoems）。去原生箭头，自绘水墨小三角并留足与圆角边框的间距 */
 select.chip#grade-chip{appearance:none;-webkit-appearance:none;-moz-appearance:none;
   padding:6px 30px 6px 12px;cursor:pointer;
@@ -109,8 +95,6 @@ select.chip#grade-chip{appearance:none;-webkit-appearance:none;-moz-appearance:n
 select.chip#grade-chip:hover,select.chip#grade-chip:focus{border-color:var(--teal);color:var(--teal);outline:none}
 body.theme-zhumo select.chip#grade-chip{
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1.5 1.5L6 6l4.5-4.5' fill='none' stroke='%23c1352b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>")}
-/* PoemGraph Pro：未登录时 2-9 年级 option 灰色 + 虚线提示 */
-select.chip#grade-chip option[data-locked="1"]{color:var(--ink3);background:var(--paper3);font-style:italic}
 .mode-switch{display:inline-flex;border:1px solid var(--border);border-radius:20px;overflow:hidden}
 .mode-switch button{padding:6px 12px;font-size:13px;color:var(--ink2);background:var(--paper2)}
 .mode-switch button.on{background:var(--teal);color:#fff}
@@ -624,18 +608,15 @@ body.theme-zhumo .d-recite-float.on{background:var(--qing)}
 .sres-empty{padding:30px;text-align:center;color:var(--ink3)}
 
 /* ══════════ 响应式 ══════════ */
-@media(max-width:820px){
+@media(max-width:680px){
   #main{padding:18px 12px 90px}
-  .vtabs .vtab, .vtabs .vtab-login{padding:6px 11px;font-size:14px}
+  .vtabs .vtab{padding:6px 11px;font-size:14px}
   .brand{font-size:19px}
   #gcanvas{height:440px}
   .match-wrap{gap:16px}
   .d-hero{padding:24px 18px}
 }
-@media(max-width:680px){
-  .vtabs .vtab, .vtabs .vtab-login{padding:5px 9px;font-size:13px}
-}
-@media(min-width:821px) and (max-width:1024px){
+@media(min-width:681px) and (max-width:1024px){
   #main{padding:22px 16px 100px}
 }
 
@@ -763,8 +744,6 @@ body.sleep-open{overflow:hidden}
 .sleep-picker::-webkit-scrollbar{display:none}
 .sleep-picker button{flex:0 0 auto;padding:6px 13px;border-radius:15px;font-size:12.5px;color:#bdae90;background:rgba(255,255,255,.06);border:1px solid rgba(205,191,166,.18);white-space:nowrap}
 .sleep-picker button.on{background:rgba(205,191,166,.24);color:#f6efde;border-color:rgba(205,191,166,.42)}
-.sleep-picker button.locked{opacity:.55;color:#9a8e72;border-style:dashed}
-.sleep-picker button.locked:hover{background:rgba(177,56,46,.1);border-color:rgba(177,56,46,.4);opacity:.85}
 .sleep-stage{flex:1 1 auto;min-height:0;width:min(680px,100%);box-sizing:border-box;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;margin:0 auto 18px;padding:8px 8px 20px;scrollbar-width:thin;scrollbar-color:rgba(205,191,166,.38) rgba(255,255,255,.04)}
 .sleep-stage::-webkit-scrollbar{width:8px;height:0}
 .sleep-stage::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:999px}
@@ -841,45 +820,6 @@ body.sleep-open{overflow:hidden}
 .ct-fun{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.65;font-family:STKaiti,"Kaiti SC",serif}
 .ct-basis{margin-top:6px;font-size:12px;color:var(--ink3);line-height:1.6}
 .ct-basis b{color:var(--moqing,#2d5a6b);font-weight:600}
-
-/* ══════════ Pro 版 modal 样式（登录 + 支付墙共用） ══════════ */
-.pro-modal{position:fixed;inset:0;z-index:300;background:rgba(28,28,30,.55);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(2px)}
-.pro-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--r2);padding:28px 32px;max-width:380px;width:100%;box-shadow:var(--shadow2);display:flex;flex-direction:column;gap:14px;text-align:center;align-items:center}
-.pro-msg{font-size:20px;color:var(--ink);font-weight:600;font-family:var(--serif)}
-.pro-sub{font-size:13px;color:var(--ink2);line-height:1.6}
-.pro-field{display:flex;flex-direction:column;gap:6px;width:100%;text-align:left}
-.pro-field label{font-size:12px;color:var(--ink3);margin-left:2px}
-.pro-field input{font-family:inherit;font-size:15px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--paper2);color:var(--ink);outline:none}
-.pro-field input:focus{border-color:var(--teal)}
-.pro-id{font-size:14px;color:var(--ink2);padding:8px 14px;background:var(--paper2);border-radius:var(--r);font-family:var(--serif);user-select:all}
-.pro-id b{color:var(--cinnabar);font-weight:700;letter-spacing:.05em}
-.pro-btn{padding:10px 18px;background:var(--teal);color:var(--paper);border-radius:var(--r);font-size:14px;font-weight:600;transition:opacity .15s;width:100%}
-.pro-btn:hover{opacity:.85}
-.pro-btn.ghost{background:transparent;color:var(--ink2);font-weight:normal}
-.pro-btn.ghost:hover{color:var(--ink)}
-.pro-err{color:var(--cinnabar);font-size:13px;min-height:18px}
-
-/* ══════════ Pro 版付费墙横幅（诗单顶部） ══════════ */
-.pro-banner{display:flex;align-items:center;gap:14px;padding:12px 18px;
-  background:linear-gradient(135deg,rgba(45,90,107,.06) 0%,rgba(177,56,46,.05) 100%);
-  border:1px solid rgba(45,90,107,.3);border-radius:var(--r);margin-bottom:18px;
-  font-size:13px;box-shadow:var(--shadow);flex-wrap:wrap}
-.pro-banner-ic{font-size:22px;flex-shrink:0}
-.pro-banner-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.pro-banner-title{color:var(--teal);font-weight:600;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
-.pro-banner-sub{color:var(--ink2);font-size:12px}
-.pro-banner-wx{font-family:var(--serif);color:var(--ink2);font-size:13px;white-space:nowrap;flex-shrink:0}
-.pro-banner-wx b{color:var(--cinnabar);font-weight:700;letter-spacing:.05em;user-select:all}
-.pro-banner-copy{padding:5px 12px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.18s;flex-shrink:0}
-.pro-banner-copy:hover{opacity:.85}
-.pro-banner-close{padding:0 6px;background:transparent;color:var(--ink3);border:none;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0}
-.pro-banner-close:hover{color:var(--ink)}
-@media(max-width:680px){
-  .pro-banner{gap:8px;padding:10px 12px;font-size:12px}
-  .pro-banner-ic{font-size:18px}
-  .pro-banner-title{font-size:13px}
-  .pro-banner-sub{font-size:11px}
-}
 </style>
 </head>
 <body>
@@ -944,7 +884,6 @@ body.sleep-open{overflow:hidden}
     <button class="vtab" id="t-timeline" onclick="showView('timeline')">⏳ 时间轴</button>
     <button class="vtab" id="t-poets" onclick="showView('poets')">✍ 诗人</button>
     <button class="vtab" id="t-path" onclick="showView('path')">🚩 闯关</button>
-    <button class="vtab-login" id="login-chip" onclick="openLoginModal()" title="登录解锁全部功能"><span class="ic">🔑</span><span id="login-chip-label">登录</span></button>
   </div>
   <div class="nav-right">
     <div class="mode-switch" id="mode-switch">
@@ -960,12 +899,7 @@ body.sleep-open{overflow:hidden}
     <button class="chip" onclick="openSearch()"><span class="ic">🔍</span>搜索</button>
     <button class="chip" id="sleep-entry" onclick="openSleep('sleep')" title="连续播放诗词朗读·睡前听诗入眠（安神诗单+睡眠定时、锁屏可播）"><span class="ic">🌙</span>听诗入眠</button>
     <button class="chip" id="eartrain-entry" onclick="openSleep('eartrain')" title="按年级连续播放·给宝宝磨耳朵（不限时循环，可切年级/安神/全部）"><span class="ic">🎧</span>磨耳朵</button>
-    <button class="chip chip-icon" id="theme-chip" onclick="toggleTheme()" title="切换视觉风格：朱墨册页 ⇄ 水墨" aria-label="切换主题">
-      <svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-        <rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="var(--cinnabar)" stroke="var(--ink)" stroke-width="1.2"/>
-        <text x="12" y="16.2" text-anchor="middle" font-family="STKaiti,KaiTi,serif" font-size="12" font-weight="700" fill="#f7e8e4">墨</text>
-      </svg>
-    </button>
+    <button class="chip" id="theme-chip" onclick="toggleTheme()" title="切换视觉风格：朱墨册页 ⇄ 水墨"><span class="ic">🖌</span>朱墨</button>
     <div class="amb-wrap">
       <button class="chip" id="amb-chip" onclick="toggleAmbPanel()"><span class="ic">🎵</span><span>古琴</span></button>
       <div class="amb-pop" id="amb-pop">
@@ -985,16 +919,6 @@ body.sleep-open{overflow:hidden}
   <!-- 年级入口 -->
   <section class="view" id="v-grade">
     <div class="page-head"><h2 class="serif">按年级学诗</h2><span class="hint">依统编版语文课本顺序编排</span></div>
-    <div class="pro-banner" id="pro-banner" style="display:none">
-      <span class="pro-banner-ic">🔒</span>
-      <span class="pro-banner-txt">
-        <b class="pro-banner-title">未登录用户只能使用 1 年级诗词</b>
-        <span class="pro-banner-sub">添加作者微信购买 9.9 元永久会员（教师免费）</span>
-      </span>
-      <span class="pro-banner-wx">微信号：<b id="pro-banner-wx">leewen2017</b></span>
-      <button class="pro-banner-copy" id="pro-banner-copy">📋 复制</button>
-      <button class="pro-banner-close" id="pro-banner-close" aria-label="关闭横幅">✕</button>
-    </div>
     <div id="grade-list"></div>
   </section>
 
@@ -1234,252 +1158,6 @@ body.sleep-open{overflow:hidden}
   </div>
 </div>
 <script>
-/* ═══════════════════════════════════════════ PoemGraph Pro 守卫（仅商业版） ═══════════════════
- * 标记：PRO_MODE_BEGIN / PRO_MODE_END
- * 与免费版合并时，仅保留这一个块；其它代码原样同步。
- * 设计：未登录 = 可浏览 1 年级诗 + 顶栏可见「🔑 登录」；全部朗读入口前置拦截弹微信弹窗。
- */
-(function(){
-  var W=window, D=document;
-  var META=D.querySelector('meta[name="x-pro-mode"]');
-  var ACCOUNT_URL=(D.querySelector('meta[name="x-account-url"]')||{}).content;
-  var WECHAT_ID =(D.querySelector('meta[name="x-wechat-id"]')||{}).content || 'leewen2017';
-  var PAYWALL_MSG=(D.querySelector('meta[name="x-paywall-msg"]')||{}).content||'创作不易，请加作者微信购买';
-
-  /* ── 付费墙文案统一常量（修改这里即可全局生效） ──
-   * 之前散落在 showPaywall()、banner、meta 等多处；
-   * 现在所有付费墙相关文案都从这里取，未来调价/换微信号改这里一处。
-   */
-  var PAY_COPY = {
-    title:         PAYWALL_MSG,                                   // 大标题
-    subtitle:      '添加作者微信购买 9.9 元永久会员（教师免费）',         // 副标题
-    wechatLabel:   '微信号',                                       // 「微信号：xxx」前缀
-    copyBtn:       '📋 复制微信号',                                  // 复制按钮
-    copyBtnShort:  '📋 复制',                                       // 横幅紧凑版
-    copiedHint:    '✓ 已复制，请打开微信搜索',                          // 复制后短暂提示
-    closeBtn:      '知道了',                                        // 关闭按钮
-    bannerTitle:   '未登录用户只能使用 1 年级诗词',                    // 诗单横幅标题
-    bannerSubtitle:'创作不易，添加作者微信购买 9.9 元永久会员（教师免费）', // 诗单横幅副标题（banner 标题未含「创作不易」，所以这里需要）
-  };
-  var PRO={on:!!META, logged:false, user:null, accounts:[], salt:'pg-pro-salt-v1'};
-
-  // ── SHA-256（浏览器原生 SubtleCrypto，零依赖） ──
-  function sha256(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){
-    return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');
-  });}
-
-  // ── 加载 accounts.json（带 sessionStorage 缓存） ──
-  function loadAccounts(){
-    var cache=sessionStorage.getItem('pg_acc_cache');
-    if(cache){ try{ PRO.accounts=JSON.parse(cache); return Promise.resolve(); }catch(e){} }
-    return fetch(ACCOUNT_URL,{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
-      PRO.accounts=j.accounts||[]; sessionStorage.setItem('pg_acc_cache',JSON.stringify(PRO.accounts));
-    }).catch(function(){ PRO.accounts=[]; });
-  }
-
-  // ── 登录校验 ──
-  function doLogin(u,p){
-    if(!u||!p) return Promise.reject(new Error('请输入用户名和密码'));
-    return loadAccounts().then(function(){
-      var found=PRO.accounts.find(function(a){return a.u===u;});
-      if(!found) throw new Error('用户名不存在');
-      return sha256(PRO.salt+p).then(function(h){ return h===found.h ? found : Promise.reject(new Error('密码错误')); });
-    }).then(function(found){
-      PRO.logged=true; PRO.user=found;
-      localStorage.setItem('pg_pro_user',JSON.stringify({u:found.u,loginAt:Date.now()}));
-      onLoginSuccess();
-    });
-  }
-
-  // ── 登录成功 UI：把顶栏 chip 改成用户名 + 退出 ──
-  function onLoginSuccess(){
-    var chip=D.getElementById('login-chip');
-    var lbl=D.getElementById('login-chip-label');
-    if(chip && lbl && PRO.user){
-      lbl.textContent=PRO.user.u;
-      chip.title='已登录（Pro 永久会员）·点击退出';
-      chip.querySelector('.ic').textContent='✓';
-      chip.onclick=function(){
-        if(confirm('确定要退出登录吗？')){ localStorage.removeItem('pg_pro_user'); location.reload(); }
-      };
-    }
-    // 关闭登录 modal（如开着）
-    var openModal=D.querySelector('.pro-modal');
-    if(openModal) D.body.removeChild(openModal);
-    applyProVisibility();
-    if(typeof updateBanner==='function') updateBanner();
-    if(typeof ST!=='undefined' && ST && typeof updateChips==='function') updateChips();
-    // 重渲当前视图以解锁年级选择等
-    if(typeof showView==='function'){
-      var active=D.querySelector('.vtab.on');
-      if(active) showView(active.id.replace('t-',''));
-    }
-  }
-
-  // ── 通用 modal（登录 + 支付墙共用） ──
-  function showModal(opts){
-    var box=D.createElement('div');
-    box.className='pro-modal';
-    box.innerHTML='<div class="pro-card">'+opts.html+'</div>';
-    D.body.appendChild(box);
-    box.addEventListener('click',function(e){ if(e.target===box) D.body.removeChild(box); });
-    return box;
-  }
-
-  // ── 支付墙（微信弹窗） ──
-  function showPaywall(){
-    var box=showModal({
-      html:
-        '<div class="pro-msg">'+PAY_COPY.title+'</div>'+
-        '<div class="pro-sub">'+PAY_COPY.subtitle+'</div>'+
-        '<div class="pro-id">'+PAY_COPY.wechatLabel+'：<b id="paywall-wx">'+WECHAT_ID+'</b></div>'+
-        '<button class="pro-btn" id="paywall-copy">'+PAY_COPY.copyBtn+'</button>'+
-        '<button class="pro-btn ghost" id="paywall-close">'+PAY_COPY.closeBtn+'</button>'
-    });
-    D.getElementById('paywall-copy').onclick=function(){
-      navigator.clipboard.writeText(WECHAT_ID).then(function(){
-        D.getElementById('paywall-copy').textContent=PAY_COPY.copiedHint;
-        setTimeout(function(){D.getElementById('paywall-copy').textContent=PAY_COPY.copyBtn;},2000);
-      }).catch(function(){
-        var sel=window.getSelection(), range=D.createRange();
-        range.selectNode(D.getElementById('paywall-wx'));
-        sel.removeAllRanges(); sel.addRange(range);
-        D.getElementById('paywall-copy').textContent='已选中，请 Ctrl/Cmd+C';
-      });
-    };
-    D.getElementById('paywall-close').onclick=function(){ D.body.removeChild(box); };
-  }
-  PRO.showPaywall = showPaywall;
-
-  // ── 登录 modal（顶栏「🔑 登录」点击触发） ──
-  W.openLoginModal = function(){
-    var box=showModal({
-      html:
-        '<div class="pro-msg">登 录</div>'+
-        '<div class="pro-sub">已购买的用户请输入账号密码</div>'+
-        '<div class="pro-field"><label>用户名</label><input id="lm-user" autocomplete="username"></div>'+
-        '<div class="pro-field"><label>密码</label><input id="lm-pass" type="password" autocomplete="current-password"></div>'+
-        '<div class="pro-err" id="lm-err"></div>'+
-        '<button class="pro-btn" id="lm-go">登 录</button>'+
-        '<button class="pro-btn ghost" id="lm-close">关闭</button>'
-    });
-    var go=function(){
-      var u=D.getElementById('lm-user').value.trim();
-      var p=D.getElementById('lm-pass').value;
-      D.getElementById('lm-err').textContent='验证中…';
-      doLogin(u,p).catch(function(ex){ D.getElementById('lm-err').textContent=ex.message||'登录失败'; });
-    };
-    D.getElementById('lm-go').onclick=go;
-    D.getElementById('lm-pass').onkeydown=function(e){ if(e.key==='Enter') go(); };
-    D.getElementById('lm-close').onclick=function(){ D.body.removeChild(box); };
-    setTimeout(function(){ var f=D.getElementById('lm-user'); if(f) f.focus(); },50);
-  };
-
-  // ── 守卫函数：所有朗读入口前置调用 ──
-  // 规则：已登录 → 放行；未登录 + 1 年级诗 → 放行；未登录 + 2~9 年级诗 → 拦截弹支付墙
-  // 参数 grade 可选：传入具体诗的 grade；不传则从全局 ST.poem.grade 取
-  function guardTTS(grade){
-    if(PRO.logged) return false;
-    if(grade===undefined || grade===null){
-      grade = (typeof ST!=='undefined' && ST && ST.poem) ? ST.poem.grade : null;
-    }
-    if(grade===1 || grade==='1') return false;
-    showPaywall();
-    return true;
-  }
-  PRO.guardTTS = guardTTS;
-
-  // ── 限制可见诗 = 仅 1 年级 ──
-  function applyProVisibility(){
-    var gc=D.getElementById('grade-chip');
-    if(gc){
-      /* PoemGraph Pro：未登录时所有 option 取消 disabled（让用户能点击弹出支付墙），
-         但 2-9 年级 option 文字加 🔒 + 灰色提示。 */
-      Array.from(gc.options).forEach(function(o){
-        o.disabled=false;
-        if(!PRO.logged && o.value!=='1'){
-          /* 保留原文字（如 "2年级"），加 🔒 后缀；只在第一次标记，避免重复叠 🔒 */
-          if(o.dataset.locked!=='1'){
-            o.dataset.locked='1';
-            o.dataset.origText=o.textContent;
-            o.textContent = o.textContent + ' 🔒';
-          }
-        }else{
-          /* 已登录或 1 年级：清除 🔒 后缀 */
-          if(o.dataset.locked==='1' && o.dataset.origText){
-            o.textContent = o.dataset.origText;
-            o.dataset.locked='0';
-          }
-        }
-      });
-      if(!PRO.logged){ gc.value='1'; gc.dispatchEvent(new Event('change')); }
-    }
-  }
-
-  // ── 启动流程 ──
-  function boot(){
-    if(!PRO.on) return;
-    applyProVisibility();
-    updateBanner();
-    bindBannerEvents();
-    try{
-      var saved=JSON.parse(localStorage.getItem('pg_pro_user')||'null');
-      if(saved && saved.u){
-        loadAccounts().then(function(){
-          var found=PRO.accounts.find(function(a){return a.u===saved.u;});
-          if(found){ PRO.logged=true; PRO.user=found; onLoginSuccess(); }
-        });
-      }
-    }catch(e){}
-  }
-
-  /* ── 诗单顶部横幅控制（文案来自 PAY_COPY） ── */
-  function updateBanner(){
-    var b=D.getElementById('pro-banner');
-    if(!b) return;
-    /* 文案渲染（即使已登录也渲染一遍，避免后续 hot reload 看到不一致） */
-    var tEl=b.querySelector('.pro-banner-title'); if(tEl) tEl.textContent=PAY_COPY.bannerTitle;
-    var sEl=b.querySelector('.pro-banner-sub'); if(sEl) sEl.textContent=PAY_COPY.bannerSubtitle;
-    var wxEl=b.querySelector('.pro-banner-wx'); if(wxEl) wxEl.innerHTML=PAY_COPY.wechatLabel+'：<b id="pro-banner-wx">'+WECHAT_ID+'</b>';
-    var cpEl=b.querySelector('.pro-banner-copy'); if(cpEl) cpEl.textContent=PAY_COPY.copyBtnShort;
-    /* 显示/隐藏 */
-    var closed=sessionStorage.getItem('pg_banner_closed')==='1';
-    b.style.display = (PRO.logged || closed) ? 'none' : 'flex';
-  }
-
-  function bindBannerEvents(){
-    var b=D.getElementById('pro-banner'); if(!b) return;
-    var cp=D.getElementById('pro-banner-copy');
-    var cl=D.getElementById('pro-banner-close');
-    if(cp){
-      cp.onclick=function(){
-        navigator.clipboard.writeText(WECHAT_ID).then(function(){
-          cp.textContent=PAY_COPY.copiedHint;
-          setTimeout(function(){ cp.textContent=PAY_COPY.copyBtnShort; },2000);
-        }).catch(function(){
-          var sel=window.getSelection(), range=D.createRange();
-          var wxNode=D.getElementById('pro-banner-wx');
-          if(wxNode){ range.selectNode(wxNode); sel.removeAllRanges(); sel.addRange(range); }
-          cp.textContent='已选中，请 Ctrl/Cmd+C';
-        });
-      };
-    }
-    if(cl){
-      cl.onclick=function(){
-        sessionStorage.setItem('pg_banner_closed','1');
-        b.style.display='none';
-      };
-    }
-  }
-
-  W.PRO_MODE = PRO;
-  W.PAY_COPY = PAY_COPY;
-  W.showPaywall = showPaywall;
-  W.applyProVisibility = applyProVisibility;
-  if(D.readyState==='loading') D.addEventListener('DOMContentLoaded',function(){ setTimeout(boot,0); });
-  else setTimeout(boot,0);
-})();
-/* ═══════════════════ PoemGraph Pro 守卫 结束 ═══════════════════ */
 /* ══════════════════════════════════════════
    数据层（统编版 20 首）
    ══════════════════════════════════════════ */
@@ -2830,16 +2508,7 @@ const gradeOv=document.getElementById('grade-overlay');
 /* 视觉风格切换：朱墨册页 ⇄ 水墨（默认朱墨，存 localStorage pg_theme） */
 function applyTheme(t){
   const zhumo=(t!=='inkwash'); document.body.classList.toggle('theme-zhumo',zhumo);
-  const b=document.getElementById('theme-chip'); if(b){
-    b.title = zhumo ? '当前：朱墨册页·点击切换到水墨' : '当前：水墨·点击切换到朱墨册页';
-    /* 朱砂红印章 SVG（朱墨态） vs 墨青印章 SVG（水墨态） */
-    const fillC = zhumo ? 'var(--cinnabar)' : 'var(--teal)';
-    const txtC = zhumo ? '#f7e8e4' : '#e4ecef';
-    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">'
-      +'<rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="'+fillC+'" stroke="var(--ink)" stroke-width="1.2"/>'
-      +'<text x="12" y="16.2" text-anchor="middle" font-family="STKaiti,KaiTi,serif" font-size="12" font-weight="700" fill="'+txtC+'">墨</text>'
-      +'</svg>';
-  }
+  const b=document.getElementById('theme-chip'); if(b)b.innerHTML='<span class="ic">'+(zhumo?'🖌':'💧')+'</span>'+(zhumo?'朱墨':'水墨');
   /* 知识图谱(Canvas)随主题换色：节点/连线/名家边/标签。动画循环每帧重绘，自动生效 */
   GCOL=zhumo?GCOL_ZHU:GCOL_INK;
   GEDGE=zhumo?'rgba(140,90,60,.30)':'rgba(92,92,110,.28)';
@@ -2891,32 +2560,7 @@ function pickGrade(g){ runChoice(function(){
 });}
 function openGradePick(){document.body.dataset.guide='1';gradeOv.style.display='flex';}
 /* 顶栏年级下拉：原地切换年级，停留在当前视图（闯关/图谱/地图等），不像 pickGrade 那样跳走 */
-/* PoemGraph Pro：未登录 + 非 1 年级 → 弹支付墙（移动端 Safari/Chrome 偶尔会绕过 disabled） */
-function quickPickGrade(g){
-  if(window.PRO_MODE && window.PRO_MODE.logged===false && +g !== 1){
-    var gc=document.getElementById('grade-chip'); if(gc) gc.value='1';
-    if(typeof window.showPaywall==='function') window.showPaywall();
-    return;
-  }
-  ST.grade=+g;lsSave();updateChips();showView(ST.view);
-}
-/* PoemGraph Pro：首次选年级也拦截（与 grade-chip 一致体验） */
-/* PoemGraph Pro：首次选年级也拦截（与 grade-chip 一致体验）
-   注意：原 pickGrade 是函数声明会被 hoisted，所以 _origPickGrade 必须在新版定义之后
-   才赋值；这里用「直接包裹原函数体」避免递归。 */
-var _pro_pickGrade_hooked=false;
-function pickGrade(g){
-  /* 只在已就绪 + 未登录 + 非 1 年级时弹支付墙；然后继续走原本的 runChoice 流程 */
-  if(window.PRO_MODE && window.PRO_MODE.logged===false && +g !== 1){
-    if(typeof window.showPaywall==='function') window.showPaywall();
-  }
-  /* 调用原始逻辑：通过 runChoice 包装（这一段是原本 pickGrade 的实现） */
-  runChoice(function(){
-    ST.grade=g;lsSave();document.body.dataset.guide='';gradeOv.style.display='none';
-    applyRole();updateChips();setMode(ST.mode,true);showView('grade');
-  });
-  _pro_pickGrade_hooked=true;
-}
+function quickPickGrade(g){ST.grade=+g;lsSave();updateChips();showView(ST.view);}
 function updateChips(){
   const ri=ROLE_INFO[ST.role]||ROLE_INFO.student;
   const rc=document.getElementById('role-chip');
@@ -2951,11 +2595,7 @@ function showView(v){
   else if(v==='path')renderPath();
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function visiblePoems(){
-  if(window.PRO_MODE && window.PRO_MODE.logged===false)
-    return POEMS.filter(p=>p.grade===1);
-  return POEMS.filter(p=>!ST.grade||p.grade<=ST.grade);
-}
+function visiblePoems(){return POEMS.filter(p=>!ST.grade||p.grade<=ST.grade);}
 /* 上一首/下一首专用顺序：POEMS 数组核心课标部分本身按年级升序，但末尾"日积月累"补充诗
    不严格按年级单调递增(如己亥杂诗grade5紧挨着临江仙grade9)——卡片墙/图谱等格局展示型视图
    用原始顺序不明显，但"下一首"强调连续翻阅的顺序感，直接用原始顺序会出现年级跳跃、显得像bug。
@@ -5404,7 +5044,6 @@ function eventPlayAudio(e){
   var pr=evtAudioEl.play(); if(pr&&pr.catch)pr.catch(function(){ eventNarrStop(); });
 }
 function eventNarrate(e){
-  if(window.PRO_MODE && window.PRO_MODE.logged===false && window.PRO_MODE.guardTTS()) return;
   // 历史故事·离线内嵌音频优先(手机/无TTS设备也能播)
   if(typeof EVENT_AUDIO_IDS!=='undefined' && EVENT_AUDIO_IDS.indexOf(e.id)>=0){ eventPlayAudio(e); return; }
   if(!('speechSynthesis' in window)){ alert('当前浏览器不支持语音朗读。'); return; }
@@ -5522,7 +5161,6 @@ function _ttsKeep(on){
 /* 主入口:启动一段朗读 (传入已过滤的 sections 数组 + 起始 idx)
    sections 格式:[{txt:'...'},{txt:'...'}],tabKey 用于高亮定位 */
 function panelNarrate(tabKey, sections, startIdx){
-  if(window.PRO_MODE && window.PRO_MODE.logged===false && window.PRO_MODE.guardTTS()) return;
   if(!('speechSynthesis' in window)){panelTtsUnsupported();return;}
   if(!sections||!sections.length)return;
   /* 关键:增 runId 让所有旧的 onend/onstart 失效 (浏览器内部旧 utterance 还会自然播完,
@@ -5588,7 +5226,6 @@ function panelClose(){
 }
 /* ▶ / ⏹ 按钮切换 */
 function panelBarToggle(){
-  if(window.PRO_MODE && window.PRO_MODE.logged===false && window.PRO_MODE.guardTTS()) return;
   if(panelSpeaking){panelStop();return;}
   var tk=currentTabKey();
   var sects=tk && window['_panelSections_'+tk];
@@ -5714,7 +5351,7 @@ var REC_AUDIO_YUE_PRE_SCALE=1.4; /* 粤语(善怡)录音报题段实际耗时比
 var PUNCT_PAUSE_BONUS=0.8; /* 句号/问号/叹号(整句结束)比逗号等标点通常多留一点自然停顿，给这类行的字数权重加成，详情页朗读和听诗入眠共用 */
 function reciteHasAudio(p){ return !!(typeof RECITE_AUDIO_IDS!=='undefined' && p && RECITE_AUDIO_IDS.indexOf(p.id)>=0); }
 function reciteHasAudioYue(p){ return !!(typeof RECITE_AUDIO_YUE_IDS!=='undefined' && p && RECITE_AUDIO_YUE_IDS.indexOf(p.id)>=0); }
-function reciteToggle(){ if(window.PRO_MODE && window.PRO_MODE.logged===false && window.PRO_MODE.guardTTS()) return; if(recReciting){recPaused?reciteResume():recitePause();}else reciteStart(); }
+function reciteToggle(){ if(recReciting){recPaused?reciteResume():recitePause();}else reciteStart(); }
 function reciteScrollLine(el){
   if(!el)return;
   var r=el.getBoundingClientRect(), vh=window.innerHeight||document.documentElement.clientHeight||0;
@@ -5786,7 +5423,6 @@ function reciteResume(){
   }
 }
 function reciteStart(){
-  if(window.PRO_MODE && window.PRO_MODE.logged===false && window.PRO_MODE.guardTTS()) return;
   const p=ST.poem; if(!p)return;
   if(!reciteAudioReady(p)){
     /* 这首诗这条音轨对应的惰性音频数据块还没解析到DOM(按"普通话→粤语→历史事件→古琴"顺序陆续解析，
@@ -5851,7 +5487,6 @@ function reciteLine(){
 }
 /* 内嵌音频朗读：整首播放 + 整体高亮(无逐句时间戳),任何浏览器都支持 <audio> */
 function recitePlayAudio(p, track){
-  if(window.PRO_MODE && window.PRO_MODE.logged===false && window.PRO_MODE.guardTTS(p && p.grade)) return;
   recMode='audio';
   if(recWatchdog){clearTimeout(recWatchdog);recWatchdog=null;}
   if('speechSynthesis' in window){try{speechSynthesis.cancel();}catch(e){}}
@@ -6024,26 +5659,9 @@ function sleepBuildList(key){
 function sleepGradesAvail(){ var all=sleepTrackIds()||[], s={}; all.forEach(function(id){var p=POEMS.find(function(x){return x.id===id;});if(p)s[p.grade]=1;}); return Object.keys(s).map(Number).sort(function(a,b){return a-b;}); }
 function renderSleepPicker(){
   var box=document.getElementById('sleep-picker'); if(!box)return;
-  var _proLogged = !(window.PRO_MODE && window.PRO_MODE.logged===false);
   var defs=[{k:'calm',l:'安神入眠'},{k:'all',l:'全部'}];
   sleepGradesAvail().forEach(function(g){ defs.push({k:'g'+g, l:(SLEEP_GN[g]||g)+'年级'}); });
-  /* PoemGraph Pro：未登录时 'calm' / 'all' / 2-9 年级 tab 可点击但会弹支付墙（与 grade-chip 一致体验） */
-  box.innerHTML=defs.map(function(d){
-    var locked = !_proLogged && (d.k!=='g1');
-    var cls = (d.k===sleepPlaylist?'on ':'') + (locked?'locked':'');
-    var label = locked ? (d.l + ' 🔒') : d.l;
-    var click = ' onclick="sleepPickerClick(\''+d.k+'\', '+locked+')"';
-    return '<button data-k="'+d.k+'" class="'+cls.trim()+'"'+click+'>'+label+'</button>';
-  }).join('');
-}
-
-/* picker 点击的统一入口（Pro 版拦截 + 已登录放行） */
-function sleepPickerClick(key, locked){
-  if(locked && window.PRO_MODE && window.PRO_MODE.logged===false){
-    if(typeof window.showPaywall==='function') window.showPaywall();
-    return;
-  }
-  sleepSetPlaylist(key);
+  box.innerHTML=defs.map(function(d){return '<button data-k="'+d.k+'"'+(d.k===sleepPlaylist?' class="on"':'')+' onclick="sleepSetPlaylist(\''+d.k+'\')">'+d.l+'</button>';}).join('');
 }
 function sleepEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
 function renderSleepList(){
@@ -6070,28 +5688,21 @@ function sleepPickIndex(i){
   if(sleepOn)sleepPlayCurrent();
 }
 function sleepSetPlaylist(key){
-  /* 拦截已在 renderSleepPicker → sleepPickerClick 里完成，这里只负责正常切换 */
   sleepPlaylist=key; sleepList=sleepBuildList(key);
   if(!sleepList.length)sleepList=sleepTrackIds();
   sleepIdx=0; renderSleepPicker(); renderSleepList();
   if(sleepOn)sleepPlayCurrent();
 }
 function openSleep(mode){
-  /* PoemGraph Pro：未登录用户可以进入听诗入眠/磨耳朵，但只能播放 1 年级诗。
-     guardTTS 拦截已经移除（PO_MODE 守卫块初始化时检测），改为在 picker 渲染时禁用 2-9 年级 tab。
-     进入时强制默认 1 年级诗单（避免落进 'calm' 安神诗单）。 */
   if(!(sleepTrackIds()||[]).length){ alert('暂无可连播的内嵌朗读音频。'); return; }
   var mEl=document.getElementById('sleep-mode');
-  /* PoemGraph Pro：未登录时强制 1 年级诗单（不论 mode） */
-  var _proLogged = !(window.PRO_MODE && window.PRO_MODE.logged===false);
-  if(mode==='eartrain'){
+  if(mode==='eartrain'){            /* 磨耳朵：按年级 + 不限时循环 */
     if(mEl)mEl.textContent='磨耳朵 · 按年级听读';
-    var gs=sleepGradesAvail(); var g=(_proLogged && gs.indexOf(ST.grade)>=0)?ST.grade:(gs[0]||1);
+    var gs=sleepGradesAvail(); var g=(gs.indexOf(ST.grade)>=0)?ST.grade:(gs[0]||1);
     sleepPlaylist='g'+g; sleepTimerMin=0;
-  }else{
+  }else{                            /* 听诗入眠：安神诗单 + 30分定时 */
     if(mEl)mEl.textContent='听诗入眠';
-    /* 未登录：强制 g1（1 年级诗）；已登录：calm（安神诗单） */
-    sleepPlaylist=_proLogged ? 'calm' : 'g1'; sleepTimerMin=30;
+    sleepPlaylist='calm'; sleepTimerMin=30;
   }
   sleepList=sleepBuildList(sleepPlaylist);
   if(!sleepList.length)sleepList=sleepTrackIds();
