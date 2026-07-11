@@ -688,23 +688,38 @@ $('#p-go').onclick = () => {
   if(loadPlainLog().length){ renderPlainTextarea(); }
 })();
 
-/* ── 自动加载 accounts.json（复用 poemgraph-pro.html 的 x-account-url） ── */
-var ACCOUNT_URL = ((document.querySelector('meta[name="x-account-url"]')||{}).content || '').trim();
-/* URL 参数 ?accountUrl=... 可临时覆盖（本地调试用） */
-var _u; try{ _u = new URL(location.href).searchParams.get('accountUrl'); }catch(_e){}
-if(_u) ACCOUNT_URL = _u;
+/* ── 自动加载 accounts.json（复用 poemgraph-pro.html 的 x-account-url） ──
+ * 同源优先策略：
+ * 1. URL 参数 ?accountUrl=... → 作者明确指定的最优先
+ * 2. <meta name="x-account-url"> → 若解析后与当前页同 origin，用 meta；否则降级到同源（避免跨源 CORS 失败）
+ * 3. 同源 location.origin + '/accounts.json' → 兜底
+ * 降级原因：作者在 Render 部署后易忘去 Dashboard 配 CORS Headers，跨源 fetch 必失败；
+ *          accounts.json 本就跟 admin HTML 同站部署，同源 0 阻。
+ */
+var ACCOUNT_URL = (function(){
+  try{
+    var u = new URL(location.href).searchParams.get('accountUrl');
+    if(u) return u.trim();
+  }catch(_e){}
+  var meta = ((document.querySelector('meta[name="x-account-url"]')||{}).content || '').trim();
+  if(meta){
+    try{
+      var m = new URL(meta, location.href);
+      if(m.origin === location.origin) return m.href;     // meta 跟当前同 origin → 用 meta
+      // meta 跟当前跨 origin → 降级到同源（兜底 URL 留注释给作者看为啥没用 meta）
+      return location.origin + '/accounts.json';
+    }catch(_e){
+      return location.origin + '/accounts.json';
+    }
+  }
+  return location.origin + '/accounts.json';
+})();
 function loadExistingJson(opts){
   opts = opts || {};
   /* opts.manual=true → 用户主动点「🔄 重新拉取」，file:// 也至少试一次 fetch（看到 CORS 报错比静默好） */
   var ta = document.getElementById('a-existing');
   var status = document.getElementById('a-existing-status');
   if(!ta) return;
-  if(!ACCOUNT_URL){
-    ta.value = '';
-    status.innerHTML = '未配置 <code>x-account-url</code>，可手动粘贴或点击「📁 从本地文件加载」';
-    status.style.color = 'var(--ink3)';
-    return;
-  }
   if(location.protocol === 'file:' && !opts.manual){
     ta.value = '';
     status.innerHTML = '本地 file:// 页面不自动拉取，可点击「📁 从本地文件加载」或手动粘贴（点「🔄 重新拉取」可强制尝试）';
