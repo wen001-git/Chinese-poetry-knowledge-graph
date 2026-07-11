@@ -1428,9 +1428,41 @@ body.sleep-open{overflow:hidden}
         loadAccounts().then(function(){
           var found=PRO.accounts.find(function(a){return a.u===saved.u;});
           if(found){ PRO.logged=true; PRO.user=found; onLoginSuccess(); }
+          else{
+            /* 账号已从 accounts.json 删除（作者手动撤销/未续费）→ 自动退出 */
+            localStorage.removeItem('pg_pro_user');
+            PRO.logged=false; PRO.user=null;
+            applyProVisibility();
+            updateBanner();
+            if(typeof updateChips==='function') updateChips();
+            showProToast('账号已被注销，请重新登录');
+          }
         });
       }
     }catch(e){}
+  }
+
+  /* ── Pro 版轻量 toast（底部居中 3s 自动消失）──
+   * 比 alert 不打断用户、不阻塞线程；与 poemgraph 主页面现有 toast 风格一致
+   */
+  function showProToast(msg){
+    try{
+      var old=D.getElementById('pro-toast');
+      if(old) old.remove();
+      var t=D.createElement('div');
+      t.id='pro-toast';
+      t.textContent=msg;
+      t.style.cssText='position:fixed;left:50%;bottom:80px;transform:translateX(-50%);'+
+        'background:rgba(28,28,30,.92);color:#f7f5f0;padding:12px 22px;border-radius:24px;'+
+        'font-size:14px;font-family:var(--sans);z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.18);'+
+        'opacity:0;transition:opacity .25s';
+      D.body.appendChild(t);
+      requestAnimationFrame(function(){ t.style.opacity='1'; });
+      setTimeout(function(){
+        t.style.opacity='0';
+        setTimeout(function(){ t.remove(); }, 280);
+      }, 3000);
+    }catch(_){}
   }
 
   /* ── 诗单顶部横幅控制（文案来自 PAY_COPY） ── */
