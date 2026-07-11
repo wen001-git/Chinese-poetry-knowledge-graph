@@ -9,6 +9,9 @@
 ## 一句话
 中国诗词知识图谱，面向小学生的**单文件离线 HTML** `poemgraph.html`。水墨基调（**禁红规则已取消**，配色可用朱砂红等暖色；视觉用 `/frontend-design` 迭代中）。
 
+## 参考文档（按需读）
+- `docs/DeviceLimit-Design.md` · 账号设备限制三方案设计（纯前端 UUID / Cloudflare Worker / CloudBase）；2026-07-11 选 A 方案但暂未实施，留作未来防盗版商升级时的备查
+
 ## 部署平台（2026-07-10 确认）
 - **Render Static Site**：`https://pg-ndxn.onrender.com/poemgraph.html`
 - **阿里 CNAME 自定义域**：`poem.leewen.work` → `pg-ndxn.onrender.com`（Cloudflare 反代）
