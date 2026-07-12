@@ -371,8 +371,8 @@ user001:pass_abc_2026"></textarea>
 (function initCfg(){
   const metaPrice = (document.querySelector('meta[name="x-price"]')||{}).content || '19.9';
   const metaWx = (document.querySelector('meta[name="x-wechat-id"]')||{}).content || '';
-  const lsPrice = localStorage.getItem('pg_admin_price');
-  const lsWx = localStorage.getItem('pg_admin_wx');
+  const lsPrice = localStorage.getItem('pg_pro_price');
+  const lsWx = localStorage.getItem('pg_pro_wx');
   const price = lsPrice || metaPrice;
   const wx = lsWx || metaWx;
   const priceEl = document.getElementById('foot-price');
@@ -386,10 +386,20 @@ user001:pass_abc_2026"></textarea>
   function sync(){
     const p = (cfgPrice.value || '').trim() || metaPrice;
     const w = (cfgWx.value || '').trim() || metaWx;
-    localStorage.setItem('pg_admin_price', p);
-    localStorage.setItem('pg_admin_wx', w);
+    localStorage.setItem('pg_pro_price', p);
+    localStorage.setItem('pg_pro_wx', w);
     if(priceEl) priceEl.textContent = p;
     if(wxEl) wxEl.textContent = w || '(未配置)';
+    /* 通知同 origin 的其他 tab（如开着的 poemgraph-pro.html）立即刷新 */
+    try{
+      // BroadcastChannel 优先（更现代）
+      if(typeof BroadcastChannel !== 'undefined'){
+        const bc = new BroadcastChannel('pg_admin_cfg');
+        bc.postMessage({type: 'cfg-update', price: p, wx: w});
+      }
+      // localStorage 事件作为兜底（旧浏览器/BroadcastChannel 不可用时）
+      // 注：本 tab 自己 setItem 不触发 storage 事件，所以只能通知其他 tab
+    }catch(_){}
   }
   if(cfgPrice) cfgPrice.addEventListener('input', sync);
   if(cfgWx) cfgWx.addEventListener('input', sync);

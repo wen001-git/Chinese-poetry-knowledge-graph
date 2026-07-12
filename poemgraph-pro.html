@@ -1278,6 +1278,21 @@ body.sleep-open{overflow:hidden}
     PAY_COPY = buildPayCopy();
     if(typeof updateBanner==='function') updateBanner();
   };
+  /* 监听 admin HTML 通过 BroadcastChannel 推送的配置变更 → 立即刷新 */
+  try{
+    if(typeof BroadcastChannel !== 'undefined'){
+      var _cfgBC = new BroadcastChannel('pg_admin_cfg');
+      _cfgBC.onmessage = function(ev){
+        if(ev && ev.data && ev.data.type === 'cfg-update'){
+          try{
+            if(ev.data.price) localStorage.setItem('pg_pro_price', ev.data.price);
+            if(ev.data.wx) localStorage.setItem('pg_pro_wx', ev.data.wx);
+          }catch(_){}
+          W.refreshPayCopy();
+        }
+      };
+    }
+  }catch(_){}
   var PRO={on:!!META, logged:false, user:null, accounts:[], salt:'pg-pro-salt-v1'};
 
   // ── SHA-256（浏览器原生 SubtleCrypto，零依赖） ──
