@@ -10,6 +10,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!-- 优先 poem.leewen.work；本机调试可改成 http://127.0.0.1:8765/accounts.json 或留空让用户手动加载 -->
 <meta name="x-account-url" content="https://poem.leewen.work/accounts.json">
+<meta name="x-wechat-id" content="leewen2017">
+<meta name="x-price" content="19.9">
 <title>账号管理 · PoemGraph Pro</title>
 <style>
 :root{
@@ -82,6 +84,24 @@ textarea{height:120px;line-height:1.5}
     这是安全特性，不是 bug。
     你发给用户的应该是<b>明文用户名 + 密码</b>，不是哈希。
   </div>
+</div>
+
+<!-- ⚙️ 配置（价格 + 微信号）—— 留本地 LS，不用每次改 meta -->
+<div class="card" style="margin-bottom:14px">
+  <details>
+    <summary style="cursor:pointer;font-weight:600;color:var(--teal)">⚙️ 配置（价格 · 微信号）</summary>
+    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 2fr;gap:10px">
+      <div>
+        <label class="lab">价格（元）</label>
+        <input id="cfg-price" type="text" placeholder="19.9">
+      </div>
+      <div>
+        <label class="lab">作者微信号</label>
+        <input id="cfg-wx" type="text" placeholder="leewen2017">
+      </div>
+    </div>
+    <div class="hint" style="margin-top:8px;font-size:12px">存 localStorage（仅本地工具），「使用流程」段会实时显示当前配置。</div>
+  </details>
 </div>
 
 <div class="tabs">
@@ -337,7 +357,7 @@ user001:pass_abc_2026"></textarea>
 
 <div class="foot">
   <b>使用流程：</b><br>
-  1. 客户付款 19.9 元 → 微信收款<br>
+  1. 客户付款 <span id="foot-price">19.9</span> 元 → 加作者微信 <b id="foot-wx">leewen2017</b> 收款<br>
   2. 打开本页面 → 「批量生成」标签 → 输入 <code>用户名:密码</code>（一行一个）<br>
   3. 点击「生成完整 accounts.json」→ 复制 JSON → 覆盖 poem.leewen.work 上的同名文件<br>
   4. 把「用户名 + 密码」发给客户（<b>明文</b>，不是哈希）<br>
@@ -347,6 +367,34 @@ user001:pass_abc_2026"></textarea>
 </div>
 
 <script>
+/* ── ⚙️ 配置（价格 + 微信号）从 meta + LS 读取，foot 段实时显示 ── */
+(function initCfg(){
+  const metaPrice = (document.querySelector('meta[name="x-price"]')||{}).content || '19.9';
+  const metaWx = (document.querySelector('meta[name="x-wechat-id"]')||{}).content || '';
+  const lsPrice = localStorage.getItem('pg_admin_price');
+  const lsWx = localStorage.getItem('pg_admin_wx');
+  const price = lsPrice || metaPrice;
+  const wx = lsWx || metaWx;
+  const priceEl = document.getElementById('foot-price');
+  const wxEl = document.getElementById('foot-wx');
+  if(priceEl) priceEl.textContent = price;
+  if(wxEl) wxEl.textContent = wx || '(未配置)';
+  const cfgPrice = document.getElementById('cfg-price');
+  const cfgWx = document.getElementById('cfg-wx');
+  if(cfgPrice) cfgPrice.value = price;
+  if(cfgWx) cfgWx.value = wx;
+  function sync(){
+    const p = (cfgPrice.value || '').trim() || metaPrice;
+    const w = (cfgWx.value || '').trim() || metaWx;
+    localStorage.setItem('pg_admin_price', p);
+    localStorage.setItem('pg_admin_wx', w);
+    if(priceEl) priceEl.textContent = p;
+    if(wxEl) wxEl.textContent = w || '(未配置)';
+  }
+  if(cfgPrice) cfgPrice.addEventListener('input', sync);
+  if(cfgWx) cfgWx.addEventListener('input', sync);
+})();
+
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
