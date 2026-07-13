@@ -990,7 +990,7 @@ body.sleep-open{overflow:hidden}
       <span class="pro-banner-ic">🔒</span>
       <span class="pro-banner-txt">
         <b class="pro-banner-title">未登录用户只能使用 1 年级诗词</b>
-        <span class="pro-banner-sub">添加作者微信购买 ¥XX 元永久会员（教师免费）</span>
+        <span class="pro-banner-sub">添加作者微信购买 ¥XX 元（解锁全部内容·教师免费）</span>
       </span>
       <span class="pro-banner-wx">微信号：<b id="pro-banner-wx">leewen2017</b></span>
       <button class="pro-banner-copy" id="pro-banner-copy">📋 复制</button>
@@ -1261,14 +1261,14 @@ body.sleep-open{overflow:hidden}
   function buildPayCopy(){
     return {
       title:         PAYWALL_MSG,                                   // 大标题
-      subtitle:      '添加作者微信购买 '+PRICE+' 元永久会员（教师免费）',  // 副标题
+      subtitle:      '添加作者微信购买 '+PRICE+' 元（解锁全部内容·教师免费）',  // 副标题
       wechatLabel:   '微信号',                                       // 「微信号：xxx」前缀
       copyBtn:       '📋 复制微信号',                                  // 复制按钮
       copyBtnShort:  '📋 复制',                                       // 横幅紧凑版
       copiedHint:    '✓ 已复制，请打开微信搜索',                          // 复制后短暂提示
       closeBtn:      '知道了',                                        // 关闭按钮
       bannerTitle:   '未登录用户只能使用 1 年级诗词',                    // 诗单横幅标题
-      bannerSubtitle:'创作不易，添加作者微信购买 '+PRICE+' 元永久会员（教师免费）', // 诗单横幅副标题（banner 标题未含「创作不易」，所以这里需要）
+      bannerSubtitle:'创作不易，添加作者微信购买 '+PRICE+' 元（解锁全部内容·教师免费）', // 诗单横幅副标题（banner 标题未含「创作不易」，所以这里需要）
     };
   }
   var PAY_COPY = buildPayCopy();
