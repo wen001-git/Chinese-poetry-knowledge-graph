@@ -15,6 +15,8 @@
 <!-- ══════════ PoemGraph Pro 配置区（仅 poemgraph-pro.html 保留） ══════════ -->
 <meta name="x-pro-mode" content="1">
 <meta name="x-account-url" content="https://poem.leewen.work/accounts.json">
+<meta name="x-auth-api" content="">
+<meta name="x-auth-required" content="true">
 <meta name="x-wechat-id" content="leewen2017">
 <meta name="x-paywall-msg" content="创作不易，请加作者微信购买">
 <meta name="x-price" content="19.9">
@@ -1308,6 +1310,16 @@ body.sleep-open{overflow:hidden}
       };
     }
   }catch(_){}
+  var AUTH_API=(function(){
+    try{
+      var u = new URL(location.href).searchParams.get('api');
+      if(u) return u.trim().replace(/\/$/, '');
+    }catch(_e){}
+    var meta=(D.querySelector('meta[name="x-auth-api"]')||{}).content || '';
+    meta = (meta || '').trim().replace(/\/$/, '');
+    return meta || location.origin;
+  })();
+  var AUTH_REQUIRED=((D.querySelector('meta[name="x-auth-required"]')||{}).content || 'true') !== 'false';
   var PRO={on:!!META, logged:false, user:null, accounts:[], salt:'pg-pro-salt-v1'};
 
   // ── SHA-256（浏览器原生 SubtleCrypto，零依赖） ──
@@ -1336,21 +1348,21 @@ body.sleep-open{overflow:hidden}
     return id;
   }
 
-  // ── 后端登录（EdgeOne Pages Node Functions + KV）──
-  // 优先走远端校验；远端 5xx / fallback 标记 / fetch 失败 → 退回 doLoginLocal
+  // ── 后端登录（Render Web Service / EdgeOne Node Functions）──
+  // 设备限制版默认要求后端可用；x-auth-required=false 时才允许回退纯前端。
   function doLoginRemote(u, p, deviceId){
-    var url = (location.origin || 'https://poem.leewen.work') + '/api/login';
+    var url = AUTH_API + '/api/login';
     return fetch(url, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({u: u, p: p, deviceId: deviceId})
+      body: JSON.stringify({u: u, p: p, deviceId: deviceId, deviceName: navigator.platform || ''})
     })
     .then(function(r){
       var status = r.status;
       return r.json().then(function(j){ return {status: status, json: j}; }).catch(function(){ return {status: status, json: null}; });
     })
     .then(function(res){
-      // 5xx 或后端主动返 fallback → 走 fallback
+      // 5xx 或后端主动返 fallback → 仅在非强制后端模式下回退。
       if(res.status >= 500 || !res.json || res.json.fallback){
         throw new Error('REMOTE_FALLBACK');
       }
@@ -1385,11 +1397,31 @@ body.sleep-open{overflow:hidden}
       if(j.bound) showProToast('✓ 设备已自动绑定（设备 1/' + (j.maxDevices||1) + '）');
       return j;
     }).catch(function(err){
-      if(err.message === 'REMOTE_FALLBACK'){
+      if(err.message === 'REMOTE_FALLBACK' && !AUTH_REQUIRED){
         try{ console.warn('[auth] 后端不可用，回退纯前端校验'); }catch(_){}
         return doLoginLocal(u, p);
       }
+      if(err.message === 'REMOTE_FALLBACK'){
+        throw new Error('登录服务暂时不可用，请稍后重试');
+      }
       throw err;
+    });
+  }
+
+  function verifyRemoteSession(saved){
+    if(!saved || !saved.token) return Promise.resolve(false);
+    return fetch(AUTH_API + '/api/session', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({token: saved.token})
+    }).then(function(r){
+      return r.json().then(function(j){ return {ok:r.ok, json:j}; }).catch(function(){ return {ok:r.ok, json:null}; });
+    }).then(function(res){
+      if(!res.ok || !res.json || !res.json.ok) return false;
+      return true;
+    }).catch(function(){
+      /* 已登录用户短暂断网时保留本地会话；新登录仍要求后端在线。 */
+      return true;
     });
   }
 
@@ -1546,7 +1578,15 @@ body.sleep-open{overflow:hidden}
       if(saved && saved.u){
         /* 优先信任 JWT（Node Functions 已校验过账号有效性 + 设备数限制）—— 直接信任，不再 fetch accounts.json */
         if(saved.token){
-          PRO.logged=true; PRO.user={u:saved.u}; onLoginSuccess();
+          verifyRemoteSession(saved).then(function(ok){
+            if(ok){ PRO.logged=true; PRO.user={u:saved.u}; onLoginSuccess(); return; }
+            localStorage.removeItem('pg_pro_user');
+            PRO.logged=false; PRO.user=null;
+            applyProVisibility();
+            updateBanner();
+            if(typeof updateChips==='function') updateChips();
+            showProToast('登录已过期或设备已解绑，请重新登录');
+          });
           return;
         }
         /* 无 token（旧版 LS 数据，没经过 Node Functions）—— 走原 SWR 校验 */

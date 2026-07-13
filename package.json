@@ -1,0 +1,13 @@
+{
+  "name": "poemgraph-auth",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node render-auth-server.mjs",
+    "test:auth": "node scripts/test_render_auth.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

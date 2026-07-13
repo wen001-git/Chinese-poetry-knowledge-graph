@@ -10,6 +10,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!-- 优先 poem.leewen.work；本机调试可改成 http://127.0.0.1:8765/accounts.json 或留空让用户手动加载 -->
 <meta name="x-account-url" content="https://poem.leewen.work/accounts.json">
+<meta name="x-auth-api" content="">
 <meta name="x-wechat-id" content="leewen2017">
 <meta name="x-price" content="19.9">
 <title>账号管理 · PoemGraph Pro</title>
@@ -316,20 +317,20 @@ user001:pass_abc_2026"></textarea>
   </div>
 </div>
 
-<!-- 设备管理（EdgeOne Pages Node Functions + KV 后端） -->
+<!-- 设备管理（Render Web Service / EdgeOne Node Functions 后端） -->
 <div class="panel" data-panel="devices">
   <div class="card">
     <div class="warn" style="background:var(--paper3);border-color:var(--border2);color:var(--ink2)">
       <span>📱</span>
       <div>
-        <b>设备管理（需 EdgeOne Pages KV + Node Functions 部署）</b><br>
-        每账号可绑定的设备数由 KV 的 <code>config:maxDevices</code> 控制（默认 1）。
-        Node Functions 后端 <code>/api/login</code> 校验；失败时自动回退纯前端（accounts.json）。
+        <b>设备管理（Render Web Service / EdgeOne Node Functions 后端）</b><br>
+        Render 版默认每账号 1 台设备，可在列表中单独调整。
+        后端 <code>/api/login</code> 校验账号密码并绑定设备；设备满额会拒绝登录。
       </div>
     </div>
 
-    <label class="lab" style="margin-top:14px">管理员 Token（与 KV 里 <code>config:adminToken</code> 一致）</label>
-    <input id="dev-token" type="password" placeholder="在 EdgeOne KV 里 put config:adminToken=你的密码">
+    <label class="lab" style="margin-top:14px">管理员 Token（与后端环境变量 <code>ADMIN_TOKEN</code> 一致）</label>
+    <input id="dev-token" type="password" placeholder="Render 后端环境变量 ADMIN_TOKEN">
 
     <div class="btn-row" style="margin-top:10px">
       <button class="btn" id="dev-load">🔄 拉取账号列表</button>
@@ -876,15 +877,16 @@ $('#a-file-input').onchange = (e) => {
 };
 
 /* ════════════════════════════════════════
-   设备管理（Node Functions + KV 后端）
+   设备管理（Render Web Service / EdgeOne Node Functions 后端）
    ════════════════════════════════════════ */
 const API_BASE = (function(){
-  // 与 admin 同源（EdgeOne Pages Node Functions 部署在本站）
-  // 与现有 loadExistingJson 同源优先策略一致：优先当前 origin
   try{
     var u = new URL(location.href).searchParams.get('api');
     if(u) return u.trim().replace(/\/$/, '');
   }catch(_e){}
+  var meta = (document.querySelector('meta[name="x-auth-api"]')||{}).content || '';
+  meta = (meta || '').trim().replace(/\/$/, '');
+  if(meta) return meta;
   return location.origin;
 })();
 
@@ -934,13 +936,18 @@ $('#dev-load').onclick = async () => {
       return;
     }
     listEl.innerHTML = data.accounts.map(a => {
-      const devicesHtml = a.devices.map((d, i) => '<code style="font-size:10px">' + d.slice(0, 8) + '…</code>').join(' · ');
-      const warn = a.deviceCount >= data.maxDevices ? ' <span class="tag err">满</span>' : '';
+      const max = a.maxDevices || data.maxDevices || 1;
+      const devicesHtml = a.devices.map((d, i) => {
+        const id = (typeof d === 'string') ? d : (d.id || '');
+        return '<code style="font-size:10px">' + id.slice(0, 8) + '…</code>';
+      }).join(' · ');
+      const warn = a.deviceCount >= max ? ' <span class="tag err">满</span>' : '';
       return '<div class="list-row" style="flex-wrap:wrap;gap:8px">' +
         '<b>' + a.u + '</b>' +
-        '<span class="tag">' + a.deviceCount + '/' + data.maxDevices + ' 台</span>' + warn +
+        '<span class="tag">' + a.deviceCount + '/' + max + ' 台</span>' + warn +
         '<span style="color:var(--ink3);font-size:11px">最后登录：' + fmtTime(a.lastSeen) + '</span>' +
         '<span style="color:var(--ink3);font-size:10px;width:100%">' + (a.devices.length ? 'UUIDs: ' + devicesHtml : '(无绑定)') + '</span>' +
+        '<button class="btn ghost" data-max="' + a.u + '" style="padding:4px 10px;font-size:12px">台数</button>' +
         '<button class="btn ghost" data-reset="' + a.u + '" style="margin-left:auto;padding:4px 10px;font-size:12px">🔄 重置</button>' +
         '</div>';
     }).join('');
@@ -955,6 +962,21 @@ $('#dev-load').onclick = async () => {
           $('#dev-load').click();
         }else{
           alert('❌ 重置失败：' + (r.body.err || ''));
+        }
+      };
+    });
+    listEl.querySelectorAll('[data-max]').forEach(btn => {
+      btn.onclick = async () => {
+        const u = btn.getAttribute('data-max');
+        const val = prompt('设置账号「' + u + '」允许绑定几台设备？', '1');
+        if(val === null) return;
+        const maxDevices = Math.max(1, parseInt(val, 10) || 1);
+        const r = await devFetch('/api/admin/set-max-devices', {u, maxDevices});
+        if(r.ok){
+          alert('✓ 已设置 ' + u + ' 为 ' + r.body.maxDevices + ' 台');
+          $('#dev-load').click();
+        }else{
+          alert('❌ 设置失败：' + (r.body.err || ''));
         }
       };
     });

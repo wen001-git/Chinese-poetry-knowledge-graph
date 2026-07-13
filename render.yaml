@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: poemgraph-auth
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: ADMIN_TOKEN
+        sync: false
+      - key: MAX_DEVICES
+        value: "1"
+      - key: SESSION_DAYS
+        value: "7"
