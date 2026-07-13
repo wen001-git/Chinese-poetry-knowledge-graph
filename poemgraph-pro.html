@@ -1244,7 +1244,11 @@ body.sleep-open{overflow:hidden}
   var W=window, D=document;
   var META=D.querySelector('meta[name="x-pro-mode"]');
   var ACCOUNT_URL=(D.querySelector('meta[name="x-account-url"]')||{}).content;
-  var WECHAT_ID =(D.querySelector('meta[name="x-wechat-id"]')||{}).content || 'leewen2017';
+  /* 微信号：meta 默认 + localStorage.pg_pro_wx 可覆盖（admin HTML 改 LS 即生效） */
+  function _readWx(){
+    try{ return localStorage.getItem('pg_pro_wx') || (D.querySelector('meta[name="x-wechat-id"]')||{}).content || 'leewen2017'; }catch(_){ return 'leewen2017'; }
+  }
+  var WECHAT_ID = _readWx();
   var PAYWALL_MSG=(D.querySelector('meta[name="x-paywall-msg"]')||{}).content||'创作不易，请加作者微信购买';
   /* 价格：meta 默认 19.9；localStorage.pg_pro_price 可临时覆盖（你 admin HTML 改 LS 即生效） */
   var PRICE=(function(){
@@ -1257,25 +1261,28 @@ body.sleep-open{overflow:hidden}
   /* ── 付费墙文案统一常量（修改这里即可全局生效） ──
    * 之前散落在 showPaywall()、banner、meta 等多处；
    * 现在所有付费墙相关文案都从这里取，未来调价/换微信号改这里一处。
+   * 纯函数：接收 price/wx 参数，避免闭包内 var 作用域坑。
    */
-  function buildPayCopy(){
+  function buildPayCopy(price, wx){
+    void wx;  // wx 当前不嵌进文案（#paywall-wx 通过 WECHAT_ID 单独渲染），留位给未来
     return {
       title:         PAYWALL_MSG,                                   // 大标题
-      subtitle:      '添加作者微信购买 '+PRICE+' 元（解锁全部内容·教师免费）',  // 副标题
+      subtitle:      '添加作者微信购买 '+price+' 元（解锁全部内容·教师免费）',  // 副标题
       wechatLabel:   '微信号',                                       // 「微信号：xxx」前缀
       copyBtn:       '📋 复制微信号',                                  // 复制按钮
       copyBtnShort:  '📋 复制',                                       // 横幅紧凑版
       copiedHint:    '✓ 已复制，请打开微信搜索',                          // 复制后短暂提示
       closeBtn:      '知道了',                                        // 关闭按钮
       bannerTitle:   '未登录用户只能使用 1 年级诗词',                    // 诗单横幅标题
-      bannerSubtitle:'创作不易，添加作者微信购买 '+PRICE+' 元（解锁全部内容·教师免费）', // 诗单横幅副标题（banner 标题未含「创作不易」，所以这里需要）
+      bannerSubtitle:'创作不易，添加作者微信购买 '+price+' 元（解锁全部内容·教师免费）', // 诗单横幅副标题（banner 标题未含「创作不易」，所以这里需要）
     };
   }
-  var PAY_COPY = buildPayCopy();
+  var PAY_COPY = buildPayCopy(PRICE, WECHAT_ID);
   /* 暴露 PRICE + 刷新函数：用户改 LS 后调 refreshPayCopy() 即生效（无需刷新页面） */
   W.refreshPayCopy = function(){
+    WECHAT_ID = _readWx();
     try{ PRICE = localStorage.getItem('pg_pro_price') || (D.querySelector('meta[name="x-price"]')||{}).content || '19.9'; }catch(_){}
-    PAY_COPY = buildPayCopy();
+    PAY_COPY = buildPayCopy(PRICE, WECHAT_ID);
     if(typeof updateBanner==='function') updateBanner();
     /* 如果当前有 paywall modal 在显示 → 实时刷新其内容 */
     var openModal = D.querySelector('.pro-modal');
@@ -1283,7 +1290,7 @@ body.sleep-open{overflow:hidden}
       var subEl = openModal.querySelector('.pro-sub');
       if(subEl) subEl.textContent = PAY_COPY.subtitle;
       var wxEl = openModal.querySelector('#paywall-wx');
-      if(wxEl) wxEl.textContent = (function(){ try{ return localStorage.getItem('pg_pro_wx') || (D.querySelector('meta[name="x-wechat-id"]')||{}).content || 'leewen2017'; }catch(_){ return 'leewen2017'; } })();
+      if(wxEl) wxEl.textContent = _readWx();
     }
   };
   /* 监听 admin HTML 通过 BroadcastChannel 推送的配置变更 → 立即刷新 */
