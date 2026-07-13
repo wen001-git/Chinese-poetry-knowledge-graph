@@ -1277,6 +1277,14 @@ body.sleep-open{overflow:hidden}
     try{ PRICE = localStorage.getItem('pg_pro_price') || (D.querySelector('meta[name="x-price"]')||{}).content || '19.9'; }catch(_){}
     PAY_COPY = buildPayCopy();
     if(typeof updateBanner==='function') updateBanner();
+    /* 如果当前有 paywall modal 在显示 → 实时刷新其内容 */
+    var openModal = D.querySelector('.pro-modal');
+    if(openModal && PAY_COPY){
+      var subEl = openModal.querySelector('.pro-sub');
+      if(subEl) subEl.textContent = PAY_COPY.subtitle;
+      var wxEl = openModal.querySelector('#paywall-wx');
+      if(wxEl) wxEl.textContent = (function(){ try{ return localStorage.getItem('pg_pro_wx') || (D.querySelector('meta[name="x-wechat-id"]')||{}).content || 'leewen2017'; }catch(_){ return 'leewen2017'; } })();
+    }
   };
   /* 监听 admin HTML 通过 BroadcastChannel 推送的配置变更 → 立即刷新 */
   try{
