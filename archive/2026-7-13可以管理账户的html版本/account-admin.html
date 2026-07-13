@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<!--
+  PoemGraph Pro · 账号管理工具
+  仅作者本人使用，输入用户名+明文密码即可生成 accounts.json 哈希。
+  纯前端 SHA-256；可按 x-account-url 自动拉取 accounts.json，失败时仍可手动粘贴。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 优先 poem.leewen.work；本机调试可改成 http://127.0.0.1:8765/accounts.json 或留空让用户手动加载 -->
+<meta name="x-account-url" content="https://poem.leewen.work/accounts.json">
+<meta name="x-wechat-id" content="leewen2017">
+<meta name="x-price" content="19.9">
+<title>账号管理 · PoemGraph Pro</title>
+<style>
+:root{
+  --ink:#1c1c1e;--ink2:#5c5c6e;--ink3:#9a9aaa;
+  --paper:#f7f5f0;--paper2:#efece4;--paper3:#e8e5dc;
+  --teal:#2d5a6b;--teal-l:#e4ecef;
+  --border:#d8d4c8;--border2:#c8c2b2;
+  --cinnabar:#b23a2e;--cinnabar-l:#f7e8e4;
+  --ochre:#a0603a;--gold:#b8923f;
+  --shadow:0 2px 12px rgba(28,28,30,.08);
+  --r:10px;--r2:16px;
+  --serif:"STKaiti","KaiTi","楷体",serif;
+  --sans:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.7;padding:24px 18px;max-width:980px;margin:0 auto}
+h1{font-family:var(--serif);font-size:28px;font-weight:700;letter-spacing:.1em;margin-bottom:6px}
+.sub{color:var(--ink2);font-size:13px;margin-bottom:24px}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 18px;border:none;background:transparent;font:inherit;color:var(--ink2);cursor:pointer;border-bottom:2px solid transparent;transition:.18s}
+.tab.on{color:var(--teal);border-bottom-color:var(--teal);font-weight:600}
+.tab:hover{color:var(--ink)}
+.panel{display:none;animation:fade .25s}
+.panel.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--paper2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.lab{display:block;font-size:13px;color:var(--ink2);margin-bottom:6px;font-weight:500}
+.lab .hint{color:var(--ink3);font-weight:normal;font-size:11px;margin-left:6px}
+textarea,input[type=text],input[type=password]{
+  font-family:ui-monospace,"SF Mono",Consolas,monospace;font-size:13px;
+  padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;
+  color:var(--ink);outline:none;width:100%;resize:vertical
+}
+textarea:focus,input:focus{border-color:var(--teal)}
+textarea{height:120px;line-height:1.5}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+@media(max-width:600px){.row{grid-template-columns:1fr}}
+.btn{padding:10px 18px;background:var(--teal);color:#fff;border:none;border-radius:8px;font:inherit;cursor:pointer;font-weight:600;transition:.18s}
+.btn:hover{opacity:.85}
+.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--border)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--teal)}
+.btn.cinnabar{background:var(--cinnabar)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.out{font-family:ui-monospace,"SF Mono",Consolas,monospace;font-size:12px;
+  background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px;
+  white-space:pre-wrap;word-break:break-all;min-height:48px;max-height:300px;overflow:auto;line-height:1.5}
+.out.empty{color:var(--ink3);font-style:italic;font-family:var(--sans)}
+.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;background:var(--teal-l);color:var(--teal);font-weight:600;margin-right:6px}
+.tag.err{background:var(--cinnabar-l);color:var(--cinnabar)}
+.tag.ok{background:#e8f5e8;color:#2e7d32}
+.list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.list-row{font-family:ui-monospace,monospace;font-size:12px;padding:8px 10px;background:#fff;border:1px solid var(--border);border-radius:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.list-row code{color:var(--teal);font-size:11px}
+.foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--border);color:var(--ink3);font-size:12px;line-height:1.6}
+.foot kbd{background:var(--paper3);padding:1px 6px;border-radius:4px;font-family:ui-monospace,monospace;font-size:11px}
+.warn{background:var(--cinnabar-l);border:1px solid var(--cinnabar);color:var(--cinnabar);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:flex;gap:8px;align-items:flex-start}
+.warn b{font-weight:700}
+</style>
+</head>
+<body>
+
+<h1>账号管理 · <span style="color:var(--cinnabar)">PoemGraph Pro</span></h1>
+<div class="sub">仅作者使用 · 离线工具 · 生成 SHA-256 哈希用于 accounts.json</div>
+
+<div class="warn">
+  <span>🔒</span>
+  <div>
+    <b>重要提示：</b>本工具只生成<b>哈希</b>（单向不可逆）。
+    SHA-256 设计上就<b>不能</b>从哈希反推回明文密码。
+    这是安全特性，不是 bug。
+    你发给用户的应该是<b>明文用户名 + 密码</b>，不是哈希。
+  </div>
+</div>
+
+<!-- ⚙️ 配置（价格 + 微信号）—— 留本地 LS，不用每次改 meta -->
+<div class="card" style="margin-bottom:14px">
+  <details>
+    <summary style="cursor:pointer;font-weight:600;color:var(--teal)">⚙️ 配置（价格 · 微信号）</summary>
+    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 2fr;gap:10px">
+      <div>
+        <label class="lab">价格（元）</label>
+        <input id="cfg-price" type="text" placeholder="19.9">
+      </div>
+      <div>
+        <label class="lab">作者微信号</label>
+        <input id="cfg-wx" type="text" placeholder="leewen2017">
+      </div>
+    </div>
+    <div class="hint" style="margin-top:8px;font-size:12px">存 localStorage（仅本地工具），「使用流程」段会实时显示当前配置。</div>
+  </details>
+</div>
+
+<div class="tabs">
+  <button class="tab on" data-tab="auto">🎲 自动生成</button>
+  <button class="tab" data-tab="batch">批量生成</button>
+  <button class="tab" data-tab="single">单条哈希</button>
+  <button class="tab" data-tab="verify">验证（哈希 + 明文）</button>
+  <button class="tab" data-tab="parse">从 accounts.json 提取</button>
+  <button class="tab" data-tab="devices">📱 设备管理</button>
+</div>
+
+<!-- 自动生成 -->
+<div class="panel on" data-panel="auto">
+  <div class="card">
+    <div class="warn" style="background:var(--teal-l);border-color:var(--teal);color:var(--teal)">
+      <span>🎲</span>
+      <div>
+        <b>一键生成新账号</b>——工具自动生成<b>易记的汉字密码</b>（如 青云·明月）和<b>用户名</b>。
+        自动计算哈希，自动追加到现有 JSON，自动保存明文到本地。<br>
+        工作流：① 设置数量 ② 点击「生成」 ③ 复制 JSON 到服务器 ④ 下载/复制明文发给客户。
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label class="lab">生成数量 <span class="hint">1–20</span></label>
+        <input id="a-count" type="text" value="3" placeholder="如 3">
+      </div>
+      <div>
+        <label class="lab">用户名格式 <span class="hint">固定 user+日期+流水号</span></label>
+        <input type="text" value="userYYYYMMDDNN（如 user2026071010）" readonly style="color:var(--ink3);background:var(--paper3)">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label class="lab">密码风格</label>
+        <select id="a-pwstyle" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;font:inherit">
+          <option value="word">4 字·易记汉字词组（推荐）</option>
+          <option value="digit">6 位纯数字（最易记）</option>
+          <option value="worddigit">汉字词组+2 位数字</option>
+        </select>
+      </div>
+      <div>
+        <label class="lab">盐值 <span class="hint">与 pro 版一致</span></label>
+        <input id="a-salt" type="text" value="pg-pro-salt-v1">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="a-gen">🎲 生成账号</button>
+      <button class="btn ghost" id="a-clear">清空所有（localStorage）</button>
+    </div>
+
+    <label class="lab" style="margin-top:18px">明文账号清单（本地保存·<b>不要上传到 GitHub</b>·可手动编辑）</label>
+    <textarea id="a-plain" placeholder="点击「🎲 生成账号」自动填充。
+也可手动编辑：每行「用户名  密码」（中间隔 2 个空格）。
+例：
+user202607101  qingzhao
+user202607102  mingyue"></textarea>
+    <div class="btn-row">
+      <button class="btn ghost" id="a-copy-plain">📋 复制明文</button>
+      <button class="btn ghost" id="a-download-plain">⬇ 下载 accounts-明文.txt</button>
+      <button class="btn cinnabar" id="a-sync-json">🔄 同步到 JSON（重算哈希）</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <label class="lab">📋 现有 accounts.json <span class="hint" id="a-existing-status">等待自动拉取…</span></label>
+    <textarea id="a-existing" placeholder='{
+  "version": 1,
+  "salt": "pg-pro-salt-v1",
+  "accounts": [
+    { "u": "demo1", "h": "..." }
+  ]
+}'></textarea>
+
+    <div class="btn-row">
+      <button class="btn cinnabar" id="a-append">🔗 追加到现有 JSON</button>
+      <button class="btn ghost" id="a-load-file">📁 从本地文件加载</button>
+      <input type="file" id="a-file-input" accept=".json,application/json" style="display:none">
+      <button class="btn ghost" id="a-refresh">🔄 重新拉取</button>
+    </div>
+
+    <label class="lab" style="margin-top:18px">输出（追加后的完整 JSON）</label>
+    <div class="out empty" id="a-json">先点「🎲 生成账号」再点「🔗 追加到现有 JSON」...</div>
+    <div class="btn-row">
+      <button class="btn ghost" id="a-copy-json">📋 复制 JSON</button>
+      <button class="btn ghost" id="a-download-json">⬇ 下载 accounts.json</button>
+    </div>
+
+    <div class="hint-block" style="margin-top:12px;padding:10px 14px;background:var(--paper3);border-left:3px solid var(--teal);border-radius:6px;font-size:12px;color:var(--ink2);line-height:1.6">
+      <b style="color:var(--teal)">⬆ 部署到服务器：</b>上面 JSON 只在本浏览器生成，<b>服务器 accounts.json 不会自动更新</b>。两种方式上传到 Render：
+      <ol style="margin:6px 0 0 18px;padding:0">
+        <li>点「⬇ 下载 accounts.json」→ 把下载的文件覆盖到本仓库根的 <code>accounts.json</code> → <code>git add accounts.json && git commit -m "添加新账号" && git push</code>（Render 自动重 deploy ≈ 30s）</li>
+        <li>或直接编辑仓库根 <code>accounts.json</code> → <code>git push</code></li>
+      </ol>
+      <div style="margin-top:8px">嫌手动麻烦？运行 <code>scripts/deploy-accounts.sh</code>（mac/Linux）或 <code>scripts/deploy-accounts.cmd</code>（Windows），把下载的 JSON 拖进终端即可一键 git push。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 批量生成 -->
+<div class="panel" data-panel="batch">
+  <div class="card">
+    <label class="lab">盐值 <span class="hint">与 poemgraph-pro.html 中的 <code>PRO.salt</code> 一致</span></label>
+    <input id="b-salt" type="text" value="pg-pro-salt-v1">
+
+    <label class="lab" style="margin-top:14px">账号清单 <span class="hint">每行一个，格式：用户名:密码（冒号分隔）</span></label>
+    <textarea id="b-input" placeholder="demo1:demo1234
+demo2:test9999
+user001:pass_abc_2026"></textarea>
+
+    <div class="btn-row">
+      <button class="btn" id="b-gen">🔨 生成完整 accounts.json</button>
+      <button class="btn ghost" id="b-clear">清空</button>
+    </div>
+
+    <label class="lab" style="margin-top:18px">输出（直接复制到 poem.leewen.work/accounts.json）</label>
+    <div class="out empty" id="b-out">点击「生成」后这里会显示完整 JSON...</div>
+    <div class="btn-row">
+      <button class="btn ghost" id="b-copy">📋 复制 JSON</button>
+      <button class="btn ghost" id="b-download">⬇ 下载 accounts.json</button>
+    </div>
+  </div>
+</div>
+
+<!-- 单条 -->
+<div class="panel" data-panel="single">
+  <div class="card">
+    <div class="row">
+      <div>
+        <label class="lab">用户名</label>
+        <input id="s-user" type="text" placeholder="如 demo1">
+      </div>
+      <div>
+        <label class="lab">明文密码</label>
+        <input id="s-pass" type="password" placeholder="如 demo1234">
+      </div>
+    </div>
+    <label class="lab">盐值</label>
+    <input id="s-salt" type="text" value="pg-pro-salt-v1">
+    <div class="btn-row">
+      <button class="btn" id="s-go">生成哈希</button>
+    </div>
+    <label class="lab" style="margin-top:18px">哈希值（粘贴到 accounts.json 的 "h" 字段）</label>
+    <div class="out empty" id="s-out">等待输入...</div>
+    <div class="btn-row">
+      <button class="btn ghost" id="s-copy">📋 复制哈希</button>
+    </div>
+  </div>
+</div>
+
+<!-- 验证 -->
+<div class="panel" data-panel="verify">
+  <div class="card">
+    <div class="warn" style="background:#fffbea;border-color:#b8923f;color:#8a7040">
+      <span>💡</span>
+      <div>
+        工作流：你给用户发了「用户名:密码」后，如果担心哈希对不上，把<b>明文密码 + accounts.json 里的哈希值</b>填进来验证。
+        匹配 = true = 用户能用这个账号登录；不匹配 = 检查是否打错字。
+      </div>
+    </div>
+
+    <label class="lab">盐值</label>
+    <input id="v-salt" type="text" value="pg-pro-salt-v1">
+
+    <div class="row" style="margin-top:14px">
+      <div>
+        <label class="lab">明文密码</label>
+        <input id="v-pass" type="text" placeholder="如 demo1234">
+      </div>
+      <div>
+        <label class="lab">哈希值 <span class="hint">64 位 SHA-256</span></label>
+        <input id="v-hash" type="text" placeholder="如 1e3471c5b2851c55...">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="v-go">验证</button>
+    </div>
+
+    <div class="out empty" id="v-out" style="margin-top:14px">点击「验证」后这里显示结果...</div>
+  </div>
+</div>
+
+<!-- 提取 -->
+<div class="panel" data-panel="parse">
+  <div class="card">
+    <div class="warn" style="background:var(--teal-l);border-color:var(--teal);color:var(--teal)">
+      <span>📋</span>
+      <div>
+        把当前 <code>accounts.json</code> 的内容贴进来，工具帮你解析出每个账号的元数据。
+        不会显示明文密码（因为根本没存）—— 只会显示用户名 + 哈希 + 哈希长度校验。
+      </div>
+    </div>
+
+    <label class="lab">accounts.json 内容</label>
+    <textarea id="p-input" placeholder='{
+  "version": 1,
+  "salt": "pg-pro-salt-v1",
+  "accounts": [
+    { "u": "demo1", "h": "..." }
+  ]
+}'></textarea>
+
+    <div class="btn-row">
+      <button class="btn" id="p-go">解析</button>
+    </div>
+
+    <div class="out empty" id="p-out" style="margin-top:14px">等待粘贴...</div>
+  </div>
+</div>
+
+<!-- 设备管理（EdgeOne Pages Node Functions + KV 后端） -->
+<div class="panel" data-panel="devices">
+  <div class="card">
+    <div class="warn" style="background:var(--paper3);border-color:var(--border2);color:var(--ink2)">
+      <span>📱</span>
+      <div>
+        <b>设备管理（需 EdgeOne Pages KV + Node Functions 部署）</b><br>
+        每账号可绑定的设备数由 KV 的 <code>config:maxDevices</code> 控制（默认 1）。
+        Node Functions 后端 <code>/api/login</code> 校验；失败时自动回退纯前端（accounts.json）。
+      </div>
+    </div>
+
+    <label class="lab" style="margin-top:14px">管理员 Token（与 KV 里 <code>config:adminToken</code> 一致）</label>
+    <input id="dev-token" type="password" placeholder="在 EdgeOne KV 里 put config:adminToken=你的密码">
+
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn" id="dev-load">🔄 拉取账号列表</button>
+    </div>
+
+    <div id="dev-status" class="hint" style="margin-top:8px;font-size:12px;color:var(--ink3)"></div>
+
+    <div id="dev-list" class="list" style="margin-top:14px"></div>
+
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;color:var(--ink3);font-size:12px">手动添加设备（高级）</summary>
+      <div style="margin-top:8px;padding:10px;border:1px dashed var(--border2);border-radius:8px">
+        <label class="lab">账号名</label>
+        <input id="dev-add-u" type="text" placeholder="user001">
+        <label class="lab" style="margin-top:8px">设备 UUID（客户截图发你的）</label>
+        <input id="dev-add-id" type="text" placeholder="abc-123-...">
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn ghost" id="dev-add-go">➕ 添加</button>
+        </div>
+        <div id="dev-add-status" class="hint" style="margin-top:6px;font-size:12px"></div>
+      </div>
+    </details>
+  </div>
+</div>
+
+<div class="foot">
+  <b>使用流程：</b><br>
+  1. 客户付款 <span id="foot-price">19.9</span> 元 → 加作者微信 <b id="foot-wx">leewen2017</b> 收款<br>
+  2. 打开本页面 → 「批量生成」标签 → 输入 <code>用户名:密码</code>（一行一个）<br>
+  3. 点击「生成完整 accounts.json」→ 复制 JSON → 覆盖 poem.leewen.work 上的同名文件<br>
+  4. 把「用户名 + 密码」发给客户（<b>明文</b>，不是哈希）<br>
+  5. 客户登录失败？→「验证」标签 → 输入客户反馈的密码 + accounts.json 里的哈希 → 确认是否一致<br>
+  <br>
+  工具特性：纯前端 SHA-256 · 离线可用 · 不上传任何数据 · 盐值必须与 <code>poemgraph-pro.html</code> 中的 <kbd>pg-pro-salt-v1</kbd> 一致
+</div>
+
+<script>
+/* ── ⚙️ 配置（价格 + 微信号）从 meta + LS 读取，foot 段实时显示 ── */
+(function initCfg(){
+  const metaPrice = (document.querySelector('meta[name="x-price"]')||{}).content || '19.9';
+  const metaWx = (document.querySelector('meta[name="x-wechat-id"]')||{}).content || '';
+  const lsPrice = localStorage.getItem('pg_pro_price');
+  const lsWx = localStorage.getItem('pg_pro_wx');
+  const price = lsPrice || metaPrice;
+  const wx = lsWx || metaWx;
+  const priceEl = document.getElementById('foot-price');
+  const wxEl = document.getElementById('foot-wx');
+  if(priceEl) priceEl.textContent = price;
+  if(wxEl) wxEl.textContent = wx || '(未配置)';
+  const cfgPrice = document.getElementById('cfg-price');
+  const cfgWx = document.getElementById('cfg-wx');
+  if(cfgPrice) cfgPrice.value = price;
+  if(cfgWx) cfgWx.value = wx;
+  function sync(){
+    const p = (cfgPrice.value || '').trim() || metaPrice;
+    const w = (cfgWx.value || '').trim() || metaWx;
+    localStorage.setItem('pg_pro_price', p);
+    localStorage.setItem('pg_pro_wx', w);
+    if(priceEl) priceEl.textContent = p;
+    if(wxEl) wxEl.textContent = w || '(未配置)';
+    /* 通知同 origin 的其他 tab（如开着的 poemgraph-pro.html）立即刷新 */
+    try{
+      // BroadcastChannel 优先（更现代）
+      if(typeof BroadcastChannel !== 'undefined'){
+        const bc = new BroadcastChannel('pg_admin_cfg');
+        bc.postMessage({type: 'cfg-update', price: p, wx: w});
+      }
+      // localStorage 事件作为兜底（旧浏览器/BroadcastChannel 不可用时）
+      // 注：本 tab 自己 setItem 不触发 storage 事件，所以只能通知其他 tab
+    }catch(_){}
+  }
+  if(cfgPrice) cfgPrice.addEventListener('input', sync);
+  if(cfgWx) cfgWx.addEventListener('input', sync);
+})();
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+// Tabs
+$$('.tab').forEach(t => t.onclick = () => {
+  $$('.tab').forEach(x => x.classList.remove('on'));
+  $$('.panel').forEach(x => x.classList.remove('on'));
+  t.classList.add('on');
+  $(`[data-panel="${t.dataset.tab}"]`).classList.add('on');
+});
+
+async function sha256(s){
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2,'0')).join('');
+}
+
+// ── 批量生成 ──
+$('#b-gen').onclick = async () => {
+  const salt = $('#b-salt').value.trim();
+  const raw = $('#b-input').value.trim();
+  const out = $('#b-out');
+  if (!salt) { out.className='out'; out.textContent='❌ 请填写盐值'; return; }
+  if (!raw) { out.className='out'; out.textContent='❌ 请填写账号清单'; return; }
+
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+  const accounts = [];
+  const errors = [];
+  for (const [i, line] of lines.entries()) {
+    const idx = line.indexOf(':');
+    if (idx < 0) { errors.push(`第 ${i+1} 行格式错：${line}`); continue; }
+    const u = line.slice(0, idx).trim();
+    const p = line.slice(idx+1).trim();
+    if (!u || !p) { errors.push(`第 ${i+1} 行用户名或密码为空`); continue; }
+    const h = await sha256(salt + p);
+    accounts.push({ u, h });
+  }
+  const json = JSON.stringify({ version: 1, salt, accounts }, null, 2);
+  out.className='out';
+  out.textContent = json + (errors.length ? '\n\n⚠️ 警告：\n' + errors.join('\n') : '');
+};
+
+$('#b-copy').onclick = () => {
+  const text = $('#b-out').textContent;
+  if (!text || $('#b-out').classList.contains('empty')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    $('#b-copy').textContent = '✓ 已复制';
+    setTimeout(() => $('#b-copy').textContent = '📋 复制 JSON', 1500);
+  });
+};
+
+$('#b-download').onclick = () => {
+  const text = $('#b-out').textContent;
+  if (!text || $('#b-out').classList.contains('empty')) return;
+  const blob = new Blob([text], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'accounts.json'; a.click();
+  URL.revokeObjectURL(url);
+};
+
+$('#b-clear').onclick = () => {
+  $('#b-input').value = '';
+  $('#b-out').className = 'out empty';
+  $('#b-out').textContent = '点击「生成」后这里会显示完整 JSON...';
+};
+
+// ── 单条 ──
+$('#s-go').onclick = async () => {
+  const u = $('#s-user').value.trim();
+  const p = $('#s-pass').value;
+  const salt = $('#s-salt').value.trim();
+  const out = $('#s-out');
+  if (!u || !p || !salt) { out.className='out'; out.textContent='❌ 用户名/密码/盐值都要填'; return; }
+  const h = await sha256(salt + p);
+  out.className = 'out';
+  out.innerHTML = `<span class="tag">用户</span> <code>${u}</code><br><span class="tag">哈希</span> <code>${h}</code><br><br>↓ 复制下面这行到 accounts.json ↓<br><br>{ "u": "${u}", "h": "${h}" }`;
+};
+
+$('#s-copy').onclick = () => {
+  const out = $('#s-out').textContent;
+  if (!out || $('#s-out').classList.contains('empty')) return;
+  navigator.clipboard.writeText(out).then(() => {
+    $('#s-copy').textContent = '✓ 已复制';
+    setTimeout(() => $('#s-copy').textContent = '📋 复制哈希', 1500);
+  });
+};
+
+// ── 验证 ──
+$('#v-go').onclick = async () => {
+  const salt = $('#v-salt').value.trim();
+  const pass = $('#v-pass').value;
+  const hash = $('#v-hash').value.trim();
+  const out = $('#v-out');
+  if (!salt || !pass || !hash) { out.className='out'; out.textContent='❌ 三个字段都要填'; return; }
+  const computed = await sha256(salt + pass);
+  const match = computed === hash;
+  out.className = 'out';
+  if (match) {
+    out.innerHTML = `<span class="tag ok">✓ 匹配</span> 哈希一致！<br><br><b>说明：</b>这个明文密码 "${pass}" 经过 SHA-256(salt+pass) 后确实等于 accounts.json 里的哈希。用户应该能用这个账号登录。<br><br>计算过程：sha256("${salt}" + "${pass}") = ${computed}`;
+  } else {
+    out.innerHTML = `<span class="tag err">✗ 不匹配</span> 哈希不一致！<br><br><b>说明：</b>accounts.json 里的哈希不是由 "${pass}" 生成的。<br><br>计算得到的：<code>${computed}</code><br>accounts.json 里的：<code>${hash}</code><br><br><b>可能原因：</b><br>1. 密码打错了一个字<br>2. accounts.json 里这个账号对应的不是这个密码<br>3. 盐值不一致（应保持 "${salt}"）<br><br>建议你用「单条哈希」重新生成这个用户的密码哈希。`;
+  }
+};
+
+// ── 自动生成（推荐）──
+// 易记 2 字汉字 → 拼音映射（如「飞鸿」→ feihong）
+// 每条密码 = 2 字 × 拼音 = 约 6~10 个字母
+const PW_CHARS = [
+  { ch: '飞鸿', py: 'feihong' },
+  { ch: '明月', py: 'mingyue' },
+  { ch: '青云', py: 'qingyun' },
+  { ch: '春风', py: 'chunfeng' },
+  { ch: '秋水', py: 'qiushui' },
+  { ch: '清照', py: 'qingzhao' },
+  { ch: '烟雨', py: 'yanyu' },
+  { ch: '江南', py: 'jiangnan' },
+  { ch: '静思', py: 'jingsi' },
+  { ch: '墨韵', py: 'moyun' },
+  { ch: '听雨', py: 'tingyu' },
+  { ch: '寻梅', py: 'xunmei' },
+  { ch: '抚琴', py: 'fuqin' },
+  { ch: '踏雪', py: 'taxue' },
+  { ch: '观星', py: 'guanxing' },
+  { ch: '枕书', py: 'zhenshu' },
+  { ch: '采菊', py: 'caiju' },
+  { ch: '竹影', py: 'zhuying' },
+  { ch: '松涛', py: 'songtao' },
+  { ch: '清欢', py: 'qinghuan' },
+];
+function randHex(n){ let s=''; for(let i=0;i<n;i++) s+=Math.floor(Math.random()*16).toString(16); return s; }
+function rand4(){ return randHex(4); }
+
+/* ── 当日流水号计数器 ──
+ * 用 localStorage 持久化 "pg_serial_YYYYMMDD" → 已用最大流水号
+ * 每天换一个 key，避免长期累积
+ * 例：2026-07-10 生成 100 个，localStorage 存 pg_serial_20260710=100
+ *     下次再生成则从 101 开始
+ */
+function serialKey(dateStr){
+  // dateStr 是 YYYY-MM-DD，转成 YYYYMMDD
+  return 'pg_serial_' + dateStr.replace(/-/g,'');
+}
+function getSerial(dateStr){
+  return parseInt(localStorage.getItem(serialKey(dateStr))||'0');
+}
+function bumpSerial(dateStr, by){
+  const next = getSerial(dateStr) + by;
+  localStorage.setItem(serialKey(dateStr), String(next));
+  return next;
+}
+function genPassword(style){
+  // 抽取 1 个 2 字词
+  const pick = () => PW_CHARS[Math.floor(Math.random()*PW_CHARS.length)];
+  if(style==='digit') return String(Math.floor(100000+Math.random()*900000));
+  if(style==='worddigit'){
+    const a = pick();
+    const d = String(Math.floor(10+Math.random()*90));
+    return a.py + d;
+  }
+  // 默认 word：2 字汉字 → 拼音（拼音 = 客户记忆用的"中文汉字"）
+  const a = pick();
+  return a.py;
+}
+
+const LS_KEY = 'pg_accounts_plain_log';
+function loadPlainLog(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch(e){ return []; }
+}
+function savePlainLog(arr){
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+}
+
+function todayStamp(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+$('#a-gen').onclick = async () => {
+  const cnt = Math.min(20, Math.max(1, parseInt($('#a-count').value)||1));
+  const pwStyle = $('#a-pwstyle').value;
+  const salt = $('#a-salt').value.trim();
+  if(!salt){ alert('盐值不能为空'); return; }
+
+  const existing = loadPlainLog();
+  const date = todayStamp();
+  /* user + YYYYMMDD + (++serial) — 流水号从 localStorage 持久化，避免重复 */
+  const dateCompact = date.replace(/-/g,'');  // 20260710
+  const startSerial = getSerial(date);
+  const newOnes = [];
+  for(let i=0;i<cnt;i++){
+    const serial = startSerial + i + 1;   // 1, 2, 3 ...
+    const u = 'user' + dateCompact + serial;
+    const p = genPassword(pwStyle);
+    const h = await sha256(salt + p);
+    newOnes.push({u, p, h, date});
+  }
+  /* 把最大流水号写回 localStorage（即使关页面也保留） */
+  bumpSerial(date, cnt);
+  savePlainLog([...existing, ...newOnes]);
+
+  // 把所有 localStorage 明文账号同步到 textarea（含汉字提示）
+  renderPlainTextarea();
+  // 暂存待追加的新账号
+  window.__pg_newAccounts = newOnes;
+};
+
+/* ── 解析 textarea：兼容 3 种行格式（自动生成带汉字 / 手加 2 空格 / 手加单字段）──
+ * 返回数组元素形如 {u, p, ch}，手加单字段时 p=''，下游（🔄 同步到 JSON）需跳过；
+ * 注释行（# / // / 开头明示含"备注"/"说明"）和中文标点连用的整行静默丢弃。
+ */
+function parsePlainTextarea(){
+  const raw = $('#a-plain').value.trim();
+  if(!raw) return [];
+  const chMap = Object.fromEntries(PW_CHARS.map(w => [w.py, w.ch]));
+  const lines = [];
+  for(const line of raw.split('\n')){
+    const trimmed = line.trim();
+    if(!trimmed) continue;
+    // 形式 1：用户名  密码 [（汉字）]——2+ 空格分隔
+    const m = trimmed.match(/^(\S+)\s{2,}(\S+?)(?:\s*[（(](.+?)[)）])?\s*$/);
+    if(m){
+      const [, u, p, ch] = m;
+      if(/[，。！？；：、]{2,}/.test(u)) continue;   // 看起来像小纸条/注释就丢
+      lines.push({u, p, ch: ch || chMap[p.replace(/\d+$/,'')] || ''});
+      continue;
+    }
+    // 形式 2：单字段行——整行当用户名、密码留空
+    if(/^\S+$/.test(trimmed) && !/^(#|\/\/|备注|说明)/.test(trimmed)){
+      lines.push({u: trimmed, p: '', ch: ''});
+    }
+    // 其它（注释 / 多余空白 / 中文整段）静默跳过
+  }
+  return lines;
+}
+
+/* 渲染 localStorage 明文到 textarea（每行：用户名  密码  （汉字）） */
+function renderPlainTextarea(){
+  const log = loadPlainLog();
+  const chMap = Object.fromEntries(PW_CHARS.map(w => [w.py, w.ch]));
+  const text = log.map(e => {
+    const ch = chMap[e.p.replace(/\d+$/,'')] || '';
+    return ch ? `${e.u}  ${e.p}  （${ch}）` : `${e.u}  ${e.p}`;
+  }).join('\n');
+  $('#a-plain').value = text;
+}
+
+$('#a-copy-plain').onclick = () => {
+  const items = parsePlainTextarea();
+  if(!items.length){ alert('还没有账号可复制'); return; }
+  const date = todayStamp();
+  const text = items.map(it => `${date}  ${it.u}  ${it.p || '(空)'}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    $('#a-copy-plain').textContent='✓ 已复制 '+items.length+' 个';
+    setTimeout(()=>$('#a-copy-plain').textContent='📋 复制明文',1500);
+  });
+};
+
+$('#a-download-plain').onclick = () => {
+  const items = parsePlainTextarea();
+  if(!items.length){ alert('还没有账号可下载'); return; }
+  const date = todayStamp();
+  const header = `PoemGraph Pro · 客户账号清单\n生成时间：${new Date().toLocaleString('zh-CN')}\n账号数：${items.length}\n\n⚠️ 警告：本文件含明文密码，请勿上传到 GitHub 或公开分享！\n\n`;
+  const text = header + items.map(it => `${date}  ${it.u}  ${it.p || '(空)'}`).join('\n') + '\n';
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `poemgraph-accounts-${date}.txt`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+};
+
+$('#a-clear').onclick = () => {
+  if(!confirm('确定清空 localStorage 中保存的所有明文账号？此操作不可恢复！')) return;
+  localStorage.removeItem(LS_KEY);
+  $('#a-plain').value = '';
+  window.__pg_newAccounts = null;
+};
+
+$('#a-append').onclick = async () => {
+  /* 优先用 textarea 解析结果（兼容手动编辑场景）；没有再用自动生成暂存 */
+  const parsedPlain = parsePlainTextarea();
+  const autoGen = window.__pg_newAccounts;
+  const items = parsedPlain.length
+    ? parsedPlain
+    : autoGen;
+  if(!items || !items.length){ alert('先点「🎲 生成账号」或在明文清单里编辑'); return; }
+  const raw = $('#a-existing').value.trim();
+  if(!raw){ alert('先粘贴现有 accounts.json'); return; }
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch(e){ alert('现有 JSON 格式错：'+e.message); return; }
+  if(!parsed.accounts) parsed.accounts = [];
+  /* 如果来自 textarea，需重算哈希 */
+  const salt = $('#a-salt').value.trim();
+  for(const it of items){
+    if(it.h) { parsed.accounts.push({u:it.u, h:it.h}); continue; }
+    const h = await sha256(salt + it.p);
+    parsed.accounts.push({u:it.u, h});
+  }
+  const out = $('#a-json');
+  out.className='out';
+  out.textContent = JSON.stringify(parsed, null, 2);
+  window.__pg_finalJson = parsed;
+};
+
+/* 「🔄 同步到 JSON（重算哈希）」：解析 textarea → 算哈希 → 输出 JSON（不需要现有 JSON） */
+$('#a-sync-json').onclick = async () => {
+  const items = parsePlainTextarea();
+  if(!items.length){ alert('明文清单为空，请先生成或编辑'); return; }
+  const salt = $('#a-salt').value.trim();
+  if(!salt){ alert('请填写盐值'); return; }
+  const accounts = [];
+  let skipped = 0;
+  for(const it of items){
+    if(!it.p){ skipped++; continue; }   // 单字段无密码 → 不能登录，跳过
+    const h = await sha256(salt + it.p);
+    accounts.push({u: it.u, h});
+  }
+  /* 把解析结果全量 sync 到 LS：已有同名 → 更新密码；新用户 → 追加；空密码 → 不入 LS */
+  const existingLog = loadPlainLog();
+  const byUser = new Map(existingLog.map(e => [e.u, e]));
+  for(const it of items){
+    if(!it.p) continue;
+    if(byUser.has(it.u)){ byUser.get(it.u).p = it.p; }
+    else { existingLog.push({u: it.u, p: it.p, h: '', date: todayStamp()}); byUser.set(it.u, existingLog[existingLog.length-1]); }
+  }
+  savePlainLog(existingLog);
+
+  const out = $('#a-json');
+  out.className='out';
+  const json = JSON.stringify({version: 1, salt, accounts}, null, 2);
+  out.textContent = json + (skipped ? `\n\n（已跳过 ${skipped} 条无密码行，不进 JSON）` : '');
+  window.__pg_finalJson = {version: 1, salt, accounts};
+};
+
+$('#a-copy-json').onclick = () => {
+  const text = $('#a-json').textContent;
+  if(!text || $('#a-json').classList.contains('empty')) return;
+  navigator.clipboard.writeText(text).then(()=>{
+    $('#a-copy-json').textContent='✓ 已复制';
+    setTimeout(()=>$('#a-copy-json').textContent='📋 复制 JSON',1500);
+  });
+};
+
+$('#a-download-json').onclick = () => {
+  const j = window.__pg_finalJson;
+  if(!j){ alert('先生成 JSON'); return; }
+  const blob = new Blob([JSON.stringify(j,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `accounts-${todayStamp()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+};
+
+// ── 解析 ──
+$('#p-go').onclick = () => {
+  const raw = $('#p-input').value.trim();
+  const out = $('#p-out');
+  if (!raw) { out.className='out'; out.textContent='❌ 请粘贴 accounts.json 内容'; return; }
+  try {
+    const j = JSON.parse(raw);
+    const lines = [];
+    lines.push(`<b>盐值：</b><code>${j.salt || '(未设置)'}</code>`);
+    lines.push(`<b>账号数：</b>${(j.accounts||[]).length}`);
+    lines.push(`<b>版本：</b>${j.version || '(未设置)'}`);
+    lines.push('');
+    if (!j.accounts || !j.accounts.length) {
+      lines.push('⚠️ 没有账号');
+    } else {
+      (j.accounts||[]).forEach((a, i) => {
+        const lenOk = a.h && a.h.length === 64 ? '✓' : '✗';
+        const lenClass = a.h && a.h.length === 64 ? 'tag ok' : 'tag err';
+        lines.push(`<div class="list-row"><span class="${lenClass}">${lenOk} ${a.h ? a.h.length : 0}/64</span><b>${a.u}</b><code>${a.h}</code></div>`);
+      });
+    }
+    out.className = 'out';
+    out.innerHTML = lines.join('\n');
+  } catch (e) {
+    out.className = 'out';
+    out.innerHTML = `<span class="tag err">✗ 解析失败</span> ${e.message}<br><br>请检查 JSON 是否有效（注意引号、逗号、括号）。`;
+  }
+};
+
+/* 页面加载时：如果 localStorage 已有明文，渲染到 textarea */
+(function initPlainTextarea(){
+  if(loadPlainLog().length){ renderPlainTextarea(); }
+})();
+
+/* ── 自动加载 accounts.json（复用 poemgraph-pro.html 的 x-account-url） ──
+ * 同源优先策略：
+ * 1. URL 参数 ?accountUrl=... → 作者明确指定的最优先
+ * 2. <meta name="x-account-url"> → 若解析后与当前页同 origin，用 meta；否则降级到同源（避免跨源 CORS 失败）
+ * 3. 同源 location.origin + '/accounts.json' → 兜底
+ * 降级原因：作者在 Render 部署后易忘去 Dashboard 配 CORS Headers，跨源 fetch 必失败；
+ *          accounts.json 本就跟 admin HTML 同站部署，同源 0 阻。
+ */
+var ACCOUNT_URL = (function(){
+  try{
+    var u = new URL(location.href).searchParams.get('accountUrl');
+    if(u) return u.trim();
+  }catch(_e){}
+  var meta = ((document.querySelector('meta[name="x-account-url"]')||{}).content || '').trim();
+  if(meta){
+    try{
+      var m = new URL(meta, location.href);
+      if(m.origin === location.origin) return m.href;     // meta 跟当前同 origin → 用 meta
+      // meta 跟当前跨 origin → 降级到同源（兜底 URL 留注释给作者看为啥没用 meta）
+      return location.origin + '/accounts.json';
+    }catch(_e){
+      return location.origin + '/accounts.json';
+    }
+  }
+  return location.origin + '/accounts.json';
+})();
+function loadExistingJson(opts){
+  opts = opts || {};
+  /* opts.manual=true → 用户主动点「🔄 重新拉取」，file:// 也至少试一次 fetch（看到 CORS 报错比静默好） */
+  var ta = document.getElementById('a-existing');
+  var status = document.getElementById('a-existing-status');
+  if(!ta) return;
+  if(location.protocol === 'file:' && !opts.manual){
+    ta.value = '';
+    status.innerHTML = '本地 file:// 页面不自动拉取，可点击「📁 从本地文件加载」或手动粘贴（点「🔄 重新拉取」可强制尝试）';
+    status.style.color = 'var(--ink3)';
+    return;
+  }
+  status.textContent = '正在从 '+ACCOUNT_URL+' 拉取…';
+  status.style.color = 'var(--ink3)';
+  fetch(ACCOUNT_URL, {cache: 'no-store'}).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(j){
+    ta.value = JSON.stringify(j, null, 2);
+    var count = (j.accounts||[]).length;
+    status.textContent = '✓ 已自动加载（'+count+' 个账号）·'+ACCOUNT_URL;
+    status.style.color = 'var(--teal)';
+  }).catch(function(err){
+    ta.value = '';
+    /* CORS 失败的典型 message 是 "Failed to fetch"（TypeError），给个一目了然的提示 */
+    var hint = (err && err.message && /fetch|network|cors/i.test(err.message))
+      ? '<br><small>· 多半是远端 <code>accounts.json</code> 没配 CORS 响应头，详见仓库根 <code>_headers</code></small>'
+      : '';
+    status.innerHTML = '⚠️ 自动加载失败：'+(err && err.message || err)+'（<b>点击「📁 从本地文件加载」</b>或手动粘贴）'+hint;
+    status.style.color = 'var(--cinnabar)';
+  });
+}
+loadExistingJson();
+$('#a-refresh').onclick = function(){ loadExistingJson({manual:true}); };
+
+/* ── 从本地文件加载 accounts.json ── */
+$('#a-load-file').onclick = () => document.getElementById('a-file-input').click();
+$('#a-file-input').onchange = (e) => {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const j = JSON.parse(ev.target.result);
+      document.getElementById('a-existing').value = JSON.stringify(j, null, 2);
+      const status = document.getElementById('a-existing-status');
+      status.textContent = '✓ 已从本地文件加载（'+((j.accounts||[]).length)+' 个账号）';
+      status.style.color = 'var(--teal)';
+    } catch(err){
+      alert('文件不是有效 JSON：'+err.message);
+    }
+  };
+  reader.readAsText(file);
+};
+
+/* ════════════════════════════════════════
+   设备管理（Node Functions + KV 后端）
+   ════════════════════════════════════════ */
+const API_BASE = (function(){
+  // 与 admin 同源（EdgeOne Pages Node Functions 部署在本站）
+  // 与现有 loadExistingJson 同源优先策略一致：优先当前 origin
+  try{
+    var u = new URL(location.href).searchParams.get('api');
+    if(u) return u.trim().replace(/\/$/, '');
+  }catch(_e){}
+  return location.origin;
+})();
+
+function devApiUrl(path){
+  // path 形如 '/api/admin/list' 或 '/api/login'
+  return API_BASE + path;
+}
+
+async function devFetch(path, body){
+  const token = (document.getElementById('dev-token')||{}).value || '';
+  const headers = {'Content-Type': 'application/json'};
+  if(token) headers['Authorization'] = 'Bearer ' + token;
+  const r = await fetch(devApiUrl(path), {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body || {})
+  });
+  const j = await r.json().catch(() => ({}));
+  return {ok: r.ok, status: r.status, body: j};
+}
+
+function fmtTime(ts){
+  if(!ts) return '—';
+  var d = new Date(ts);
+  var pad = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+$('#dev-load').onclick = async () => {
+  const st = document.getElementById('dev-status');
+  const listEl = document.getElementById('dev-list');
+  st.textContent = '正在拉取…';
+  st.style.color = 'var(--ink3)';
+  listEl.innerHTML = '';
+  try{
+    const r = await devFetch('/api/admin/list', {});
+    if(!r.ok){
+      st.innerHTML = '❌ 失败：HTTP ' + r.status + ' · ' + (r.body.err || '');
+      st.style.color = 'var(--cinnabar)';
+      return;
+    }
+    const data = r.body;
+    st.textContent = '✓ 拉取成功（maxDevices=' + data.maxDevices + '，共 ' + data.accounts.length + ' 个账号）';
+    st.style.color = 'var(--teal)';
+    if(data.accounts.length === 0){
+      listEl.innerHTML = '<div class="hint">KV 里还没有账号数据。请先用「批量生成」生成账号后，手动 KV put 到 namespace pg-accounts（key 格式：account:用户名，value 为 JSON）</div>';
+      return;
+    }
+    listEl.innerHTML = data.accounts.map(a => {
+      const devicesHtml = a.devices.map((d, i) => '<code style="font-size:10px">' + d.slice(0, 8) + '…</code>').join(' · ');
+      const warn = a.deviceCount >= data.maxDevices ? ' <span class="tag err">满</span>' : '';
+      return '<div class="list-row" style="flex-wrap:wrap;gap:8px">' +
+        '<b>' + a.u + '</b>' +
+        '<span class="tag">' + a.deviceCount + '/' + data.maxDevices + ' 台</span>' + warn +
+        '<span style="color:var(--ink3);font-size:11px">最后登录：' + fmtTime(a.lastSeen) + '</span>' +
+        '<span style="color:var(--ink3);font-size:10px;width:100%">' + (a.devices.length ? 'UUIDs: ' + devicesHtml : '(无绑定)') + '</span>' +
+        '<button class="btn ghost" data-reset="' + a.u + '" style="margin-left:auto;padding:4px 10px;font-size:12px">🔄 重置</button>' +
+        '</div>';
+    }).join('');
+    // 绑定重置按钮
+    listEl.querySelectorAll('[data-reset]').forEach(btn => {
+      btn.onclick = async () => {
+        const u = btn.getAttribute('data-reset');
+        if(!confirm('确认重置账号「' + u + '」的所有设备绑定？该账号下次登录将自动绑定当前浏览器。')) return;
+        const r = await devFetch('/api/admin/reset', {u});
+        if(r.ok){
+          alert('✓ 已清空 ' + u + ' 的设备列表（旧 ' + r.body.clearedDevices + ' 台）');
+          $('#dev-load').click();
+        }else{
+          alert('❌ 重置失败：' + (r.body.err || ''));
+        }
+      };
+    });
+  } catch(err){
+    st.innerHTML = '❌ 网络错误：' + err.message;
+    st.style.color = 'var(--cinnabar)';
+  }
+};
+
+$('#dev-add-go').onclick = async () => {
+  const u = (document.getElementById('dev-add-u').value || '').trim();
+  const id = (document.getElementById('dev-add-id').value || '').trim();
+  const st = document.getElementById('dev-add-status');
+  if(!u || !id){
+    st.textContent = '❌ 账号名和设备 UUID 都要填';
+    st.style.color = 'var(--cinnabar)';
+    return;
+  }
+  st.textContent = '正在添加…';
+  st.style.color = 'var(--ink3)';
+  try{
+    const r = await devFetch('/api/admin/add-device', {u, deviceId: id});
+    if(r.ok){
+      st.textContent = '✓ ' + (r.body.added ? '已添加' : 'UUID 已在列表中（无需添加）') + '（当前 ' + r.body.devices.length + ' 台）';
+      st.style.color = 'var(--teal)';
+      document.getElementById('dev-add-id').value = '';
+      // 自动刷新列表
+      setTimeout(() => $('#dev-load').click(), 500);
+    }else{
+      st.textContent = '❌ 失败：HTTP ' + r.status + ' · ' + (r.body.err || '');
+      st.style.color = 'var(--cinnabar)';
+    }
+  } catch(err){
+    st.textContent = '❌ 网络错误：' + err.message;
+    st.style.color = 'var(--cinnabar)';
+  }
+};
+
+/* 切到设备管理 tab 时自动拉取一次（如果还没拉过） */
+const origDatasets = Array.from(document.querySelectorAll('.tab')).map(t => t.dataset.tab);
+document.querySelector('.tab[data-tab="devices"]').addEventListener('click', () => {
+  setTimeout(() => {
+    if(document.getElementById('dev-list').children.length === 0){
+      $('#dev-load').click();
+    }
+  }, 50);
+});
+</script>
+
+</body>
+</html>
