@@ -33,7 +33,7 @@ function json(res, status, obj) {
   res.writeHead(status, {
     'content-type': 'application/json; charset=utf-8',
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET, POST, OPTIONS',
+    'access-control-allow-methods': 'GET, HEAD, POST, OPTIONS',
     'access-control-allow-headers': 'Content-Type, Authorization',
     'cache-control': 'no-store'
   });
@@ -321,11 +321,24 @@ function serveStatic(req, res, pathname) {
   createReadStream(file).pipe(res);
 }
 
+function health(req, res) {
+  const body = JSON.stringify({ ok: true, service: 'poemgraph-auth' });
+  res.writeHead(200, {
+    'content-type': 'application/json; charset=utf-8',
+    'content-length': Buffer.byteLength(body),
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, HEAD, POST, OPTIONS',
+    'access-control-allow-headers': 'Content-Type, Authorization',
+    'cache-control': 'no-store'
+  });
+  res.end(req.method === 'HEAD' ? undefined : body);
+}
+
 const server = createServer(async (req, res) => {
   try {
     if (req.method === 'OPTIONS') return json(res, 204, {});
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
-    if (req.method === 'GET' && url.pathname === '/health') return json(res, 200, { ok: true, service: 'poemgraph-auth' });
+    if ((req.method === 'GET' || req.method === 'HEAD') && url.pathname === '/health') return health(req, res);
     if (req.method === 'POST' && url.pathname === '/api/login') return handleLogin(req, res);
     if (req.method === 'POST' && url.pathname === '/api/session') return handleSession(req, res);
     if (req.method === 'POST' && url.pathname === '/api/admin/list') return handleAdminList(req, res);

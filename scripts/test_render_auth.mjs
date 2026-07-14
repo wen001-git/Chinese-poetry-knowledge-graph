@@ -36,6 +36,9 @@ async function main() {
   await wait(500);
   const h = await fetch(`http://127.0.0.1:${port}/health`).then(r => r.json());
   if (!h.ok) throw new Error('health failed');
+  const head = await fetch(`http://127.0.0.1:${port}/health`, { method: 'HEAD' });
+  if (!head.ok) throw new Error('health HEAD failed');
+  if (!head.headers.get('content-type')?.includes('application/json')) throw new Error('health HEAD content-type failed');
 
   const d1 = randomUUID();
   const d2 = randomUUID();
