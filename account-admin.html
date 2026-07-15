@@ -89,7 +89,7 @@ textarea{height:120px;line-height:1.5}
 
 <!-- ⚙️ 配置（价格 + 微信号）—— 留本地 LS，不用每次改 meta -->
 <div class="card" style="margin-bottom:14px">
-  <details>
+  <details open>
     <summary style="cursor:pointer;font-weight:600;color:var(--teal)">⚙️ 配置（价格 · 微信号）</summary>
     <div style="margin-top:10px;display:grid;grid-template-columns:1fr 2fr;gap:10px">
       <div>
@@ -101,7 +101,16 @@ textarea{height:120px;line-height:1.5}
         <input id="cfg-wx" type="text" placeholder="leewen2017">
       </div>
     </div>
-    <div class="hint" style="margin-top:8px;font-size:12px">存 localStorage（仅本地工具），「使用流程」段会实时显示当前配置。</div>
+    <div class="hint" style="margin-top:8px;font-size:12px">
+      立即生效（仅同浏览器同 tab）：存 <code>localStorage</code> + 通过 BroadcastChannel 通知同浏览器其他 tab。
+      <br>
+      <b style="color:var(--cinnabar)">要让所有用户（不同电脑）看到最新价格：</b>点下面按钮 → 把生成的 JSON 提交到仓库根 <code>paywall.json</code> → <code>git push</code> → Render 自动重 deploy ≈ 30s。
+    </div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn cinnabar" id="cfg-save">💾 保存到 paywall.json</button>
+      <button class="btn ghost" id="cfg-fetch">🔄 从 paywall.json 拉取</button>
+    </div>
+    <div id="cfg-save-status" class="hint" style="margin-top:8px;font-size:12px"></div>
   </details>
 </div>
 
@@ -404,6 +413,98 @@ user001:pass_abc_2026"></textarea>
   }
   if(cfgPrice) cfgPrice.addEventListener('input', sync);
   if(cfgWx) cfgWx.addEventListener('input', sync);
+})();
+
+/* ── 💾 保存到 paywall.json（git push 后跨电脑生效） ── */
+(function cfgFile(){
+  const PRICE_URL = (() => {
+    try {
+      const u = new URL(location.href);
+      if (u.searchParams.get('paywallUrl')) return u.searchParams.get('paywallUrl').trim();
+    } catch(_){}
+    const meta = ((document.querySelector('meta[name="x-paywall-url"]')||{}).content || '').trim();
+    if (meta) {
+      try { const m = new URL(meta, location.href); if (m.origin === location.origin) return m.href; } catch(_){}
+    }
+    return location.origin + '/paywall.json';
+  })();
+  const statusEl = document.getElementById('cfg-save-status');
+
+  function stampNow() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' +
+           pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  function buildPaywall() {
+    const metaPrice = (document.querySelector('meta[name="x-price"]')||{}).content || '19.9';
+    const metaWx    = (document.querySelector('meta[name="x-wechat-id"]')||{}).content || '';
+    const cfgPrice  = document.getElementById('cfg-price');
+    const cfgWx     = document.getElementById('cfg-wx');
+    const p = (cfgPrice && cfgPrice.value.trim()) || metaPrice;
+    const w = (cfgWx    && cfgWx.value.trim())    || metaWx;
+    return {
+      version: 1,
+      price: p,
+      wx: w,
+      updatedAt: stampNow()
+    };
+  }
+
+  document.getElementById('cfg-save').onclick = async () => {
+    const json = JSON.stringify(buildPaywall(), null, 2);
+    try {
+      await navigator.clipboard.writeText(json);
+    } catch(_e) {}
+
+    const repoCwd = (location.hostname === 'localhost' || location.protocol === 'file:') ? '/Users/Zhuanz/Claude/PoemGraph' : '<your-repo-path>';
+    const cmd = [
+      `cat > paywall.json << 'EOF'`,
+      json,
+      `EOF`,
+      `git add paywall.json && git commit -m "paywall: price=${buildPaywall().price}, wx=${buildPaywall().wx}" && git push`
+    ].join('\n');
+
+    statusEl.style.color = 'var(--teal)';
+    statusEl.innerHTML = '✓ JSON 已复制到剪贴板。在仓库根（' + repoCwd + '）执行下面命令，Render 自动 deploy 后所有用户即看到新价格（约 30s 生效）：';
+    // 把命令也展示在一段 <pre> 里供一键复制
+    const pre = document.createElement('pre');
+    pre.style.cssText = 'margin-top:8px;padding:10px;background:#fff;border:1px solid var(--border);border-radius:6px;font-size:11.5px;white-space:pre-wrap;line-height:1.5;color:var(--ink)';
+    pre.textContent = cmd;
+    statusEl.appendChild(pre);
+
+    const copyCmd = document.createElement('button');
+    copyCmd.className = 'btn ghost';
+    copyCmd.style.cssText = 'margin-top:6px;padding:4px 10px;font-size:12px';
+    copyCmd.textContent = '📋 也复制这条终端命令';
+    copyCmd.onclick = () => navigator.clipboard.writeText(cmd).then(() => {
+      copyCmd.textContent = '✓ 已复制终端命令';
+      setTimeout(() => copyCmd.textContent = '📋 也复制这条终端命令', 1500);
+    });
+    statusEl.appendChild(copyCmd);
+  };
+
+  document.getElementById('cfg-fetch').onclick = async () => {
+    statusEl.style.color = 'var(--ink3)';
+    statusEl.textContent = '正在从 ' + PRICE_URL + ' 拉取…';
+    try {
+      const r = await fetch(PRICE_URL, {cache: 'no-store'});
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      const cfgPrice = document.getElementById('cfg-price');
+      const cfgWx    = document.getElementById('cfg-wx');
+      if (cfgPrice && j.price) cfgPrice.value = j.price;
+      if (cfgWx    && j.wx)    cfgWx.value    = j.wx;
+      // 触发 sync 把 LS 也更新（这样 foot 段会实时刷新）
+      cfgPrice.dispatchEvent(new Event('input'));
+      cfgWx.dispatchEvent(new Event('input'));
+      statusEl.style.color = 'var(--teal)';
+      statusEl.textContent = '✓ 已拉取 paywall.json 并填入上方输入框（price=' + j.price + ', wx=' + j.wx + ', updatedAt=' + (j.updatedAt || '?') + '）';
+    } catch (err) {
+      statusEl.style.color = 'var(--cinnabar)';
+      statusEl.textContent = '⚠️ 拉取失败：' + err.message + '（多半 paywall.json 还没提交；点 💾 保存会先帮你生成并复制到剪贴板）';
+    }
+  };
 })();
 
 const $ = s => document.querySelector(s);

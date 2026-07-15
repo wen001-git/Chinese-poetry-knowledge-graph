@@ -1246,19 +1246,69 @@ body.sleep-open{overflow:hidden}
   var W=window, D=document;
   var META=D.querySelector('meta[name="x-pro-mode"]');
   var ACCOUNT_URL=(D.querySelector('meta[name="x-account-url"]')||{}).content;
-  /* 微信号：meta 默认 + localStorage.pg_pro_wx 可覆盖（admin HTML 改 LS 即生效） */
+
+  /* ════════ paywall.json（同 origin 优先 + meta fallback + 同源兜底）══════
+   * 跨电脑配置同步：admin 改了 price/wx → 点「💾 保存到 paywall.json」 → git push →
+   *                 Render 自动 deploy → 这里 fetch 到新的 price/wx，全网生效。
+   * 与 meta / localStorage 优先级：
+   *   1. localStorage.pg_pro_price / pg_pro_wx（用户本地覆盖；BroadcastChannel 同步）
+   *   2. paywall.json（部署到生产的最权威源；离线 / file:// 会失败走 fallback）
+   *   3. <meta name="x-price"> / <meta name="x-wechat-id">（HTML 内置默认值）
+   */
+  var PAYWALL_URL = (function(){
+    try{
+      var u = new URL(location.href).searchParams.get('paywallUrl');
+      if(u) return u.trim();
+    }catch(_e){}
+    var meta = ((D.querySelector('meta[name="x-paywall-url"]')||{}).content || '').trim();
+    if(meta){
+      try{
+        var m = new URL(meta, location.href);
+        if(m.origin === location.origin) return m.href;
+        return location.origin + '/paywall.json';
+      }catch(_e){
+        return location.origin + '/paywall.json';
+      }
+    }
+    return location.origin + '/paywall.json';
+  })();
+
+  var _remotePaywall = null;  // 缓存 paywall.json 内容；供 refreshPayCopy() 读
+
+  /* 微信号：localStorage > paywall.json > meta > 硬编码默认 */
   function _readWx(){
-    try{ return localStorage.getItem('pg_pro_wx') || (D.querySelector('meta[name="x-wechat-id"]')||{}).content || 'leewen2017'; }catch(_){ return 'leewen2017'; }
+    try{
+      var ls = localStorage.getItem('pg_pro_wx');
+      if(ls) return ls;
+    }catch(_){}
+    if(_remotePaywall && _remotePaywall.wx) return _remotePaywall.wx;
+    return (D.querySelector('meta[name="x-wechat-id"]')||{}).content || 'leewen2017';
   }
   var WECHAT_ID = _readWx();
   var PAYWALL_MSG=(D.querySelector('meta[name="x-paywall-msg"]')||{}).content||'创作不易，请加作者微信购买';
-  /* 价格：meta 默认 19.9；localStorage.pg_pro_price 可临时覆盖（你 admin HTML 改 LS 即生效） */
+  /* 价格：localStorage > paywall.json > meta > 硬编码默认 */
   var PRICE=(function(){
-    var meta = (D.querySelector('meta[name="x-price"]')||{}).content || '19.9';
-    var ls = '';
-    try{ ls = localStorage.getItem('pg_pro_price') || ''; }catch(_){}
-    return ls || meta;
+    try{
+      var ls = localStorage.getItem('pg_pro_price');
+      if(ls) return ls;
+    }catch(_){}
+    if(_remotePaywall && _remotePaywall.price) return _remotePaywall.price;
+    return (D.querySelector('meta[name="x-price"]')||{}).content || '19.9';
   })();
+
+  /* 异步预取 paywall.json —— 返回 Promise，boot() 链上后调用 refreshPayCopy() 重算
+   * （不 await 在 init 阶段会冻屏；放后台跑，把结果存到 _remotePaywall） */
+  function fetchPaywallCfg(){
+    return fetch(PAYWALL_URL, {cache: 'no-store'}).then(function(r){
+      if(!r || !r.ok) return null;
+      return r.json();
+    }).then(function(j){
+      if(j && typeof j === 'object') _remotePaywall = j;
+      return _remotePaywall;
+    }).catch(function(){ return null; });
+  }
+  W.fetchPaywallCfg = fetchPaywallCfg;
+  W.PAYWALL_URL = PAYWALL_URL;
 
   /* ── 付费墙文案统一常量（修改这里即可全局生效） ──
    * 之前散落在 showPaywall()、banner、meta 等多处；
@@ -1571,6 +1621,28 @@ body.sleep-open{overflow:hidden}
     applyProVisibility();
     updateBanner();
     bindBannerEvents();
+
+    /* 后台 fetch paywall.json；拿到后刷新 PRICE / WECHAT_ID + 重画 banner + paywall
+     * （失败时静默 fallback 到 meta 默认值；不影响主流程） */
+    try{
+      fetchPaywallCfg().then(function(j){
+        if(j){
+          /* 把 paywall.json 的值当默认；不写 LS（不污染用户本地覆盖） */
+          WECHAT_ID = _readWx();
+          try{ PRICE = localStorage.getItem('pg_pro_price') || (j.price) || (D.querySelector('meta[name="x-price"]')||{}).content || '19.9'; }catch(_){ PRICE = j.price || PRICE; }
+          PAY_COPY = buildPayCopy(PRICE, WECHAT_ID);
+          if(typeof updateBanner==='function') updateBanner();
+          var openModal = D.querySelector('.pro-modal');
+          if(openModal && PAY_COPY){
+            var subEl = openModal.querySelector('.pro-sub');
+            if(subEl) subEl.textContent = PAY_COPY.subtitle;
+            var wxEl = openModal.querySelector('#paywall-wx');
+            if(wxEl) wxEl.textContent = _readWx();
+          }
+        }
+      });
+    }catch(_){}
+
     try{
       /* 确保本机设备 ID 存在（首次访问也生成，存 LS）—— 后续 doLogin 才能带上 */
       getDeviceId();
