@@ -1444,7 +1444,7 @@ body.sleep-open{overflow:hidden}
       PRO.logged=true; PRO.user={u:u};
       localStorage.setItem('pg_pro_user', JSON.stringify({u:u, loginAt:Date.now(), deviceId:deviceId, token:j.token, mode:'remote'}));
       onLoginSuccess();
-      if(j.bound) showProToast('✓ 设备已自动绑定（设备 1/' + (j.maxDevices||1) + '）');
+      if(j.bound) showProToast('✓ 设备已自动绑定（设备 1/' + (j.maxDevices||3) + '）');
       return j;
     }).catch(function(err){
       if(err.message === 'REMOTE_FALLBACK' && !AUTH_REQUIRED){

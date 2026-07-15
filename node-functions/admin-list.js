@@ -11,7 +11,7 @@ export async function onRequestPost({request, env}){
     if(!auth.ok) return json({err: auth.err}, 401);
 
     const kv = getKV(env);
-    const maxDevices = parseInt(await kv.get('config:maxDevices') || '1');
+    const maxDevices = parseInt(await kv.get('config:maxDevices') || '3');
 
     // 列出所有 account:* keys
     const accounts = [];

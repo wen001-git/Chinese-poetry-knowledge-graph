@@ -33,7 +33,7 @@ export async function onRequestPost({request, env}){
     if(hash !== account.h) return json({err: '密码错误'}, 401);
 
     // 4. 设备校验
-    const maxDevices = parseInt(await kv.get('config:maxDevices') || '1');
+    const maxDevices = parseInt(await kv.get('config:maxDevices') || '3');
     const devices = Array.isArray(account.devices) ? account.devices : [];
 
     if(devices.includes(deviceId)){

@@ -53,7 +53,7 @@ edgeone login
 # put 初始 KV
 edgeone kv put --namespace pg-accounts config:adminToken "你的安全密码（≥16 字符）"
 edgeone kv put --namespace pg-accounts config:salt      "pg-pro-salt-v1"
-edgeone kv put --namespace pg-accounts config:maxDevices "1"
+edgeone kv put --namespace pg-accounts config:maxDevices "3"
 edgeone kv put --namespace pg-accounts config:enabled   "true"
 
 # 加账号（每个账号单独 put）
@@ -77,24 +77,24 @@ EdgeOne Pages KV 控制台通常**有"调试"或"数据浏览"标签**，里面�
 - KV 里和 accounts.json 的账号数据**必须一致**（第一次迁移时手工同步两份）
 - 后端不可用时用户照常登录（你的 KV 配置错了不会影响老用户）
 
-## 测试流程（按你 maxDevices=1 的设定）
+## 测试流程（按你 maxDevices=3 的设定）
 
 ### 场景 1：后端 OK
 
-1. 在 EdgeOne KV put：`config:enabled=true` + `config:adminToken=xxx` + `config:maxDevices=1` + `account:demo1={"u":"demo1","h":"<demo1的哈希>","devices":[]}`
+1. 在 EdgeOne KV put：`config:enabled=true` + `config:adminToken=xxx` + `config:maxDevices=3` + `account:demo1={"u":"demo1","h":"<demo1的哈希>","devices":[]}`
 2. 打开 `https://poem.leewen.work/poemgraph-pro.html`（或你的 EdgeOne Pages 域名）
 3. 顶栏「🔑 登录」→ 输 demo1 + 密码 → 登录成功 ✅
 4. F12 → Application → Local Storage → 应看到 `pg_pro_device`（UUID）+ `pg_pro_user`（含 deviceId）
 5. EdgeOne 控制台 → KV → `account:demo1` 应看到 `devices: ["<那个UUID>"]`
 
-### 场景 2：maxDevices=1 限制生效
+### 场景 2：maxDevices=3 限制生效
 
-1. 同一浏览器换 incognito 窗口（UUID 重新生成）→ 登录 demo1 → **应被拒**：error message = "此账号已在 1 台设备登录。请联系作者重置设备列表。"
+1. 同一浏览器换 incognito 窗口 3 次（UUID 重新生成）→ 第 4 次登录 demo1 → **应被拒**：error message = "此账号已在 3 台设备登录。请联系作者重置设备列表。"
 
 ### 场景 3：admin 重置设备
 
 1. 打开 admin HTML → 「📱 设备管理」tab → 输 adminToken → 「🔄 拉取账号列表」 → 看到 demo1 + 设备数 1/1
-2. 点「🔄 重置」 → 确认 → 应看到 "已清空 1 台"
+2. 点「🔄 重置」 → 确认 → 应看到 "已清空 3 台"
 3. KV 检查：`account:demo1` 的 `devices` 数组应是 `[]`
 4. 回到 incognito 窗口 → 再登录 demo1 → 这次应成功 ✅
 

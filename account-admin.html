@@ -333,7 +333,7 @@ user001:pass_abc_2026"></textarea>
       <span>📱</span>
       <div>
         <b>设备管理（Render Web Service / EdgeOne Node Functions 后端）</b><br>
-        Render 版默认每账号 1 台设备，可在列表中单独调整。
+        Render 版默认每账号 3 台设备，可在列表中单独调整。
         后端 <code>/api/login</code> 校验账号密码并绑定设备；设备满额会拒绝登录。
       </div>
     </div>
@@ -1037,7 +1037,7 @@ $('#dev-load').onclick = async () => {
       return;
     }
     listEl.innerHTML = data.accounts.map(a => {
-      const max = a.maxDevices || data.maxDevices || 1;
+      const max = a.maxDevices || data.maxDevices || 3;
       const devicesHtml = a.devices.map((d, i) => {
         const id = (typeof d === 'string') ? d : (d.id || '');
         return '<code style="font-size:10px">' + id.slice(0, 8) + '…</code>';
@@ -1071,7 +1071,7 @@ $('#dev-load').onclick = async () => {
         const u = btn.getAttribute('data-max');
         const val = prompt('设置账号「' + u + '」允许绑定几台设备？', '1');
         if(val === null) return;
-        const maxDevices = Math.max(1, parseInt(val, 10) || 1);
+        const maxDevices = Math.max(1, parseInt(val, 10) || 3);
         const r = await devFetch('/api/admin/set-max-devices', {u, maxDevices});
         if(r.ok){
           alert('✓ 已设置 ' + u + ' 为 ' + r.body.maxDevices + ' 台');
