@@ -122,23 +122,23 @@
       </div>
     </section>
 
-    <div class="account-row">
-      <section class="panel">
-        <h2>创建账号</h2>
-        <form class="grid" id="createForm">
-          <div class="field"><label for="newUsername">账号</label><input id="newUsername" required maxlength="80" autocomplete="off"></div>
-          <div class="field"><label for="newPassword">初始密码（至少 4 位）</label><input id="newPassword" type="password" required minlength="4" autocomplete="new-password"></div>
-          <div class="field"><label for="newLimit">设备上限</label><input id="newLimit" type="number" min="1" max="20" value="3" required></div>
-          <button class="primary" type="submit">创建账号</button>
-        </form>
-      </section>
+    <section class="panel account-combo">
+      <h2>账号管理</h2>
+      <p class="hint" style="margin-top:0">在下方表单创建新账号，或在表格里调整已有账号的设备上限、密码、状态。创建后账号会立刻出现在下方表格顶部 ✨。<br>
+      <strong>存储位置:</strong>此按钮创建的账号<strong>写到 Neon Postgres 数据库</strong>,<strong>不需要 git push</strong> — 创建后立刻对所有用户生效。<strong>不会写回仓库根的 <code>accounts.json</code></strong>。若需保留 <code>accounts.json</code> 静态登录兼容,改用下方「哈希工具」生成 + 追加 JSON + git push。</p>
 
-      <section class="panel accounts" aria-label="账号列表">
-        <h2>📋 已存在账号 <span class="hint" id="accountCount" style="font-weight:400">（连接后查看）</span></h2>
-        <div class="accounts-head"><span>账号</span><span>状态</span><span>设备上限</span><span>最近登录</span><span>操作</span></div>
+      <form class="grid" id="createForm" style="padding-bottom:14px;border-bottom:1px dashed var(--border);margin-bottom:14px">
+        <div class="field"><label for="newUsername">账号名（username，不是数量）</label><input id="newUsername" required maxlength="80" autocomplete="off"></div>
+        <div class="field"><label for="newPassword">初始密码（至少 4 位）</label><input id="newPassword" type="password" required minlength="4" autocomplete="new-password"></div>
+        <div class="field"><label for="newLimit">设备上限</label><input id="newLimit" type="number" min="1" max="20" value="3" required></div>
+        <button class="primary" type="submit" id="createBtn">创建账号</button>
+      </form>
+
+      <div class="accounts">
+        <div class="accounts-head" style="grid-template-columns:1.2fr .8fr .8fr 1.2fr 1.6fr"><span>账号</span><span>状态</span><span>设备上限</span><span>最近登录</span><span>操作</span></div>
         <div id="accountList"><div class="empty">请输入管理令牌并连接账号服务</div></div>
-      </section>
-    </div>
+      </div>
+    </section>
 
     <section class="panel">
       <h2>从 <code>accounts.json</code> 迁移到 Neon（一次性）</h2>
@@ -361,19 +361,43 @@
       </article>`).join('');
     }
 
-    async function loadAccounts(){
+    async function loadAccounts(highlightUsername){
       status('正在连接账号服务…');
-      try{const data=await request('/api/admin/accounts');accounts=data.accounts||[];render();status(`已加载 ${accounts.length} 个账号`)}catch(error){status(error.message,true)}
+      try{
+        const data=await request('/api/admin/accounts');
+        accounts=data.accounts||[];
+        render();
+        if(highlightUsername){
+          const row = document.querySelector(`[data-username="${CSS.escape(highlightUsername)}"]`);
+          if(row){
+            row.classList.add('flash');
+            row.scrollIntoView({behavior:'smooth', block:'center'});
+            setTimeout(() => row.classList.remove('flash'), 2000);
+          }
+        }
+        status(`已加载 ${accounts.length} 个账号` + (highlightUsername ? ` · 刚刚创建「${highlightUsername}」✨` : ''));
+      }catch(error){status(error.message,true)}
     }
     document.getElementById('connectBtn').onclick=loadAccounts;
 
     document.getElementById('createForm').addEventListener('submit',async event=>{
       event.preventDefault();
+      const btn = document.getElementById('createBtn');
+      const newName = document.getElementById('newUsername').value.trim();
       try{
         status('正在创建账号…');
-        await request('/api/admin/accounts',{method:'POST',body:JSON.stringify({username:document.getElementById('newUsername').value,password:document.getElementById('newPassword').value,maxDevices:Number(document.getElementById('newLimit').value)})});
-        event.target.reset();document.getElementById('newLimit').value=3;await loadAccounts();status('账号创建成功');
-      }catch(error){status(error.message,true)}
+        btn.disabled = true; btn.textContent = '创建中…';
+        await request('/api/admin/accounts',{method:'POST',body:JSON.stringify({username:newName,password:document.getElementById('newPassword').value,maxDevices:Number(document.getElementById('newLimit').value)})});
+        event.target.reset();document.getElementById('newLimit').value=3;
+        await loadAccounts(newName);  // 把新账号 id 传过去,高亮 + 滚动
+        status('✓ 账号「' + newName + '」已创建');
+        const orig = btn.textContent;
+        btn.textContent = '✓ 已创建';
+        setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+      }catch(error){
+        status(error.message,true);
+        btn.disabled = false; btn.textContent = '创建账号';
+      }
     });
 
     document.getElementById('migrateBtn').onclick=async()=>{
