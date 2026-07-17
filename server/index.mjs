@@ -49,7 +49,7 @@ const handler = createApp({
   authSecret: process.env.AUTH_SECRET,
   adminToken: process.env.ADMIN_TOKEN,
   sessionDays: process.env.SESSION_DAYS || 7,
-  defaultMaxDevices: process.env.MAX_DEVICES || 3,
+  defaultMaxDevices: Math.max(3, Number(process.env.MAX_DEVICES) || 3),
   loadAccountsJson
 });
 
