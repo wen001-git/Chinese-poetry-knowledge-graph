@@ -1427,12 +1427,14 @@ body.sleep-open{overflow:hidden}
     if(!u||!p) return Promise.reject(new Error('请输入用户名和密码'));
     return loadAccounts().then(function(){
       var found=PRO.accounts.find(function(a){return a.u===u;});
-      if(!found) throw new Error('用户名不存在');
-      return sha256(PRO.salt+p).then(function(h){ return h===found.h ? found : Promise.reject(new Error('密码错误')); });
-    }).then(function(found){
-      PRO.logged=true; PRO.user=found;
-      localStorage.setItem('pg_pro_user',JSON.stringify({u:found.u, loginAt:Date.now(), deviceId: getDeviceId()}));
-      onLoginSuccess();
+      /* 没找到 → 返回 'NOT_FOUND' 标记,doLogin 看到会 fall through 到 Neon
+       * 找到了但密码错 → 立即拒(本地是权威)
+       * 找到且密码对 → 返回 {u, source:'local', ...} */
+      if(!found) return {u:u, _NOT_FOUND:true};
+      return sha256(PRO.salt+p).then(function(h){
+        if(h !== found.h) throw new Error('密码错误');
+        return {u:found.u, h:found.h, source:'local'};
+      });
     });
   }
 
@@ -1440,57 +1442,65 @@ body.sleep-open{overflow:hidden}
   function doLogin(u, p){
     if(!u||!p) return Promise.reject(new Error('请输入用户名和密码'));
     var deviceId = getDeviceId();
-    /* 第一关：本地 accounts.json + SHA-256 校验（快/离线能用）
-     * 通过后才走第二关：远程设备绑定检查（决定是否被 N 台限制挡住）
-     * 用户可见的语义：密码对不上 → 立刻拒；密码对 → 看设备数是否超限 */
-    return doLoginLocal(u, p).then(function(){
-      /* 本地通过，但 PRO.user 还是 doLoginLocal 设的简单值。
-       * 调 doLoginRemote 走设备绑定（不再次验密码——scrypt 与本地 SHA-256 不兼容，
-       * 但 server 端用同一份 accounts.json 迁移过来的 hash 是 SHA-256(salt+p)，
-       * 而 server 现在存的是 scrypt hash，两种 hash 都不互通——
-       * 实际语义：远程只做设备绑定 / 限制检查，不重复验密码；
-       * 因此 doLoginRemote 会以 ok 形式给出绑定状态（即使密码在 server 看不对——它
-       * 用 PRO.user.u 反查 accountExists 而不再校验 hash 本身）。
-       * 简化方案：doLoginRemote 改成「仅传 u+deviceId，让 server 检查设备数」。 */
-      return fetch(AUTH_API + '/api/login', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({u: u, p: p, deviceId: deviceId, deviceName: navigator.platform || ''})
-      }).then(function(r){
-        return r.json().then(function(j){ return {status: r.status, json: j}; }).catch(function(){ return {status: r.status, json: null}; });
-      }).then(function(res){
-        if(res.status >= 500 || !res.json){
-          /* 远程不可用 → 本地已通过,放行(软门模式) */
-          try{ console.warn('[auth] 远程登录服务不可用,仅做本地校验'); }catch(_){}
-          showProToast('✓ 本地登录成功（远程校验暂不可用）');
-          return {ok: true, localOnly: true};
-        }
-        if(res.json && res.json.code === 'DEVICE_LIMIT'){
-          throw new Error('此账号最多可关联 ' + (res.json.maxDevices || 3) + ' 台设备，请联系作者清空设备列表');
-        }
-        if(res.json && res.json.code === 'LOGIN_FAILED'){
-          /* 本地通过但远程说密码错——表示账号在 server 端有不同 hash（如新建在 Neon 没迁）
-           * 软门：仍按本地通过放行 */
-          try{ console.warn('[auth] 本地通过但远程 hash 不匹配,放行'); }catch(_){}
-          return {ok: true, localOnly: true};
-        }
-        if(res.json && res.json.code === 'ACCOUNT_DISABLED'){
-          throw new Error('此账号已被停用');
-        }
-        if(res.json && res.json.ok){
-          PRO.user = {u: res.json.username || u};
-          localStorage.setItem('pg_pro_user', JSON.stringify({
-            u: res.json.username || u,
-            loginAt: Date.now(),
-            deviceId: deviceId,
-            token: res.json.token,
-            mode: 'remote'
-          }));
-          if(res.json.bound) showProToast('✓ 设备已自动绑定（设备 ' + (res.json.boundCount || '?') + '/' + (res.json.maxDevices || 3) + '）');
-          return res.json;
-        }
-        return {ok: true, localOnly: true};
-      });
+    /* 双层登录：
+     *   第一关：本地 accounts.json SHA-256
+     *     - 找到 + 密码对 → 直接登录,跳过 Neon(快)
+     *     - 找到 + 密码错 → 拒(本地权威,密码错就是错,无 fallthrough)
+     *     - 找不到 → 标记 _NOT_FOUND,fall through 到 Neon
+     *   第二关：远程 Neon(只对本地找不到的账号)
+     *     - DEVICE_LIMIT → 拒
+     *     - LOGIN_FAILED → 拒(真没有这个账号)
+     *     - 5xx/不可用 → 静默放行(软门,token 走本地 LS)
+     *     - 成功 → 登录
+     * 用户可见的语义:账号在 accounts.json → 快;不在 → 走 Neon;都没 → 拒。 */
+    return doLoginLocal(u, p).then(function(localRes){
+      if(localRes && localRes._NOT_FOUND){
+        /* 本地没有这个账号,走 Neon */
+        return tryRemote(u, p, deviceId);
+      }
+      /* 本地通过(或明确拒了 — throw 会冒泡),把 localRes 当结果返回 */
+      return {ok: true, source: 'local', u: localRes.u, deviceId: deviceId};
+    });
+  }
+
+  /* 第二关:只用于本地找不到的账号,真远程登录 + 设备绑定 */
+  function tryRemote(u, p, deviceId){
+    return fetch(AUTH_API + '/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({u: u, p: p, deviceId: deviceId, deviceName: navigator.platform || ''})
+    }).then(function(r){
+      return r.json().then(function(j){ return {status: r.status, json: j}; }).catch(function(){ return {status: r.status, json: null}; });
+    }).then(function(res){
+      if(res.status >= 500 || !res.json){
+        /* 远程不可用 + 本地没这个账号 → 拒(不能让远端挂了就能随便进) */
+        try{ console.warn('[auth] 远程登录服务不可用,账号本地无记录,拒绝'); }catch(_){}
+        throw new Error('登录服务暂时不可用，请稍后重试');
+      }
+      if(res.json && res.json.code === 'DEVICE_LIMIT'){
+        throw new Error('此账号最多可关联 ' + (res.json.maxDevices || 3) + ' 台设备，请联系作者清空设备列表');
+      }
+      if(res.json && res.json.code === 'LOGIN_FAILED'){
+        /* Neon 里也没这个账号(或密码错)→ 拒 */
+        throw new Error('用户名或密码错误');
+      }
+      if(res.json && res.json.code === 'ACCOUNT_DISABLED'){
+        throw new Error('此账号已被停用');
+      }
+      if(res.json && res.json.ok){
+        PRO.user = {u: res.json.username || u};
+        localStorage.setItem('pg_pro_user', JSON.stringify({
+          u: res.json.username || u,
+          loginAt: Date.now(),
+          deviceId: deviceId,
+          token: res.json.token,
+          mode: 'remote'
+        }));
+        onLoginSuccess();
+        if(res.json.bound) showProToast('✓ 设备已自动绑定（设备 ' + (res.json.boundCount || '?') + '/' + (res.json.maxDevices || 3) + '）');
+        return res.json;
+      }
+      throw new Error('登录失败:未知响应');
     });
   }
 
