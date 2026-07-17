@@ -1,6 +1,8 @@
 -- server/schema.sql
 -- PoemGraph · Neon Postgres schema (separate from WhiteBoard tables via `poemgraph.` prefix)
 
+CREATE SCHEMA IF NOT EXISTS poemgraph;
+
 CREATE TABLE IF NOT EXISTS poemgraph.accounts (
   id BIGSERIAL PRIMARY KEY,
   username TEXT NOT NULL,
