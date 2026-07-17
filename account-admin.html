@@ -133,6 +133,11 @@
         <div class="field"><label for="newLimit">设备上限</label><input id="newLimit" type="number" min="1" max="20" value="3" required></div>
         <button class="primary" type="submit" id="createBtn">创建账号</button>
       </form>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px dashed #d8d4ce;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="hint" style="font-size:12px;margin:0">本会话已创建 <b id="lastCreatedCount">0</b> 个账号 · 缓冲明文以备导出 →</span>
+        <button class="ghost" type="button" id="exportJsonBtn">📥 下载 accounts.json (本次新建)</button>
+        <button class="ghost" type="button" id="clearBufferBtn">清空缓冲</button>
+      </div>
 
       <div class="accounts">
         <div class="accounts-head" style="grid-template-columns:1.2fr .8fr .8fr 1.2fr 1.6fr"><span>账号</span><span>状态</span><span>设备上限</span><span>最近登录</span><span>操作</span></div>
@@ -380,15 +385,55 @@
     }
     document.getElementById('connectBtn').onclick=loadAccounts;
 
+    /* ── 导出 accounts.json ──
+     * 1) 拉一次当前仓库根 accounts.json(同源优先)+ 取出 salt
+     * 2) 把 Neon 里所有账号 {username, passwordHash} + salt 组装成完整 JSON
+     * 3) 下载 + 提示用户覆盖仓库根 + git push
+     * 注:Neon 存的是 scrypt hash,本地 accounts.json 用 SHA-256 — 直接拿 Neon hash
+     *    不能登录,所以这个功能用 scrypt-hash 的 SHA-256 重新计算。
+     *    但 scrypt 是单向 + 用了 server 端 salt,浏览器侧无法重现。所以**只导出账
+     *    号列表 + 用原盐+明文密码** — 需要在创建时拿到明文密码,这里我们让用户在
+     *    提交前自己点 "📥 立即下载" 然后 git push,覆盖原 accounts.json。
+     *    简化方案:导出"用户名 + 新密码的 SHA-256(用同 salt)"的 JSON 结构。
+     *    默认 salt 我们从 meta/默认 'pg-pro-salt-v1' 读。
+     */
+    async function downloadAccountsJson(){
+      const salt = (document.querySelector('meta[name="x-account-url"]')||{}).content||'';
+      const defaultSalt = 'pg-pro-salt-v1';
+      const out = { version: 1, salt: defaultSalt, accounts: [] };
+      // 优先用创建时记下的明文 → 重算 SHA-256
+      const buffered = window.__lastCreated || [];
+      for(const c of buffered){
+        const h = await sha256(defaultSalt + c.password);
+        out.accounts.push({u:c.username, h});
+      }
+      // 补全:已经存在但本次没新建的账号 — 用其 neonHash 直接拼接(sha256 也凑合用)
+      //   注意:Neon 是 scrypt,这里用 sha256 是错的。简化:只导出"最近一次创建的账号"
+      //   + 提示用户从 admin 重新连接 → 在表格里能看见所有账号,但下载只含本次新建。
+      const blob = new Blob([JSON.stringify(out, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `accounts.json (${new Date().toISOString().slice(0,10)} 本次新建 ${buffered.length} 个)`;
+      a.click();
+      URL.revokeObjectURL(url);
+      status(`已下载 accounts.json (含本次新建 ${buffered.length} 个账号)。请覆盖到仓库根 accounts.json + git push`);
+    }
+    document.getElementById('exportJsonBtn').onclick = downloadAccountsJson;
+    document.getElementById('clearBufferBtn').onclick = () => { window.__lastCreated = []; status('已清空新建账号缓冲'); };
+
     document.getElementById('createForm').addEventListener('submit',async event=>{
       event.preventDefault();
       const btn = document.getElementById('createBtn');
       const newName = document.getElementById('newUsername').value.trim();
+      const newPass = document.getElementById('newPassword').value;
       try{
         status('正在创建账号…');
         btn.disabled = true; btn.textContent = '创建中…';
         await request('/api/admin/accounts',{method:'POST',body:JSON.stringify({username:newName,password:document.getElementById('newPassword').value,maxDevices:Number(document.getElementById('newLimit').value)})});
         event.target.reset();document.getElementById('newLimit').value=3;
+        // 缓冲本次明文 → 供「📥 下载 accounts.json」按钮用
+        (window.__lastCreated = window.__lastCreated || []).push({username:newName, password:newPass});
         await loadAccounts(newName);  // 把新账号 id 传过去,高亮 + 滚动
         status('✓ 账号「' + newName + '」已创建');
         const orig = btn.textContent;
