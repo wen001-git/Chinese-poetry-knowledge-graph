@@ -191,6 +191,8 @@
           <button class="compact" id="a-download-plain" type="button">⬇ 下载明文 .txt</button>
           <button class="compact" id="a-clear" type="button">清空 LS</button>
           <button class="compact" id="a-sync-json" type="button">🔄 同步到 JSON（重算哈希）</button>
+          <button class="compact" id="a-download-json" type="button">⬇ 下载完整 JSON</button>
+          <button class="compact" id="a-copy-json" type="button">📋 复制 JSON</button>
         </div>
         <label class="lab" style="display:block;font-size:13px;color:var(--muted);margin:18px 0 6px;font-weight:500">现有 accounts.json <span class="hint" id="a-existing-status">等待拉取…</span></label>
         <textarea id="a-existing" class="full" rows="12" style="font-family:ui-monospace,monospace;font-size:13px;line-height:1.55" placeholder='{ "version": 1, "salt": "pg-pro-salt-v1", "accounts": [{ "u": "demo", "h": "..." }] }'></textarea>
@@ -201,7 +203,8 @@
           <button class="compact" id="a-refresh" type="button">🔄 重新拉取</button>
         </div>
         <label class="lab" style="display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;font-weight:500">输出（追加后的完整 JSON）</label>
-        <pre id="a-json" class="full" style="margin-top:0;color:var(--muted)">先点「🎲 生成账号」再点「🔗 追加到现有 JSON」…</pre>
+        <div id="a-status" class="hint" style="margin-bottom:6px;font-size:13px;color:var(--teal);min-height:18px"></div>
+        <pre id="a-json" class="full" style="margin-top:0;color:var(--muted);min-height:80px">先点「🎲 生成账号」再点「🔄 同步到 JSON」,JSON 会出现在这里 ⬇</pre>
         <div class="actions" style="margin-top:8px">
           <button class="compact" id="a-copy-json" type="button">📋 复制 JSON</button>
           <button class="compact" id="a-download-json" type="button">⬇ 下载 accounts.json</button>
@@ -701,6 +704,40 @@
       const json = JSON.stringify({version: 1, salt, accounts}, null, 2);
       out.textContent = json + (skipped ? `\n\n（已跳过 ${skipped} 条无密码行）` : '');
       __pgFinalJson = {version: 1, salt, accounts};
+      const statusEl = document.getElementById('a-status');
+      if(statusEl){
+        statusEl.textContent = `✅ 已生成 ${accounts.length} 个账号的 SHA-256 哈希 · 可点下方「⬇ 下载完整 JSON」或「📋 复制 JSON」导出` + (skipped ? ` · 跳过 ${skipped} 条无密码行` : '');
+        setTimeout(() => { if(statusEl.textContent.startsWith('✅')) statusEl.textContent = ''; }, 5000);
+      }
+      out.scrollIntoView({behavior:'smooth', block:'center'});
+    };
+
+    document.getElementById('a-download-json').onclick = () => {
+      if(!__pgFinalJson){ alert('请先点「🔄 同步到 JSON」生成'); return; }
+      const json = JSON.stringify(__pgFinalJson, null, 2);
+      const blob = new Blob([json], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `accounts.json (${todayStamp()})`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    document.getElementById('a-copy-json').onclick = async () => {
+      if(!__pgFinalJson){ alert('请先点「🔄 同步到 JSON」生成'); return; }
+      const json = JSON.stringify(__pgFinalJson, null, 2);
+      try{
+        await navigator.clipboard.writeText(json);
+        const statusEl = document.getElementById('a-status');
+        if(statusEl){
+          const orig = statusEl.textContent;
+          statusEl.textContent = '📋 已复制到剪贴板 · 粘贴到仓库根 accounts.json';
+          setTimeout(() => statusEl.textContent = orig, 2500);
+        }
+      }catch(_){
+        prompt('自动复制失败,请手动复制下面内容:', json);
+      }
     };
     document.getElementById('a-copy-json').onclick = () => {
       const text = document.getElementById('a-json').textContent;
