@@ -104,6 +104,117 @@
       </div>
     </section>
 
+    <section class="panel">
+      <h2>🛠 哈希工具（手动生成 / 验证 / 提取）</h2>
+      <p class="hint" style="margin-top:0">不需要连后端。给现有 <code>accounts.json</code> 加新账号、批量造号、手算单条哈希、验证哈希、或从一份 JSON 提取字段。改完手动 <code>git push</code> 部署。</p>
+
+      <div class="tabs" style="display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px">
+        <button class="tab on" data-tab="auto" type="button">🎲 自动生成</button>
+        <button class="tab" data-tab="batch" type="button">批量</button>
+        <button class="tab" data-tab="single" type="button">单条</button>
+        <button class="tab" data-tab="verify" type="button">验证</button>
+        <button class="tab" data-tab="parse" type="button">提取</button>
+      </div>
+
+      <!-- 自动生成 -->
+      <div class="tab-panel on" data-panel="auto">
+        <div class="card" style="background:var(--accent-soft);border-radius:8px;padding:14px;margin-bottom:12px;border:1px solid var(--line)">
+          <b>一键生成新账号</b>：工具自动生成易记汉字密码（如 青云·明月）和用户名,自动算哈希,自动追加到现有 JSON,自动保存明文到本地。
+        </div>
+        <div class="grid">
+          <div class="field"><label>生成数量 <span class="hint">1–20</span></label><input id="a-count" type="text" value="3"></div>
+          <div class="field"><label>密码风格</label>
+            <select id="a-pwstyle" style="height:42px;border:1px solid #d8d4ce;border-radius:6px;padding:0 11px;font:inherit">
+              <option value="word">4 字·易记汉字词组</option>
+              <option value="digit">6 位纯数字</option>
+              <option value="worddigit">汉字词组+2 位数字</option>
+            </select>
+          </div>
+          <div class="field"><label>盐值 <span class="hint">与 pro 版一致</span></label><input id="a-salt" type="text" value="pg-pro-salt-v1"></div>
+          <div><button class="primary" id="a-gen" type="button">🎲 生成账号</button></div>
+        </div>
+        <label class="lab" style="display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;font-weight:500">明文账号清单（本地保存·<b>不要上传</b>·可手动编辑）</label>
+        <textarea id="a-plain" rows="6" placeholder="点击「🎲 生成账号」自动填充。也可手动编辑:每行「用户名  密码」(中间隔 2 个空格)。"></textarea>
+        <div class="actions" style="margin-top:8px">
+          <button class="compact" id="a-copy-plain" type="button">📋 复制明文</button>
+          <button class="compact" id="a-download-plain" type="button">⬇ 下载明文 .txt</button>
+          <button class="compact" id="a-clear" type="button">清空 LS</button>
+          <button class="compact" id="a-sync-json" type="button">🔄 同步到 JSON（重算哈希）</button>
+        </div>
+        <label class="lab" style="display:block;font-size:13px;color:var(--muted);margin:18px 0 6px;font-weight:500">现有 accounts.json <span class="hint" id="a-existing-status">等待拉取…</span></label>
+        <textarea id="a-existing" rows="6" placeholder='{ "version": 1, "salt": "pg-pro-salt-v1", "accounts": [{ "u": "demo", "h": "..." }] }'></textarea>
+        <div class="actions" style="margin-top:8px">
+          <button class="compact primary" id="a-append" type="button">🔗 追加到现有 JSON</button>
+          <button class="compact" id="a-load-file" type="button">📁 从本地文件加载</button>
+          <input type="file" id="a-file-input" accept=".json,application/json" style="display:none">
+          <button class="compact" id="a-refresh" type="button">🔄 重新拉取</button>
+        </div>
+        <label class="lab" style="display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;font-weight:500">输出（追加后的完整 JSON）</label>
+        <pre id="a-json" style="margin-top:0;color:var(--muted)">先点「🎲 生成账号」再点「🔗 追加到现有 JSON」…</pre>
+        <div class="actions" style="margin-top:8px">
+          <button class="compact" id="a-copy-json" type="button">📋 复制 JSON</button>
+          <button class="compact" id="a-download-json" type="button">⬇ 下载 accounts.json</button>
+        </div>
+        <div class="hint" style="background:var(--accent-soft);border-left:3px solid var(--accent);padding:10px 14px;border-radius:6px;font-size:12px;margin-top:14px">
+          <b>⬆ 部署到服务器：</b>点「⬇ 下载 accounts.json」→ 覆盖到本仓库根的 <code>accounts.json</code> → <code>git add accounts.json && git commit -m "添加新账号" && git push</code>（Render 自动重 deploy ≈ 30s）。
+        </div>
+      </div>
+
+      <!-- 批量 -->
+      <div class="tab-panel" data-panel="batch" style="display:none">
+        <div class="field"><label>盐值</label><input id="b-salt" type="text" value="pg-pro-salt-v1"></div>
+        <div class="field" style="margin-top:10px"><label>账号清单 <span class="hint">每行一个,格式:用户名:密码(冒号分隔)</span></label>
+          <textarea id="b-input" rows="6" placeholder="demo1:demo1234&#10;demo2:test9999&#10;user001:pass_abc_2026"></textarea>
+        </div>
+        <div class="actions" style="margin-top:8px">
+          <button class="primary" id="b-gen" type="button">🔨 生成完整 accounts.json</button>
+          <button class="compact" id="b-clear" type="button">清空</button>
+        </div>
+        <label class="lab" style="display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;font-weight:500">输出（直接覆盖到 accounts.json）</label>
+        <pre id="b-out" style="margin-top:0;color:var(--muted)">点击「生成」后这里会显示完整 JSON…</pre>
+        <div class="actions" style="margin-top:8px">
+          <button class="compact" id="b-copy" type="button">📋 复制 JSON</button>
+          <button class="compact" id="b-download" type="button">⬇ 下载 accounts.json</button>
+        </div>
+      </div>
+
+      <!-- 单条 -->
+      <div class="tab-panel" data-panel="single" style="display:none">
+        <div class="grid">
+          <div class="field"><label>用户名</label><input id="s-user" type="text" placeholder="如 demo1"></div>
+          <div class="field"><label>明文密码</label><input id="s-pass" type="password" placeholder="如 demo1234"></div>
+        </div>
+        <div class="field" style="margin-top:10px"><label>盐值</label><input id="s-salt" type="text" value="pg-pro-salt-v1"></div>
+        <div class="actions" style="margin-top:10px"><button class="primary" id="s-go" type="button">生成哈希</button></div>
+        <label class="lab" style="display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;font-weight:500">哈希值（粘贴到 accounts.json 的 "h" 字段）</label>
+        <pre id="s-out" style="margin-top:0;color:var(--muted)">等待输入…</pre>
+        <div class="actions" style="margin-top:8px"><button class="compact" id="s-copy" type="button">📋 复制哈希</button></div>
+      </div>
+
+      <!-- 验证 -->
+      <div class="tab-panel" data-panel="verify" style="display:none">
+        <div class="hint" style="background:#fffbea;border-left:3px solid #b8923f;padding:10px 14px;border-radius:6px;font-size:12px;margin-bottom:12px">
+          💡 你给用户发了「用户名:密码」后,担心哈希对不上,把<b>明文密码 + accounts.json 里的哈希值</b>填进来验证。匹配=true=用户能用这个账号登录。
+        </div>
+        <div class="field"><label>盐值</label><input id="v-salt" type="text" value="pg-pro-salt-v1"></div>
+        <div class="grid" style="margin-top:10px">
+          <div class="field"><label>明文密码</label><input id="v-pass" type="text" placeholder="如 demo1234"></div>
+          <div class="field"><label>哈希值 <span class="hint">64 位 SHA-256</span></label><input id="v-hash" type="text" placeholder="如 1e3471c5b2851c55..."></div>
+        </div>
+        <div class="actions" style="margin-top:10px"><button class="primary" id="v-go" type="button">验证</button></div>
+        <pre id="v-out" style="margin-top:14px;color:var(--muted)">点击「验证」后这里显示结果…</pre>
+      </div>
+
+      <!-- 提取 -->
+      <div class="tab-panel" data-panel="parse" style="display:none">
+        <div class="field"><label>accounts.json 内容 <span class="hint">自动从 meta 同源拉取,这里只展示</span></label>
+          <textarea id="p-input" rows="10" placeholder="把现有 accounts.json 贴这里,工具会提取出每个账号的元数据(用户名 + 哈希长度校验)。"></textarea>
+        </div>
+        <div class="actions" style="margin-top:8px"><button class="primary" id="p-go" type="button">提取元数据</button></div>
+        <pre id="p-out" style="margin-top:14px;color:var(--muted)">点击「提取」后这里显示…</pre>
+      </div>
+    </section>
+
     <section class="accounts" aria-label="账号列表">
       <div class="accounts-head"><span>账号</span><span>状态</span><span>设备上限</span><span>最近登录</span><span>操作</span></div>
       <div id="accountList"><div class="empty">请输入管理令牌并连接账号服务</div></div>
@@ -293,6 +404,356 @@
         }
       };
     })();
+
+    /* ────── 5 哈希工具 tab 的 JS 处理（手动生成/验证/提取） ────── */
+
+    // 易记 2 字汉字 → 拼音映射（如「飞鸿」→ feihong）
+    const PW_CHARS = [
+      { ch: '飞鸿', py: 'feihong' },{ ch: '明月', py: 'mingyue' },
+      { ch: '青云', py: 'qingyun' },{ ch: '春风', py: 'chunfeng' },
+      { ch: '秋水', py: 'qiushui' },{ ch: '清照', py: 'qingzhao' },
+      { ch: '烟雨', py: 'yanyu' },{ ch: '江南', py: 'jiangnan' },
+      { ch: '静思', py: 'jingsi' },{ ch: '墨韵', py: 'moyun' },
+      { ch: '听雨', py: 'tingyu' },{ ch: '寻梅', py: 'xunmei' },
+      { ch: '抚琴', py: 'fuqin' },{ ch: '踏雪', py: 'taxue' },
+      { ch: '观星', py: 'guanxing' },{ ch: '枕书', py: 'zhenshu' },
+      { ch: '采菊', py: 'caiju' },{ ch: '竹影', py: 'zhuying' },
+      { ch: '松涛', py: 'songtao' },{ ch: '望月', py: 'wangyue' }
+    ];
+    function genPassword(style){
+      const pick = () => PW_CHARS[Math.floor(Math.random()*PW_CHARS.length)];
+      if(style==='digit') return String(Math.floor(100000+Math.random()*900000));
+      if(style==='worddigit') return pick().py + String(Math.floor(10+Math.random()*90));
+      return pick().py;
+    }
+    function todayStamp(){
+      const d=new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function todayCompact(){
+      return todayStamp().replace(/-/g,'');
+    }
+    function getSerial(date){
+      return parseInt(localStorage.getItem('pg_serial_'+date)||'0', 10);
+    }
+    function bumpSerial(date, by){
+      const next = getSerial(date) + by;
+      localStorage.setItem('pg_serial_'+date, String(next));
+    }
+    async function adminSha256(s){
+      const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+      return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+    }
+    const LS_PLAIN = 'pg_accounts_plain';
+    function loadPlainLog(){
+      try{ return JSON.parse(localStorage.getItem(LS_PLAIN)||'[]'); }catch(_){ return []; }
+    }
+    function savePlainLog(arr){
+      localStorage.setItem(LS_PLAIN, JSON.stringify(arr));
+    }
+    function renderPlainTextarea(){
+      const log = loadPlainLog();
+      const chMap = Object.fromEntries(PW_CHARS.map(w => [w.py, w.ch]));
+      const text = log.map(e => {
+        const ch = chMap[e.p.replace(/\d+$/,'')] || '';
+        return ch ? `${e.u}  ${e.p}  （${ch}）` : `${e.u}  ${e.p}`;
+      }).join('\n');
+      const ta = document.getElementById('a-plain');
+      if(ta) ta.value = text;
+    }
+    function parsePlainTextarea(){
+      const raw = (document.getElementById('a-plain')||{}).value || '';
+      if(!raw.trim()) return [];
+      const chMap = Object.fromEntries(PW_CHARS.map(w => [w.py, w.ch]));
+      const lines = [];
+      for(const line of raw.split('\n')){
+        const t = line.trim();
+        if(!t) continue;
+        const m = t.match(/^(\S+)\s{2,}(\S+?)(?:\s*[（(](.+?)[)）])?\s*$/);
+        if(m){
+          const [, u, p, ch] = m;
+          if(/[，。！？；：、]{2,}/.test(u)) continue;
+          lines.push({u, p, ch: ch || chMap[p.replace(/\d+$/,'')] || ''});
+          continue;
+        }
+        if(/^\S+$/.test(t) && !/^(#|\/\/|备注|说明)/.test(t)){
+          lines.push({u: t, p: '', ch: ''});
+        }
+      }
+      return lines;
+    }
+    let __pgNewAccounts = null;
+    let __pgFinalJson = null;
+
+    // 自动生成
+    const aCount = document.getElementById('a-count');
+    const aPwStyle = document.getElementById('a-pwstyle');
+    const aSalt = document.getElementById('a-salt');
+    const aPlain = document.getElementById('a-plain');
+    document.getElementById('a-gen').onclick = async () => {
+      const cnt = Math.min(20, Math.max(1, parseInt(aCount.value)||1));
+      const style = aPwStyle.value;
+      const salt = aSalt.value.trim();
+      if(!salt){ alert('盐值不能为空'); return; }
+      const date = todayStamp();
+      const dateCompact = todayCompact();
+      const start = getSerial(date);
+      const newOnes = [];
+      for(let i=0;i<cnt;i++){
+        const serial = start + i + 1;
+        const u = 'user' + dateCompact + serial;
+        const p = genPassword(style);
+        const h = await adminSha256(salt + p);
+        newOnes.push({u, p, h, date});
+      }
+      bumpSerial(date, cnt);
+      savePlainLog([...loadPlainLog(), ...newOnes]);
+      renderPlainTextarea();
+      __pgNewAccounts = newOnes;
+      document.getElementById('a-existing-status').textContent = '✓ 已生成 ' + cnt + ' 个（可点「🔗 追加」写入 JSON）';
+    };
+    document.getElementById('a-copy-plain').onclick = () => {
+      const items = parsePlainTextarea();
+      if(!items.length){ alert('没有可复制的明文'); return; }
+      const date = todayStamp();
+      const text = items.map(it => `${date}  ${it.u}  ${it.p || '(空)'}`).join('\n');
+      navigator.clipboard.writeText(text).then(()=>{
+        const b = document.getElementById('a-copy-plain');
+        b.textContent='✓ 已复制 '+items.length+' 个';
+        setTimeout(()=>b.textContent='📋 复制明文',1500);
+      });
+    };
+    document.getElementById('a-download-plain').onclick = () => {
+      const items = parsePlainTextarea();
+      if(!items.length){ alert('没有可下载的明文'); return; }
+      const date = todayStamp();
+      const header = `PoemGraph Pro · 客户账号清单\n生成时间：${new Date().toLocaleString('zh-CN')}\n账号数：${items.length}\n\n⚠️ 含明文密码，请勿上传到 GitHub!\n\n`;
+      const text = header + items.map(it => `${date}  ${it.u}  ${it.p || '(空)'}`).join('\n') + '\n';
+      const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `poemgraph-accounts-${date}.txt`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    };
+    document.getElementById('a-clear').onclick = () => {
+      if(!confirm('确定清空 localStorage 中所有明文账号?')) return;
+      localStorage.removeItem(LS_PLAIN);
+      aPlain.value = '';
+      __pgNewAccounts = null;
+    };
+    document.getElementById('a-append').onclick = async () => {
+      const items = parsePlainTextarea();
+      if(!items.length && !__pgNewAccounts){ alert('先点「🎲 生成账号」或在明文清单里编辑'); return; }
+      const list = items.length ? items : __pgNewAccounts;
+      const raw = document.getElementById('a-existing').value.trim();
+      if(!raw){ alert('先粘贴现有 accounts.json'); return; }
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch(e){ alert('现有 JSON 格式错：'+e.message); return; }
+      if(!parsed.accounts) parsed.accounts = [];
+      const salt = aSalt.value.trim();
+      for(const it of list){
+        if(it.h){ parsed.accounts.push({u:it.u, h:it.h}); continue; }
+        const h = await adminSha256(salt + it.p);
+        parsed.accounts.push({u:it.u, h});
+      }
+      const out = document.getElementById('a-json');
+      out.className = '';
+      out.textContent = JSON.stringify(parsed, null, 2);
+      __pgFinalJson = parsed;
+    };
+    document.getElementById('a-sync-json').onclick = async () => {
+      const items = parsePlainTextarea();
+      if(!items.length){ alert('明文清单为空'); return; }
+      const salt = aSalt.value.trim();
+      if(!salt){ alert('请填写盐值'); return; }
+      const accounts = [];
+      let skipped = 0;
+      for(const it of items){
+        if(!it.p){ skipped++; continue; }
+        const h = await adminSha256(salt + it.p);
+        accounts.push({u: it.u, h});
+      }
+      const existing = loadPlainLog();
+      const byUser = new Map(existing.map(e => [e.u, e]));
+      for(const it of items){
+        if(!it.p) continue;
+        if(byUser.has(it.u)) byUser.get(it.u).p = it.p;
+        else existing.push({u: it.u, p: it.p, h: '', date: todayStamp()});
+      }
+      savePlainLog(existing);
+      const out = document.getElementById('a-json');
+      out.className = '';
+      const json = JSON.stringify({version: 1, salt, accounts}, null, 2);
+      out.textContent = json + (skipped ? `\n\n（已跳过 ${skipped} 条无密码行）` : '');
+      __pgFinalJson = {version: 1, salt, accounts};
+    };
+    document.getElementById('a-copy-json').onclick = () => {
+      const text = document.getElementById('a-json').textContent;
+      if(!text) return;
+      navigator.clipboard.writeText(text).then(()=>{
+        const b = document.getElementById('a-copy-json');
+        b.textContent='✓ 已复制';
+        setTimeout(()=>b.textContent='📋 复制 JSON',1500);
+      });
+    };
+    document.getElementById('a-download-json').onclick = () => {
+      const j = __pgFinalJson;
+      if(!j){ alert('先生成 JSON'); return; }
+      const blob = new Blob([JSON.stringify(j, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'accounts.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    };
+    document.getElementById('a-load-file').onclick = () => {
+      document.getElementById('a-file-input').click();
+    };
+    document.getElementById('a-file-input').onchange = (e) => {
+      const f = e.target.files[0];
+      if(!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        document.getElementById('a-existing').value = r.result;
+        document.getElementById('a-existing-status').textContent = '✓ 已从本地文件加载';
+      };
+      r.readAsText(f);
+    };
+    document.getElementById('a-refresh').onclick = async () => {
+      const status = document.getElementById('a-existing-status');
+      status.textContent = '正在拉取 accounts.json…';
+      try{
+        const meta = (document.querySelector('meta[name="x-account-url"]')||{}).content || '';
+        const url = meta || (location.origin + '/accounts.json');
+        const r = await fetch(url, {cache:'no-store'});
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        document.getElementById('a-existing').value = JSON.stringify(j, null, 2);
+        status.textContent = '✓ 已从远端加载（' + (j.accounts||[]).length + ' 个账号）';
+      }catch(err){
+        status.textContent = '⚠️ 拉取失败：' + err.message;
+      }
+    };
+
+    // 批量
+    const bSalt = document.getElementById('b-salt');
+    const bInput = document.getElementById('b-input');
+    const bOut = document.getElementById('b-out');
+    let __bJson = null;
+    document.getElementById('b-gen').onclick = async () => {
+      const salt = bSalt.value.trim();
+      if(!salt){ alert('盐值不能为空'); return; }
+      const lines = bInput.value.split('\n').map(s=>s.trim()).filter(Boolean);
+      if(!lines.length){ alert('请输入至少 1 行账号:密码'); return; }
+      const accounts = [];
+      for(const line of lines){
+        const colonIdx = line.indexOf(':');
+        if(colonIdx < 0){ alert('格式错误（需 用户名:密码）: ' + line); return; }
+        const u = line.slice(0, colonIdx).trim();
+        const p = line.slice(colonIdx+1).trim();
+        if(!u || !p){ alert('账号或密码为空: ' + line); return; }
+        const h = await adminSha256(salt + p);
+        accounts.push({u, h});
+      }
+      const j = {version: 1, salt, accounts};
+      bOut.className = '';
+      bOut.textContent = JSON.stringify(j, null, 2);
+      __bJson = j;
+    };
+    document.getElementById('b-copy').onclick = () => {
+      if(!__bJson) return;
+      navigator.clipboard.writeText(JSON.stringify(__bJson, null, 2)).then(()=>{
+        const b = document.getElementById('b-copy');
+        b.textContent='✓ 已复制';
+        setTimeout(()=>b.textContent='📋 复制 JSON',1500);
+      });
+    };
+    document.getElementById('b-download').onclick = () => {
+      if(!__bJson){ alert('先生成 JSON'); return; }
+      const blob = new Blob([JSON.stringify(__bJson, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'accounts.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    };
+    document.getElementById('b-clear').onclick = () => {
+      bInput.value = ''; bOut.className = 'out empty'; bOut.textContent = '点击「生成」后这里会显示完整 JSON…';
+      __bJson = null;
+    };
+
+    // 单条
+    const sUser = document.getElementById('s-user');
+    const sPass = document.getElementById('s-pass');
+    const sSalt = document.getElementById('s-salt');
+    const sOut = document.getElementById('s-out');
+    let __sHash = '';
+    document.getElementById('s-go').onclick = async () => {
+      const u = sUser.value.trim();
+      const p = sPass.value;
+      const salt = sSalt.value.trim();
+      if(!u || !p || !salt){ sOut.className=''; sOut.textContent='❌ 用户名/密码/盐值都要填'; return; }
+      const h = await adminSha256(salt + p);
+      __sHash = h;
+      sOut.className = '';
+      sOut.innerHTML = `<span class="tag">用户</span> <code>${u}</code><br><span class="tag">哈希</span> <code>${h}</code><br><br>↓ 复制下面这行到 accounts.json ↓<br><br><code>{ "u": "${u}", "h": "${h}" }</code>`;
+    };
+    document.getElementById('s-copy').onclick = () => {
+      if(!__sHash) return;
+      navigator.clipboard.writeText(__sHash).then(()=>{
+        const b = document.getElementById('s-copy');
+        b.textContent='✓ 已复制';
+        setTimeout(()=>b.textContent='📋 复制哈希',1500);
+      });
+    };
+
+    // 验证
+    const vSalt = document.getElementById('v-salt');
+    const vPass = document.getElementById('v-pass');
+    const vHash = document.getElementById('v-hash');
+    const vOut = document.getElementById('v-out');
+    document.getElementById('v-go').onclick = async () => {
+      const salt = vSalt.value.trim();
+      const pass = vPass.value;
+      const hash = vHash.value.trim();
+      if(!salt || !pass || !hash){ vOut.className=''; vOut.textContent='❌ 三个字段都要填'; return; }
+      const computed = await adminSha256(salt + pass);
+      const match = computed === hash;
+      vOut.className = '';
+      if(match){
+        vOut.innerHTML = `<span class="tag ok">✓ 匹配</span> 哈希一致!<br>说明:"${pass}" 经过 SHA-256("${salt}" + "${pass}") = ${computed}`;
+      } else {
+        vOut.innerHTML = `<span class="tag err">✗ 不匹配</span><br>计算: <code>${computed}</code><br>现有: <code>${hash}</code><br>可能:密码打错 / 盐值不一致`;
+      }
+    };
+
+    // 提取
+    const pInput = document.getElementById('p-input');
+    const pOut = document.getElementById('p-out');
+    document.getElementById('p-go').onclick = () => {
+      const raw = pInput.value.trim();
+      if(!raw){ pOut.className=''; pOut.textContent='❌ 粘贴 accounts.json 内容'; return; }
+      let j;
+      try { j = JSON.parse(raw); } catch(e){ pOut.className=''; pOut.textContent='❌ JSON 解析失败: '+e.message; return; }
+      const accounts = (j.accounts || []);
+      const ok = accounts.filter(a => a.h && a.h.length === 64);
+      const bad = accounts.filter(a => !a.h || a.h.length !== 64);
+      pOut.className = '';
+      pOut.innerHTML = `盐值: <code>${j.salt || '(无)'}</code><br>账号总数: ${accounts.length}<br>哈希长度正确(64位): ${ok.length}<br>哈希异常: ${bad.length}<br><br>用户名清单:<br>` +
+        accounts.map(a => `• <code>${a.u}</code> (hash ${a.h ? a.h.length : 0}/64)`).join('<br>');
+    };
+
+    // 5 个 hash 工具 tab 切换
+    document.querySelectorAll('.tab[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.dataset.tab;
+        document.querySelectorAll('.tab[data-tab]').forEach(x => x.classList.toggle('on', x === btn));
+        document.querySelectorAll('.tab-panel[data-panel]').forEach(p => p.style.display = p.dataset.panel === t ? 'block' : 'none');
+      });
+    });
+
+    /* EdgeOne KV / Node Functions 后端已删除（admin 现在只有纯前端功能） */
 
     if(location.protocol==='file:'){
       status(`当前通过 file:// 打开，无法安全调用账号服务。请运行 python3 -m http.server 8000，再打开 ${LOCAL_ADMIN_URL}`,true);
