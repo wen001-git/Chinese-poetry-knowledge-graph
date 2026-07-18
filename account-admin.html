@@ -568,10 +568,34 @@
       }catch(error){status(error.message,true)}
     };
 
-    accountList.addEventListener('change',async event=>{
-      if(!event.target.classList.contains('device-limit'))return;
-      const account=accounts.find(item=>item.id===Number(event.target.closest('.account').dataset.id));
-      try{await request(`/api/admin/accounts/${account.id}`,{method:'PATCH',body:JSON.stringify({maxDevices:Number(event.target.value)})});await loadAccounts();status('设备上限已更新')}catch(error){event.target.value=account.maxDevices;status(error.message,true)}
+    // 💾 设备上限保存 — 实时反馈 + 自动保存 + 错误回滚
+    let deviceLimitSaveTimer = null;
+    accountList.addEventListener('input', async event => {
+      if(!event.target.classList.contains('device-limit')) return;
+      const input = event.target;
+      const account = accounts.find(a => a.id === Number(input.closest('.account').dataset.id));
+      if(!account) return;
+      // 视觉:输入框立刻变成"保存中"状态
+      input.style.background = 'var(--paper3)';
+      // debounce:用户连续打字时,等停顿 600ms 再发 PATCH
+      clearTimeout(deviceLimitSaveTimer);
+      deviceLimitSaveTimer = setTimeout(async () => {
+        try{
+          await request(`/api/admin/accounts/${account.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({maxDevices: Number(input.value)})
+          });
+          input.style.background = '#d4edda';
+          account.maxDevices = Number(input.value);
+          status(`✓ 已保存 · ${account.username} 设备上限 → ${input.value}`);
+          setTimeout(() => { input.style.background = ''; }, 1200);
+        }catch(error){
+          input.style.background = '#f8d7da';
+          input.value = account.maxDevices;
+          status(error.message, true);
+          setTimeout(() => { input.style.background = ''; }, 1500);
+        }
+      }, 600);
     });
 
     accountList.addEventListener('click',async event=>{
