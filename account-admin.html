@@ -65,11 +65,12 @@
     .danger{color:var(--danger)}.compact{height:32px;padding:0 12px;font-size:12px}
     .token-row{display:grid;grid-template-columns:minmax(260px,1fr) minmax(220px,1fr) auto;gap:12px;align-items:end}
     .accounts{background:#fff;border:1px solid var(--border);box-shadow:var(--shadow);border-radius:var(--r);overflow:hidden}
-    .accounts-head,.account-main{display:grid;grid-template-columns:minmax(150px,1.2fr) 110px 120px minmax(180px,1.3fr) auto;gap:12px;align-items:center}
+    .accounts-head,.account-main{display:grid;grid-template-columns:40px minmax(150px,1.2fr) 110px 120px minmax(180px,1.3fr) auto;gap:12px;align-items:center}
     .accounts-head{padding:11px 18px;background:var(--paper2);color:var(--ink2);font-size:12px;font-weight:700;letter-spacing:.04em}
     .account{border-top:1px solid var(--border)}.account:first-of-type{border-top:0}
     .account-main{padding:16px 18px}
     .username{font-weight:700;color:var(--ink);font-family:var(--serif);font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.idx{font-family:var(--sans);color:var(--ink3);font-size:12px;font-weight:600;text-align:right;padding-right:4px;font-variant-numeric:tabular-nums}
     .source{font-size:10.5px;padding:2px 7px;border-radius:10px;font-weight:600;background:var(--teal);color:#fff;letter-spacing:.02em}
     .source.static{background:var(--ochre);color:#fff}
     .meta{font-size:11px;color:var(--ink2);margin-top:4px}
@@ -151,7 +152,7 @@
       </div>
 
       <div class="accounts">
-        <div class="accounts-head" style="grid-template-columns:1.2fr .8fr .8fr 1.2fr 1.6fr"><span>账号</span><span>状态</span><span>设备上限</span><span>最近登录</span><span>操作</span></div>
+        <div class="accounts-head" style="grid-template-columns:40px 1.2fr .8fr .8fr 1.2fr 1.6fr"><span>#</span><span>账号</span><span>状态</span><span>设备上限</span><span>最近登录</span><span>操作</span></div>
         <div id="accountList"><div class="empty">请输入管理令牌并连接账号服务</div></div>
       </div>
     </section>
@@ -412,8 +413,9 @@
 
     function render(){
       if(!accounts.length){accountList.innerHTML='<div class="empty">还没有账号，可以先创建测试账号或点击「🥚 迁移到 Neon」从 accounts.json 导入</div>';return}
-      accountList.innerHTML=accounts.map(account=>`<article class="account" data-id="${account.id}">
+      accountList.innerHTML=accounts.map((account,idx)=>`<article class="account" data-id="${account.id}">
         <div class="account-main">
+          <div class="idx">${idx+1}</div>
           <div><div class="username">${escapeHtml(account.username)}${(() => {
             const isStatic = staticAccounts.some(s => (s.u||'').toLowerCase() === (account.username||'').toLowerCase());
             return isStatic
