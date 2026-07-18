@@ -30,7 +30,8 @@
 - 宣纸白 `#f7f5f0` / 浓墨 `#1c1c1e` / 墨青 `#2d5a6b` + **朱砂红 `#c1352b` 可作强调/印章/朱批**（禁红规则已取消，配色可演进；视觉用 `/frontend-design` 迭代中）
 - 内容对齐**统编版**课本；进度/偏好存 `localStorage`（键 `pg_v1`），无账号系统
 
-## 当前状态（2026-07-10）
+## 当前状态（2026-07-18）
+- **2026-07-18：角色选择卡片换成三张彩铅人物图（普通版 + Pro 同步）**：`poemgraph.html` 与 `poemgraph-pro.html` 的学生/家长/教师卡片，已分别替换为用户提供的“小书童 / 亲子共读 / 女教师”图片。为保持两页离线自包含，原始 1254×1254 PNG（单张约 1.9–2.1MB）压缩为 256×256 JPEG（单张 17–19KB）后以内联 data URI 使用；卡片显示为 96×96 圆形头像，并加暖金细边与柔和阴影。桌面 1280×720、手机 390×844 浏览器回归通过：三图均 naturalWidth=256、显示 96×96、手机无横向/纵向溢出、控制台 0 error。
 - **2026-07-17：admin.html 合并 5 hash 工具 + doLogin 双层校验（local → Neon fallback）**：用户反馈 Neo UI admin 缺了老 5-tab 工具（自动生成/批量/单条/验证/提取），要求保留 Neo 风格同时把 5 个 hash 工具 + paywall.json 配置块拼回去；另外要求保留 accounts.json 静态登录能力。**关键设计澄清（doLogin 语义）**：用户原话"优先从本地校验,本地校验不通过,再去 neon 校验,neon 校验通过的话,也通过"——这表示双层**不是串联权威**（"本地有→只看本地,本地没有→只看 Neon"），也不是**串联组合**（"本地对+ Neon 对才行"），而是**fallthrough 分流**：
 - **2026-07-17：设备上限策略 = 信任 accounts.json 内的账号（修法 4）**：用户确认场景为「开发期单用户 + 上线后付费客户（数量小，1–20 范围内）」（见 `[[poemgraph-target-audience]]` + `[[poemgraph-no-users-yet]]`）。**取舍：accounts.json 内的账号不强制设备上限**。原因：pro.html:1456 的 doLogin 是 fallthrough 分流——**本地 SHA-256 校验通过即 return,根本不再调 Neon**,所以 Neon 的 `account.devices[]` 设备绑定表对 accounts.json 内的账号是"观察"而非"拦截"**。已知后果**:客户在 5 台机器登录,本地都能过(因为账号在 accounts.json),Neon 完全不知道——**设备上限被本地快路绕过**。**用户接受这个权衡**(理由:客户量小 + 真要封就改 admin 改 enabled=false)。**应用**:
   - 只在 Neon、不在 accounts.json 的账号(临时 admin 创建但未同步到 JSON)→ 设备上限**严格生效**(N 台拒)
@@ -136,3 +137,9 @@
 - `video-showcase.html` — 正式录屏展示页（场景化脚本+模拟截图框+真实应用跳转，不改 poemgraph.html 本体）
 - `demo/showcase.html` + `demo/VIDEO_SCRIPT.md` — 演示视频章节卡+讲稿（不改 poemgraph.html 本体）
 - 完整变更历史 → `git log`
+
+## 变更记录
+
+| 日期 | 变更内容 |
+|------|---------|
+| 2026-07-18 | 同步记录普通版与 Pro 版角色卡片图片替换及响应式回归结果，确保下一位 AI 可直接了解最新视觉状态。 |
