@@ -1531,6 +1531,7 @@ body.sleep-open{overflow:hidden}
 
   // ── 登录成功 UI：把顶栏 chip 改成用户名 + 退出 ──
   function onLoginSuccess(){
+    PRO.logged = true;  // ← 重要:在 chip 更新前先设状态,否则下游 applyProVisibility / updateBanner 看不到
     var chip=D.getElementById('login-chip');
     var lbl=D.getElementById('login-chip-label');
     if(chip && lbl && PRO.user){
