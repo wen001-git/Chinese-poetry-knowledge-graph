@@ -1,18 +1,15 @@
 // server/auth.mjs
-// PoemGraph auth utilities — ported from WhiteBoard pattern.
+// PoemGraph auth utilities.
 //
-// Hash scheme: scrypt(password, salt) -> 64-byte base64url string.
-// Why scrypt over plain SHA-256: scrypt is memory-hard + per-account salt,
-// which is the standard for low-budget services where the salt can be a
-// shared constant (we trust Render + Neon, not a hostile database).
-// Plain SHA-256 was the old accounts.json scheme; we preserve it ONLY for
-// imports from accounts.json (server/store.mjs#importFromJson), not for
-// new accounts created via this server.
+// Hash scheme: SHA-256(salt + password) -> 64-char lowercase hex.
+// Why SHA-256 (not scrypt / bcrypt): matches the hash already used in
+// accounts.json so the two paths (local browser-side SHA-256 + server-side
+// SHA-256) are byte-for-byte identical. Single source of truth for password
+// verification. Trade-off: SHA-256 is fast (no memory hardness), so we
+// rely on (a) Render + Neon as the trust boundary and (b) the per-account
+// username being effectively a salt (no two accounts share a username).
 
-import { createHmac, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
-import { promisify } from 'node:util';
-
-const scrypt = promisify(scryptCallback);
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 
 // Salt used for all NEW accounts created via /api/admin/accounts.
 // Kept identical to WhiteBoard's so the logic is interchangeable; rotate
@@ -29,24 +26,21 @@ export function normalizeUsername(value) {
   return String(value ?? '').trim().toLocaleLowerCase('en-US');
 }
 
-export async function makePassword(password) {
-  const salt = SHARED_PASSWORD_SALT;
-  const derived = await scrypt(String(password), salt, 64);
-  return { salt, hash: Buffer.from(derived).toString('base64url') };
+export function sha256Hex(input) {
+  return createHash('sha256').update(String(input)).digest('hex');
 }
 
-export async function verifyPassword(password, salt, expectedHash) {
-  // Two paths:
-  //   1. New accounts: hash = base64url(scrypt(pw, salt))
-  //   2. Legacy import: hash = hex(sha256(salt + pw))  — 64 lowercase chars
-  const derivedScrypt = await scrypt(String(password), String(salt), 64);
-  if (safeEqual(Buffer.from(derivedScrypt).toString('base64url'), expectedHash)) return true;
-  if (typeof expectedHash === 'string' && expectedHash.length === 64) {
-    const crypto = await import('node:crypto');
-    const legacyHash = crypto.createHash('sha256').update(String(salt) + String(password)).digest('hex');
-    if (safeEqual(legacyHash, expectedHash.toLowerCase())) return true;
-  }
-  return false;
+export function makePassword(password) {
+  const salt = SHARED_PASSWORD_SALT;
+  return { salt, hash: sha256Hex(salt + password) };
+}
+
+export function verifyPassword(password, salt, expectedHash) {
+  // Single scheme: hex(sha256(salt + password)). accounts.json uses the
+  // exact same recipe in the browser, so what the browser computes
+  // is what the server stores and verifies.
+  const derived = sha256Hex(String(salt) + String(password));
+  return safeEqual(derived, String(expectedHash).toLowerCase());
 }
 
 export function signToken(payload, secret) {
