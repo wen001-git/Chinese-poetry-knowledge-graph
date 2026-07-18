@@ -180,6 +180,20 @@ export class PgAccountStore {
     } finally { client.release(); }
   }
 
+  async deleteAccount(id) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(`DELETE FROM ${this.tbl}.devices WHERE account_id=$1`, [id]);
+      const deleted = await client.query(`DELETE FROM ${this.tbl}.accounts WHERE id=$1`, [id]);
+      await client.query('COMMIT');
+      return deleted.rowCount > 0;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally { client.release(); }
+  }
+
   /**
    * One-time import from a legacy accounts.json blob.
    * Preserves the original sha256(salt + p) hash + salt so existing

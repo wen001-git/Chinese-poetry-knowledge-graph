@@ -212,6 +212,11 @@ export function createApp(options) {
             const clearedDevices = await store.resetDevices(id);
             return sendJson(res, 200, { ok: true, clearedDevices });
           }
+          if (req.method === 'DELETE' && !action) {
+            const ok = await store.deleteAccount(id);
+            if (!ok) return sendJson(res, 404, { ok: false, code: 'NOT_FOUND', message: '账号不存在' });
+            return sendJson(res, 200, { ok: true });
+          }
         }
 
         // One-time migration from accounts.json (PoemGraph legacy data)
