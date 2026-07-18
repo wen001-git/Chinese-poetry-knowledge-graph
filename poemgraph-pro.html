@@ -1416,12 +1416,22 @@ body.sleep-open{overflow:hidden}
   function sharePoemgraph(){
     var wx = (typeof _readWx === 'function' ? _readWx() : 'leewen2017');
     var price = (document.querySelector('meta[name="x-price"]')||{}).content || '19.9';
-    var text = [
-      '【小学语文·诗词图谱 Po...clipboard.writeText(text).then(function(){
-      showProToast('已复制到剪贴板 · 粘给朋友吧');
-    }).catch(function(){
-      prompt('复制失败,请手动 Ctrl/Cmd+C:', text);
-    });
+    var url = location.origin + '/poemgraph-pro.html';
+    var qrUrl = location.origin + '/docs/marketing/qrcode-wechat.jpg';
+    var L = '【小学语文·诗词图谱 PoemGraph Pro】\n';
+    L += '给小学生看古诗的「网状图」工具：300+ 诗人 / 1200+ 诗 / 1-9 年级跟课本同步 / 朗读音频。\n';
+    L += '会员年费 ¥' + price + '，老师免费。\n';
+    L += '打开：' + url + '\n';
+    L += '作者微信：' + wx + '\n';
+    L += '扫一扫加我（备注「诗词图谱」）：' + qrUrl;
+    var text = L;
+    var done = function(){ showProToast('已复制到剪贴板 · 粘给朋友吧'); };
+    var fail = function(){ prompt('复制失败,请手动 Ctrl/Cmd+C:', text); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    } else {
+      fail();
+    }
   }
 
   // ── 加载 accounts.json（带 sessionStorage 缓存） ──
