@@ -422,10 +422,38 @@
     }
 
     function render(){
-      if(!accounts.length){accountList.innerHTML='<div class="empty">还没有账号，可以先创建测试账号或点击「🥚 迁移到 Neon」从 accounts.json 导入</div>';return}
-      /* 按当前下拉框排序:创建时间 / 最近登录 / 账号名字母 */
+      /* 合并 Neon + 静态账号:
+       *   - 都在 → 1 行(双源,可删除 Neon 这条变成纯静态)
+       *   - 只 Neon → 1 行(可"↓ 转静态")
+       *   - 只静态 → 1 行(只在 accounts.json,无可删按钮)
+       * 排序:全局按当前下拉框 */
+      const map = new Map();  // key: username.lowercase()
+      const keyOf = (u) => (u || '').toLowerCase();
+      accounts.forEach(a => {
+        map.set(keyOf(a.username), {
+          ...a,
+          source: 'neon',
+          inStatic: !!staticAccounts.find(s => keyOf(s.u) === keyOf(a.username))
+        });
+      });
+      staticAccounts.forEach(s => {
+        if(!map.has(keyOf(s.u))){
+          map.set(keyOf(s.u), {
+            id: null,
+            username: s.u,
+            passwordHash: s.h,
+            enabled: true,
+            maxDevices: 1,
+            createdAt: null,
+            lastLoginAt: null,
+            source: 'static'
+          });
+        }
+      });
+      const merged = Array.from(map.values());
+      if(!merged.length){accountList.innerHTML='<div class="empty">还没有账号。可以创建测试账号,或点「🥚 迁移到 Neon」从 accounts.json 导入</div>';return}
       const sortKey = (document.getElementById('accountSort')||{}).value || 'createdAt';
-      const sorted = accounts.slice().sort((a, b) => {
+      const sorted = merged.slice().sort((a, b) => {
         if(sortKey === 'name') return (a.username||'').localeCompare(b.username||'');
         const ta = new Date(a[sortKey] || 0).getTime();
         const tb = new Date(b[sortKey] || 0).getTime();
@@ -434,26 +462,29 @@
       accountList.innerHTML=sorted.map((account,idx)=>`<article class="account" data-id="${account.id}">
         <div class="account-main">
           <div class="idx">${idx+1}</div>
-          <div><div class="username">${escapeHtml(account.username)}${(() => {
-            const isStatic = staticAccounts.some(s => (s.u||'').toLowerCase() === (account.username||'').toLowerCase());
-            return isStatic
-              ? '<span class="source static" title="此账号也在仓库根 accounts.json (本地静态登录)">Neon + 静态</span>'
-              : '<span class="source" title="此账号只在 Neon 数据库">仅 Neon</span>';
-          })()}</div><div class="meta">创建于 ${formatDate(account.createdAt)}</div></div>
-          <div class="badge ${account.enabled?'':'off'}"><i class="dot"></i>${account.enabled?'已启用':'已停用'}</div>
-          <div><input class="device-limit" type="number" min="1" max="20" value="${account.maxDevices}" aria-label="设备上限"></div>
-          <div>${formatDate(account.lastLoginAt)}<div class="meta">已绑定 ${account.devices.length} 台设备</div></div>
-          <div class="actions">
-            <button class="compact" data-action="devices">设备</button>
+          <div><div class="username">${escapeHtml(account.username)}${account.source==='static'
+              ? '<span class="source static" title="此账号只在仓库根 accounts.json (本地静态登录)">仅 静态</span>'
+              : account.inStatic
+                ? '<span class="source static" title="此账号也在仓库根 accounts.json (本地静态登录)">Neon + 静态</span>'
+                : '<span class="source" title="此账号只在 Neon 数据库">仅 Neon</span>'}</div><div class="meta">创建于 ${formatDate(account.createdAt)||'—'}</div></div>
+          <div class="badge ${account.source==='static'?'off':(account.enabled?'':'off')}"><i class="dot"></i>${account.source==='static'?'纯静态':(account.enabled?'已启用':'已停用')}</div>
+          <div>${account.source==='static'
+              ? '<span class="meta">本地校验,无设备上限</span>'
+              : `<input class="device-limit" type="number" min="1" max="20" value="${account.maxDevices}" aria-label="设备上限">`}</div>
+          <div>${account.source==='static'
+              ? '<span class="meta">仅本地校验</span>'
+              : `${formatDate(account.lastLoginAt)}<div class="meta">已绑定 ${account.devices.length} 台设备</div>`}</div>
+          <div class="actions">${account.source==='static'
+              ? '<span class="meta" style="font-size:11px">在 accounts.json 管理</span>'
+              : `<button class="compact" data-action="devices">设备</button>
             <button class="compact" data-action="password">改密码</button>
             <button class="compact ${account.enabled?'danger':''}" data-action="toggle">${account.enabled?'停用':'启用'}</button>
             <button class="compact danger" data-action="delete" title="从 Neon 中永久删除此账号(此账号若也在 accounts.json,删除 Neon 后即变纯静态)">🗑 删除</button>
-            <button class="compact" data-action="to-static" title="下载此账号的 SHA-256 行,以便手动加到 accounts.json">↓ 转静态</button>
-          </div>
+            <button class="compact" data-action="to-static" title="下载此账号的 SHA-256 行,以便手动加到 accounts.json">↓ 转静态</button>`}</div>
         </div>
-        <div class="devices">${account.devices.length?account.devices.map(device=>`<div class="device"><span>${escapeHtml(device.deviceName||'未命名设备')}</span><span title="${escapeHtml(device.userAgent)}">${escapeHtml(device.userAgent||device.deviceId)}</span><span>${formatDate(device.lastSeenAt)}</span></div>`).join(''):'<div class="meta">暂无绑定设备</div>'}
+        ${account.source==='static' ? '' : `<div class="devices">${account.devices.length?account.devices.map(device=>`<div class="device"><span>${escapeHtml(device.deviceName||'未命名设备')}</span><span title="${escapeHtml(device.userAgent)}">${escapeHtml(device.userAgent||device.deviceId)}</span><span>${formatDate(device.lastSeenAt)}</span></div>`).join(''):'<div class="meta">暂无绑定设备</div>'}
           ${account.devices.length?'<div class="actions" style="margin-top:10px"><button class="compact danger" data-action="clear">清空全部设备</button></div>':''}
-        </div>
+        </div>`}
       </article>`).join('');
     }
 
