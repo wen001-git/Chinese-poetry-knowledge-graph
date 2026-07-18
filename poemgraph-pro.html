@@ -1458,7 +1458,16 @@ body.sleep-open{overflow:hidden}
         /* 本地没有这个账号,走 Neon */
         return tryRemote(u, p, deviceId);
       }
-      /* 本地通过(或明确拒了 — throw 会冒泡),把 localRes 当结果返回 */
+      /* 本地通过 → 走登录成功流程(对齐 tryRemote 成功路径) */
+      PRO.user = {u: localRes.u};
+      localStorage.setItem('pg_pro_user', JSON.stringify({
+        u: localRes.u,
+        loginAt: Date.now(),
+        deviceId: deviceId,
+        source: 'local'
+      }));
+      onLoginSuccess();
+      showProToast('✓ 本地登录成功（无设备绑定）');
       return {ok: true, source: 'local', u: localRes.u, deviceId: deviceId};
     });
   }
