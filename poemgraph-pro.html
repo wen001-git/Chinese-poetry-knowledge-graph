@@ -1651,6 +1651,9 @@ body.sleep-open{overflow:hidden}
         '<button class="pro-btn" id="lm-go">登 录</button>'+
         '<button class="pro-btn ghost" id="lm-close">关闭</button>'
     });
+    // 👁 modal 是动态注入的,page-load 跑的 attachEyeButtons() 当时 lm-pass 还不存在。
+    // 这里再扫一次:在 lm-pass/其他 type=password input 出现后挂眼按钮。
+    try{ attachEyeButtons(); }catch(_){}
     var go=function(){
       var u=D.getElementById('lm-user').value.trim();
       var p=D.getElementById('lm-pass').value;
