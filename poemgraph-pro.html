@@ -883,6 +883,12 @@ body.sleep-open{overflow:hidden}
   .pro-banner-title{font-size:13px}
   .pro-banner-sub{font-size:11px}
 }
+
+/* 密码可见性切换 👁 按钮 */
+.eye-wrap{position:relative}
+.eye-wrap input{padding-right:38px !important}
+.eye-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:0;background:transparent;cursor:pointer;font-size:16px;line-height:1;border-radius:6px;color:var(--ink2)}
+.eye-btn:hover{background:var(--paper3);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -1376,6 +1382,17 @@ body.sleep-open{overflow:hidden}
   function sha256(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){
     return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');
   });}
+
+  /* 👁 给所有 type=password 输入框挂「可见性切换」按钮 */
+  function attachEyeButtons(){
+    document.querySelectorAll('input[type="password"]').forEach(function(inp){
+      if(inp.dataset.... 'password' : 'text';
+        btn.textContent = showing ? '👁' : '🙈';
+      };
+      wrap.appendChild(btn);
+    });
+  }
+  attachEyeButtons();
 
   // ── 加载 accounts.json（带 sessionStorage 缓存） ──
   function loadAccounts(){
