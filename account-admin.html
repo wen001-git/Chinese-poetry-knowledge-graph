@@ -667,6 +667,12 @@
         return;
       }
       if(action==='to-static'){
+        if(account.inStatic){
+          if(!confirm('账号「'+account.username+'」已在 accounts.json 中。\n\n点击"确定"会从 Neon 中删除此账号,保留 accounts.json 那条 — 此后此账号完全走本地静态登录路径(SHA-256(salt+password) 校验)。\n\n此操作不可恢复!')) return;
+          try{ await request('/api/admin/accounts/'+id, {method:'DELETE'}); await loadAccounts(); status('✓ 已删除 Neon 账号: '+account.username+' (现仅 accounts.json)'); }
+          catch(error){ status(error.message, true); }
+          return;
+        }
         var salt = (document.querySelector('meta[name="x-salt"]')||{}).content || 'pg-pro-salt-v1';
         var line = JSON.stringify({u: account.username, h: account.passwordHash}, null, 0);
         var hint = `把这一行追加到仓库根 accounts.json 的 accounts 数组:\n\n${line}\n\n${salt}  ← 当前 salt(若改了也同步)\n\n(若要彻底从 Neon 移除此账号,请先合并到 accounts.json + git push,然后点 🗑 删除按钮)\n\n需要复制吗？`;
