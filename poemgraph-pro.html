@@ -1386,7 +1386,22 @@ body.sleep-open{overflow:hidden}
   /* 👁 给所有 type=password 输入框挂「可见性切换」按钮 */
   function attachEyeButtons(){
     document.querySelectorAll('input[type="password"]').forEach(function(inp){
-      if(inp.dataset.... 'password' : 'text';
+      if(inp.dataset.eyeInit) return;
+      inp.dataset.eyeInit = '1';
+      var wrap = document.createElement('span');
+      wrap.className = 'eye-wrap';
+      // 安全包住 input:用 parentNode + Node.replaceChild 替代 prototype hack
+      if(inp.parentNode && inp.parentNode.classList && inp.parentNode.classList.contains('eye-wrap')) return;
+      inp.parentNode.insertBefore(wrap, inp);
+      wrap.appendChild(inp);
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'eye-btn';
+      btn.textContent = '👁';
+      btn.title = '显示 / 隐藏密码';
+      btn.onclick = function(){
+        var showing = inp.type === 'text';
+        inp.type = showing ? 'password' : 'text';
         btn.textContent = showing ? '👁' : '🙈';
       };
       wrap.appendChild(btn);
