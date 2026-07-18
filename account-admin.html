@@ -103,6 +103,11 @@
       .device{grid-template-columns:1fr}
       .topbar{align-items:flex-start;flex-direction:column}
     }
+    /* 密码可见性切换 👁 按钮 */
+    .eye-wrap{position:relative}
+    .eye-wrap input{padding-right:38px !important}
+    .eye-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:0;background:transparent;cursor:pointer;font-size:16px;line-height:1;border-radius:6px;color:var(--ink2)}
+    .eye-btn:hover{background:var(--paper3);color:var(--ink)}
   </style>
 </head>
 <body>
@@ -329,6 +334,31 @@
     const LOCAL_API_HOSTS=new Set(['localhost','127.0.0.1']);
     const RENDER_API='https://poemgraph-auth-api.onrender.com';
     const LOCAL_ADMIN_URL='http://localhost:8000/account-admin.html';
+
+    /* ── 👁 给所有 type=password 的输入框挂「可见性切换」按钮 ── */
+    function attachEyeButtons(){
+      document.querySelectorAll('input[type="password"]').forEach(inp => {
+        if(inp.dataset.eyeAttached) return;
+        inp.dataset.eyeAttached = '1';
+        const wrap = document.createElement('span');
+        wrap.className = 'eye-wrap';
+        inp.parentNode.insertBefore(wrap, inp);
+        wrap.appendChild(inp);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'eye-btn';
+        btn.setAttribute('aria-label', '切换密码可见性');
+        btn.textContent = '👁';
+        btn.onclick = () => {
+          const showing = inp.type === 'text';
+          inp.type = showing ? 'password' : 'text';
+          btn.textContent = showing ? '👁' : '🙈';
+        };
+        wrap.appendChild(btn);
+      });
+    }
+    attachEyeButtons();
+
     function resolveApiBase(){
       const isLocal=LOCAL_API_HOSTS.has(location.hostname);
       const fallback=isLocal?'http://localhost:8787':RENDER_API;
