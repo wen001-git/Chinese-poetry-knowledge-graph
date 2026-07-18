@@ -152,7 +152,17 @@
       </div>
 
       <div class="accounts">
-        <div class="accounts-head" style="grid-template-columns:40px 1.2fr .8fr .8fr 1.2fr 1.6fr"><span>#</span><span>账号</span><span>状态</span><span>设备上限</span><span>最近登录</span><span>操作</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--paper2);border-radius:var(--r) var(--r) 0 0;border-bottom:1px solid var(--line)">
+          <span style="color:var(--ink2);font-size:12px;font-weight:700;letter-spacing:.04em">账号列表</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="color:var(--ink2);font-size:12px">排序：</span>
+            <select id="accountSort" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font:inherit;color:var(--ink);background:#fff;cursor:pointer">
+              <option value="createdAt">创建时间</option>
+              <option value="lastLogin">最近登录</option>
+              <option value="name">账号名字母</option>
+            </select>
+          </div>
+        </div>
         <div id="accountList"><div class="empty">请输入管理令牌并连接账号服务</div></div>
       </div>
     </section>
@@ -413,7 +423,15 @@
 
     function render(){
       if(!accounts.length){accountList.innerHTML='<div class="empty">还没有账号，可以先创建测试账号或点击「🥚 迁移到 Neon」从 accounts.json 导入</div>';return}
-      accountList.innerHTML=accounts.map((account,idx)=>`<article class="account" data-id="${account.id}">
+      /* 按当前下拉框排序:创建时间 / 最近登录 / 账号名字母 */
+      const sortKey = (document.getElementById('accountSort')||{}).value || 'createdAt';
+      const sorted = accounts.slice().sort((a, b) => {
+        if(sortKey === 'name') return (a.username||'').localeCompare(b.username||'');
+        const ta = new Date(a[sortKey] || 0).getTime();
+        const tb = new Date(b[sortKey] || 0).getTime();
+        return tb - ta;  // 最新在前
+      });
+      accountList.innerHTML=sorted.map((account,idx)=>`<article class="account" data-id="${account.id}">
         <div class="account-main">
           <div class="idx">${idx+1}</div>
           <div><div class="username">${escapeHtml(account.username)}${(() => {
@@ -498,6 +516,7 @@
       }catch(error){status(error.message,true)}
     }
     document.getElementById('connectBtn').onclick=loadAccounts;
+    document.getElementById('accountSort').onchange = render;
 
     /* ── 导出 accounts.json ──
      * 1) 拉一次当前仓库根 accounts.json(同源优先)+ 取出 salt
