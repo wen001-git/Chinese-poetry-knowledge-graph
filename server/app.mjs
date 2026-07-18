@@ -44,7 +44,7 @@ function send(res, status, body, headers = {}) {
   // public static site. Tighten via `corsOrigin` option if you ever need to.
   const cors = {
     'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET, HEAD, POST, OPTIONS',
+    'access-control-allow-methods': 'GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS',
     'access-control-allow-headers': 'Content-Type, Authorization',
     'access-control-max-age': '600'
   };
