@@ -193,7 +193,6 @@
           <button class="compact" id="a-sync-json" type="button">🔄 同步到 JSON（重算哈希）</button>
           <button class="compact" id="a-download-json" type="button">⬇ 下载完整 JSON</button>
           <button class="compact" id="a-copy-json" type="button">📋 复制 JSON</button>
-          <button class="compact" id="a-mark-pushed" type="button" style="border-color:var(--bamboo);color:var(--bamboo)">✓ 全部标记为已 git push</button>
         </div>
         <label class="lab" style="display:block;font-size:13px;color:var(--muted);margin:18px 0 6px;font-weight:500">现有 accounts.json <span class="hint" id="a-existing-status">等待拉取…</span></label>
         <textarea id="a-existing" class="full" rows="12" style="font-family:ui-monospace,monospace;font-size:13px;line-height:1.55" placeholder='{ "version": 1, "salt": "pg-pro-salt-v1", "accounts": [{ "u": "demo", "h": "..." }] }'></textarea>
@@ -214,8 +213,9 @@
           <b>⬆ 部署到服务器：</b>点「⬇ 下载 accounts.json」→ 覆盖到本仓库根的 <code>accounts.json</code> → <code>git add accounts.json && git commit -m "添加新账号" && git push</code>（Render 自动重 deploy ≈ 30s）。
         </div>
 
-        <label class="lab" style="display:block;font-size:13px;color:var(--muted);margin:18px 0 6px;font-weight:500">已 git push 的账号 <span class="hint" id="a-pushed-count">（0 个）</span></label>
-        <div id="a-pushed-table" class="hint" style="color:var(--ink3);font-size:12px;min-height:30px">还没有「已上传」的账号。</div>
+        <div class="hint" style="background:var(--accent-soft);border-left:3px solid var(--accent);padding:8px 12px;border-radius:6px;font-size:12px;margin-top:10px">
+          <b>📝 提示:</b>「同步到 JSON」会计算 <u>textarea 里所有行</u>。git push 完后,<b>手动从 textarea 删掉那几行</b>(下次同步就不会再算了)。git 仓库是唯一真相 — admin HTML 不维护已上传状态。
+        </div>
       </div>
 
       <!-- 批量 -->
@@ -567,7 +567,12 @@
     }
     const LS_PLAIN = 'pg_accounts_plain';
     function loadPlainLog(){
-      try{ return JSON.parse(localStorage.getItem(LS_PLAIN)||'[]'); }catch(_){ return []; }
+      try{
+        const arr = JSON.parse(localStorage.getItem(LS_PLAIN)||'[]');
+        // 一次性迁移:删掉上一版遗留的 'pushed' / 'id' 字段(不再使用)
+        for(const e of arr){ delete e.pushed; delete e.id; }
+        return arr;
+      }catch(_){ return []; }
     }
     function savePlainLog(arr){
       localStorage.setItem(LS_PLAIN, JSON.stringify(arr));
@@ -575,22 +580,18 @@
     function renderPlainTextarea(){
       const log = loadPlainLog();
       const chMap = Object.fromEntries(PW_CHARS.map(w => [w.py, w.ch]));
-      // 仅显示「未上传」的账号。已上传的进下面那张表,不再重复。
-      const unpushed = log.filter(e => !e.pushed);
-      const text = unpushed.map(e => {
+      // 简化为:显示所有,git push 完后手动从 textarea 删行(git 仓库是唯一真相)
+      const text = log.map(e => {
         const ch = chMap[e.p.replace(/\d+$/,'')] || '';
         return ch ? `${e.u}  ${e.p}  （${ch}）` : `${e.u}  ${e.p}`;
       }).join('\n');
       const ta = document.getElementById('a-plain');
       if(ta) ta.value = text;
-      // 更新状态计数
       const totalEl = document.getElementById('a-plain-count');
       if(totalEl){
-        const total = log.length, pushed = log.length - unpushed.length;
-        totalEl.textContent = `未上传 ${unpushed.length} · 已上传 ${pushed} · 合计 ${total}`;
-        totalEl.style.color = unpushed.length > 0 ? 'var(--teal)' : 'var(--ink3)';
+        totalEl.textContent = log.length ? `共 ${log.length} 个账号在清单中(可手动删除已 git push 的行)` : '';
+        totalEl.style.color = 'var(--ink3)';
       }
-      renderUploadedTable();
     }
 
     function parsePlainTextarea(){
@@ -636,7 +637,7 @@
         const u = 'user' + dateCompact + serial;
         const p = genPassword(style);
         const h = await adminSha256(salt + p);
-        newOnes.push({u, p, h, date, id: Date.now() + '-' + i, pushed: false});
+        newOnes.push({u, p, h, date, id: Date.now() + '-' + i});
       }
       bumpSerial(date, cnt);
       savePlainLog([...loadPlainLog(), ...newOnes]);
@@ -727,57 +728,8 @@
       out.scrollIntoView({behavior:'smooth', block:'center'});
     };
 
-    /* ── 「已上传」账号管理:标记 / 撤销 / 列表渲染 ── */
-    function renderUploadedTable(){
-      const log = loadPlainLog();
-      const pushed = log.filter(e => e.pushed);
-      const tbl = document.getElementById('a-pushed-table');
-      const countEl = document.getElementById('a-pushed-count');
-      if(countEl) countEl.textContent = `（${pushed.length} 个）`;
-      if(!tbl) return;
-      if(!pushed.length){
-        tbl.innerHTML = '<span style="color:var(--ink3)">还没有「已上传」的账号。</span>';
-        return;
-      }
-      // 倒序:最新上传的在上
-      pushed.slice().reverse().forEach(e => {
-        const row = document.createElement('div');
-        row.style.cssText = 'padding:4px 0;display:flex;align-items:center;gap:8px;border-bottom:1px dashed #e0dcd3';
-        row.innerHTML = `<code style="background:var(--paper2);padding:2px 6px;border-radius:3px">${e.date}</code> <b>${e.u}</b> <span style="color:var(--ink3);font-size:11px">${e.p}</span> <button class="compact" data-unmark="${e.id}" style="margin-left:auto;padding:2px 8px;font-size:11px">↩ 撤销</button>`;
-        tbl.appendChild(row);
-      });
-      tbl.querySelectorAll('[data-unmark]').forEach(btn => {
-        btn.onclick = () => {
-          const id = btn.getAttribute('data-unmark');
-          const all = loadPlainLog();
-          const item = all.find(x => x.id === id);
-          if(item) item.pushed = false;
-          savePlainLog(all);
-          renderPlainTextarea();
-        };
-      });
-    }
-
-    document.getElementById('a-mark-pushed').onclick = () => {
-      const log = loadPlainLog();
-      const unpushedCount = log.filter(e => !e.pushed).length;
-      if(!unpushedCount){
-        alert('没有「未上传」账号可标记');
-        return;
-      }
-      if(!confirm(`将 ${unpushedCount} 个未上传账号标记为「已 git push」？\n\n(下一步: 确认你已经 git push 完;否则这些账号会从下次同步里消失)`)){
-        return;
-      }
-      for(const e of log) e.pushed = true;
-      savePlainLog(log);
-      renderPlainTextarea();
-      const statusEl = document.getElementById('a-status');
-      if(statusEl){
-        statusEl.textContent = `✓ 已标记 ${unpushedCount} 个账号为「已上传」· 下次「同步到 JSON」会跳过它们`;
-        setTimeout(() => { if(statusEl.textContent.startsWith('✓')) statusEl.textContent = ''; }, 5000);
-      }
-    };
-    renderUploadedTable();
+    /* ── (已删除:「已上传」账号管理 — 改用 git 仓库作为唯一真相) ── */
+    renderPlainTextarea();
 
 
     document.getElementById('a-download-json').onclick = () => {
