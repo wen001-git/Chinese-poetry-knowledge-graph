@@ -1008,7 +1008,7 @@ body.sleep-open{overflow:hidden}
       <button class="pro-banner-qr" id="pro-banner-qr" type="button">📱 加我微信</button>
       <button class="pro-banner-close" id="pro-banner-close" aria-label="关闭横幅">✕</button>
     </div>
-    <div id="pro-banner-qr-panel" style="display:block;text-align:center;padding:14px;background:var(--paper2);border-bottom:1px solid var(--border)">
+    <div id="pro-banner-qr-panel" style="display:none;text-align:center;padding:14px;background:var(--paper2);border-bottom:1px solid var(--border)">
       <img src="./docs/marketing/qrcode-wechat.jpg" alt="微信号二维码" style="max-width:200px;width:100%;border:1px solid var(--border);border-radius:6px;padding:4px">
       <div style="font-size:13px;color:var(--ink2);margin-top:8px">用微信扫一扫,告诉我「诗词图谱」</div>
     </div>
@@ -1890,6 +1890,19 @@ body.sleep-open{overflow:hidden}
       cl.onclick=function(){
         sessionStorage.setItem('pg_banner_closed','1');
         b.style.display='none';
+      };
+    }
+    // 📱 「加我微信」toggle:展开/收起 QR panel,记住状态
+    var qrBtn=D.getElementById('pro-banner-qr');
+    var qrPanel=D.getElementById('pro-banner-qr-panel');
+    if(qrBtn && qrPanel){
+      var saved=localStorage.getItem('pg_qr_panel_open')==='1';
+      if(saved){ qrPanel.style.display='block'; qrBtn.textContent='▴ 收起二维码'; }
+      qrBtn.onclick=function(){
+        var on=qrPanel.style.display==='block';
+        qrPanel.style.display=on?'none':'block';
+        qrBtn.textContent=on?'📱 加我微信':'▴ 收起二维码';
+        localStorage.setItem('pg_qr_panel_open', on?'0':'1');
       };
     }
   }
