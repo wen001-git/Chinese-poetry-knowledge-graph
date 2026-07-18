@@ -1581,7 +1581,13 @@ body.sleep-open{overflow:hidden}
         try{ applyProVisibility(); updateBanner(); if(typeof updateChips==='function') updateChips(); if(typeof showView==='function') showView('home'); }catch(_){}
         // 还原 chip 本身:文字 + 图标 + 重绑点击(下次点开登录弹窗)
         var newChip=D.getElementById('login-chip');
-        if(newChip){ newChip.title='未登录 · 点击登录'; newChip.querySelector('.ic').textContent='🔑'; newChip.onclick=function(){ try{openLoginModal();}catch(_){} }; }
+        if(newChip){
+          newChip.title='未登录 · 点击登录';
+          newChip.querySelector('.ic').textContent='🔑';
+          var lblEl = newChip.querySelector('#login-chip-label') || D.getElementById('login-chip-label');
+          if(lblEl) lblEl.textContent = '登录';
+          newChip.onclick=function(){ try{openLoginModal();}catch(_){} };
+        }
         showProToast('已退出登录');
       };
     }
