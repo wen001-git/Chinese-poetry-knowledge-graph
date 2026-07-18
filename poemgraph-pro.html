@@ -956,6 +956,7 @@ body.sleep-open{overflow:hidden}
     <button class="vtab" id="t-poets" onclick="showView('poets')">✍ 诗人</button>
     <button class="vtab" id="t-path" onclick="showView('path')">🚩 闯关</button>
     <button class="vtab-login" id="login-chip" onclick="openLoginModal()" title="登录解锁全部功能"><span class="ic">🔑</span><span id="login-chip-label">登录</span></button>
+    <button class="vtab-share" id="share-chip" onclick="sharePoemgraph()" style="display:none" title="分享诗词图谱给朋友(自动复制文案+微信号+链接)">📤 分享</button>
   </div>
   <div class="nav-right">
     <div class="mode-switch" id="mode-switch">
@@ -1411,6 +1412,18 @@ body.sleep-open{overflow:hidden}
   }
   attachEyeButtons();
 
+  /* 📤 「分享」按钮 — 已登录用户点一下,自动拼一段种草文案 + 微信好友信息 + 二维码链接,复制到剪贴板。 */
+  function sharePoemgraph(){
+    var wx = (typeof _readWx === 'function' ? _readWx() : 'leewen2017');
+    var price = (document.querySelector('meta[name="x-price"]')||{}).content || '19.9';
+    var text = [
+      '【小学语文·诗词图谱 Po...clipboard.writeText(text).then(function(){
+      showProToast('已复制到剪贴板 · 粘给朋友吧');
+    }).catch(function(){
+      prompt('复制失败,请手动 Ctrl/Cmd+C:', text);
+    });
+  }
+
   // ── 加载 accounts.json（带 sessionStorage 缓存） ──
   function loadAccounts(){
     var cache=sessionStorage.getItem('pg_acc_cache');
@@ -1568,6 +1581,8 @@ body.sleep-open{overflow:hidden}
     PRO.logged = true;  // ← 重要:在 chip 更新前先设状态,否则下游 applyProVisibility / updateBanner 看不到
     var chip=D.getElementById('login-chip');
     var lbl=D.getElementById('login-chip-label');
+    var shareBtn=D.getElementById('share-chip');
+    if(shareBtn) shareBtn.style.display='';  // 已登录才显示分享按钮
     if(chip && lbl && PRO.user){
       lbl.textContent=PRO.user.u;
       chip.title='已登录（Pro 永久会员）·点击退出';
@@ -1588,6 +1603,9 @@ body.sleep-open{overflow:hidden}
           if(lblEl) lblEl.textContent = '登录';
           newChip.onclick=function(){ try{openLoginModal();}catch(_){} };
         }
+        // 登出后隐藏分享按钮
+        var shareBtn = D.getElementById('share-chip');
+        if(shareBtn) shareBtn.style.display = 'none';
         showProToast('已退出登录');
       };
     }
