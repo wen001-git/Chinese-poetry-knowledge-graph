@@ -1573,7 +1573,16 @@ body.sleep-open{overflow:hidden}
       chip.title='已登录（Pro 永久会员）·点击退出';
       chip.querySelector('.ic').textContent='✓';
       chip.onclick=function(){
-        if(confirm('确定要退出登录吗？')){ localStorage.removeItem('pg_pro_user'); location.reload(); }
+        if(!confirm('确定要退出登录吗？')) return;
+        localStorage.removeItem('pg_pro_user');
+        // 不 location.reload():poemgraph-pro.html 是 13MB,重新下载 + 解析 3~8s。
+        // 改在原页面 in-place 清理:重置状态 + 重新应用 visibility + 重画 chip。
+        PRO.logged=false; PRO.user=null;
+        try{ applyProVisibility(); updateBanner(); if(typeof updateChips==='function') updateChips(); if(typeof showView==='function') showView('home'); }catch(_){}
+        // 还原 chip 本身:文字 + 图标 + 重绑点击(下次点开登录弹窗)
+        var newChip=D.getElementById('login-chip');
+        if(newChip){ newChip.title='未登录 · 点击登录'; newChip.querySelector('.ic').textContent='🔑'; newChip.onclick=function(){ try{openLoginModal();}catch(_){} }; }
+        showProToast('已退出登录');
       };
     }
     // 关闭登录 modal（如开着）
