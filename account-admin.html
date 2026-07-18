@@ -421,6 +421,12 @@
       return data;
     }
 
+    /* 🔍 判断某账号是否在 accounts.json (本地静态) 中。render + click 共享此函数,避免分支判断不一致。 */
+    function isInStaticAccounts(username){
+      const k = (username || '').toLowerCase();
+      return staticAccounts.some(s => (s.u || '').toLowerCase() === k);
+    }
+
     function render(){
       /* 合并 Neon + 静态账号:
        *   - 都在 → 1 行(双源,可删除 Neon 这条变成纯静态)
@@ -433,7 +439,7 @@
         map.set(keyOf(a.username), {
           ...a,
           source: 'neon',
-          inStatic: !!staticAccounts.find(s => keyOf(s.u) === keyOf(a.username))
+          inStatic: isInStaticAccounts(a.username)
         });
       });
       staticAccounts.forEach(s => {
@@ -651,6 +657,13 @@
         }
       }, 600);
     });
+
+    /* 🔍 给定 username,判断是否在 accounts.json (本地静态) 中。
+     * 必须在 render() 之前调用,确保 merge 时和 click 时一致。 */
+    function isInStaticAccounts(username){
+      const k = (username || '').toLowerCase();
+      return staticAccounts.some(s => (s.u || '').toLowerCase() === k);
+    }
 
     accountList.addEventListener('click',async event=>{
       const button=event.target.closest('[data-action]');if(!button)return;
