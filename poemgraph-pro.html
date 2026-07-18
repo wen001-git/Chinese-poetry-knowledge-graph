@@ -1449,11 +1449,13 @@ body.sleep-open{overflow:hidden}
 
   // ── 加载 accounts.json（带 sessionStorage 缓存） ──
   function loadAccounts(){
+    /* 永远 fetch 当前最新的 accounts.json,不信任 sessionStorage 缓存
+     * 原因:admin HTML 添加账号后,旧缓存没包含新账号 → 登录走 fallback 到 Neon → 401 误报"密码错误"
+     * 网络失败时再用 sessionStorage 兜底 */
     var cache=sessionStorage.getItem('pg_acc_cache');
-    if(cache){ try{ PRO.accounts=JSON.parse(cache); return Promise.resolve(); }catch(e){} }
     return fetch(ACCOUNT_URL,{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
       PRO.accounts=j.accounts||[]; sessionStorage.setItem('pg_acc_cache',JSON.stringify(PRO.accounts));
-    }).catch(function(){ PRO.accounts=[]; });
+    }).catch(function(){ if(cache){ try{ PRO.accounts=JSON.parse(cache); }catch(e){ PRO.accounts=[]; } } else PRO.accounts=[]; });
   }
 
   // ── 设备 ID（首次访问生成，存 LS；用于后端校验设备数限制）──
