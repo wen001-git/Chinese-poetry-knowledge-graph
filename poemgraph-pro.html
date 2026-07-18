@@ -1005,7 +1005,12 @@ body.sleep-open{overflow:hidden}
       </span>
       <span class="pro-banner-wx">微信号：<b id="pro-banner-wx">leewen2017</b></span>
       <button class="pro-banner-copy" id="pro-banner-copy">📋 复制</button>
+      <button class="pro-banner-qr" id="pro-banner-qr" type="button">📱 加我微信</button>
       <button class="pro-banner-close" id="pro-banner-close" aria-label="关闭横幅">✕</button>
+    </div>
+    <div id="pro-banner-qr-panel" style="display:block;text-align:center;padding:14px;background:var(--paper2);border-bottom:1px solid var(--border)">
+      <img src="./docs/marketing/qrcode-wechat.jpg" alt="微信号二维码" style="max-width:200px;width:100%;border:1px solid var(--border);border-radius:6px;padding:4px">
+      <div style="font-size:13px;color:var(--ink2);margin-top:8px">用微信扫一扫,告诉我「诗词图谱」</div>
     </div>
     <div id="grade-list"></div>
   </section>
@@ -1676,6 +1681,7 @@ body.sleep-open{overflow:hidden}
   PRO.showPaywall = showPaywall;
 
   // ── 登录 modal（顶栏「🔑 登录」点击触发） ──
+  W.sharePoemgraph = sharePoemgraph;
   W.openLoginModal = function(){
     var box=showModal({
       html:
