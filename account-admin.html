@@ -69,7 +69,9 @@
     .accounts-head{padding:11px 18px;background:var(--paper2);color:var(--ink2);font-size:12px;font-weight:700;letter-spacing:.04em}
     .account{border-top:1px solid var(--border)}.account:first-of-type{border-top:0}
     .account-main{padding:16px 18px}
-    .username{font-weight:700;color:var(--ink);font-family:var(--serif);font-size:15px}
+    .username{font-weight:700;color:var(--ink);font-family:var(--serif);font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .source{font-size:10.5px;padding:2px 7px;border-radius:10px;font-weight:600;background:var(--teal);color:#fff;letter-spacing:.02em}
+    .source.static{background:var(--ochre);color:#fff}
     .meta{font-size:11px;color:var(--ink2);margin-top:4px}
     .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px}
     .dot{width:8px;height:8px;border-radius:50%;background:var(--good)}.off .dot{background:#aaa}
@@ -156,9 +158,29 @@
     </section>
 
     <section class="panel">
-      <h2>🛠 哈希工具（手动生成 / 验证 / 提取）</h2>
-      <p class="hint" style="margin-top:0">不需要连后端。给现有 <code>accounts.json</code> 加新账号、批量造号、手算单条哈希、验证哈希、或从一份 JSON 提取字段。改完手动 <code>git push</code> 部署。</p>
+      <h2>📚 静态账号管理（accounts.json）</h2>
+      <p class="hint" style="margin-top:0">本地静态账号存放在仓库根的 <code>accounts.json</code> — 用户走纯前端 SHA-256 校验登录，<b>不依赖 Render 后端在线</b>。下方 5 个工具用于：造号、批量、查单条哈希、验证、提取元数据。改完手动 <code>git push</code> 部署。</p>
 
+      <div class="stat-cards" id="static-overview" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 18px">
+        <div class="stat-card" style="padding:12px;background:var(--accent-soft);border-radius:8px;text-align:center">
+          <div style="font-size:24px;font-weight:700;color:var(--teal)" id="static-count-total">—</div>
+          <div class="hint">accounts.json 总账号数</div>
+        </div>
+        <div class="stat-card" style="padding:12px;background:var(--paper2);border-radius:8px;text-align:center">
+          <div style="font-size:24px;font-weight:700;color:var(--ochre)" id="static-count-neon">—</div>
+          <div class="hint">已同步到 Neon</div>
+        </div>
+        <div class="stat-card" style="padding:12px;background:var(--paper2);border-radius:8px;text-align:center">
+          <div style="font-size:24px;font-weight:700;color:var(--ink2)" id="static-count-static-only">—</div>
+          <div class="hint">仅静态（无 Neon）</div>
+        </div>
+        <div class="stat-card" style="padding:12px;background:var(--paper2);border-radius:8px;text-align:center">
+          <div style="font-size:11px;font-weight:600;color:var(--ink2);font-family:var(--mono);word-break:break-all" id="static-salt">—</div>
+          <div class="hint">当前 salt</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:14px;font-weight:600;color:var(--ink);margin:18px 0 10px">🛠 工具：</h3>
       <div class="tabs" style="display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px">
         <button class="tab on" data-tab="auto" type="button">🎲 自动生成</button>
         <button class="tab" data-tab="batch" type="button">批量</button>
@@ -327,6 +349,7 @@
     const accountList=document.getElementById('accountList');
     const passwordDialog=document.getElementById('passwordDialog');
     let accounts=[];
+    let staticAccounts=[];  // 从仓库根 accounts.json 读出的账号列表(仅用于显示「存储来源」标签)
     let passwordAccountId=null;
     apiBase.value=DEFAULT_API;
     adminToken.value=sessionStorage.getItem(TOKEN_KEY)||'';
@@ -357,7 +380,12 @@
       if(!accounts.length){accountList.innerHTML='<div class="empty">还没有账号，可以先创建测试账号或点击「🥚 迁移到 Neon」从 accounts.json 导入</div>';return}
       accountList.innerHTML=accounts.map(account=>`<article class="account" data-id="${account.id}">
         <div class="account-main">
-          <div><div class="username">${escapeHtml(account.username)}</div><div class="meta">创建于 ${formatDate(account.createdAt)}</div></div>
+          <div><div class="username">${escapeHtml(account.username)}${(() => {
+            const isStatic = staticAccounts.some(s => (s.u||'').toLowerCase() === (account.username||'').toLowerCase());
+            return isStatic
+              ? '<span class="source static" title="此账号也在仓库根 accounts.json (本地静态登录)">Neon + 静态</span>'
+              : '<span class="source" title="此账号只在 Neon 数据库">仅 Neon</span>';
+          })()}</div><div class="meta">创建于 ${formatDate(account.createdAt)}</div></div>
           <div class="badge ${account.enabled?'':'off'}"><i class="dot"></i>${account.enabled?'已启用':'已停用'}</div>
           <div><input class="device-limit" type="number" min="1" max="20" value="${account.maxDevices}" aria-label="设备上限"></div>
           <div>${formatDate(account.lastLoginAt)}<div class="meta">已绑定 ${account.devices.length} 台设备</div></div>
@@ -373,12 +401,55 @@
       </article>`).join('');
     }
 
+    async function loadStaticAccounts(){
+      // 拉仓库根 accounts.json(只为了显示存储来源标签,失败也不阻断主流程)
+      try{
+        const url = (document.querySelector('meta[name="x-account-url"]')||{}).content
+          || (location.origin + '/accounts.json');
+        const r = await fetch(url, {cache:'no-store'});
+        if(r.ok){
+          const j = await r.json();
+          staticAccounts = j.accounts || [];
+        } else {
+          staticAccounts = [];
+        }
+      }catch(_){ staticAccounts = []; }
+      return staticAccounts;
+    }
+
+    /* ── 静态账号总览:4 个统计卡 ── */
+    async function renderStaticOverview(){
+      try{
+        await loadStaticAccounts();
+        const neonUsernames = new Set(accounts.map(a => (a.username||'').toLowerCase()));
+        const totalEl = document.getElementById('static-count-total');
+        const neonEl = document.getElementById('static-count-neon');
+        const staticOnlyEl = document.getElementById('static-count-static-only');
+        const saltEl = document.getElementById('static-salt');
+        const total = staticAccounts.length;
+        const synced = staticAccounts.filter(s => neonUsernames.has((s.u||'').toLowerCase())).length;
+        const staticOnly = total - synced;
+        if(totalEl) totalEl.textContent = total;
+        if(neonEl) neonEl.textContent = synced;
+        if(staticOnlyEl) staticOnlyEl.textContent = staticOnly;
+        if(saltEl){
+          // 读 meta 标签的 salt
+          const metaSalt = (document.querySelector('meta[name="x-account-salt"]')||{}).content;
+          saltEl.textContent = metaSalt || '—';
+        }
+      }catch(_){}
+    }
+
     async function loadAccounts(highlightUsername){
       status('正在连接账号服务…');
       try{
-        const data=await request('/api/admin/accounts');
+        const [data] = await Promise.all([
+          request('/api/admin/accounts'),
+          loadStaticAccounts()
+        ]);
         accounts=data.accounts||[];
         render();
+        renderStaticOverview();  // 刷新静态账号总览卡 + 列表中的「存储来源」标签
         if(highlightUsername){
           const row = document.querySelector(`[data-username="${CSS.escape(highlightUsername)}"]`);
           if(row){
@@ -930,6 +1001,9 @@
       status(`当前通过 file:// 打开，无法安全调用账号服务。请运行 python3 -m http.server 8000，再打开 ${LOCAL_ADMIN_URL}`,true);
     }else if(adminToken.value){
       loadAccounts();
+    }else{
+      // 没填 token 也加载静态账号总览(只用 fetch accounts.json,不连 Neon)
+      renderStaticOverview();
     }
   </script>
 </body>
