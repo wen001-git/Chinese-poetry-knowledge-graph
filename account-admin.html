@@ -591,9 +591,9 @@
           setTimeout(() => { input.style.background = ''; }, 1200);
         }catch(error){
           input.style.background = '#f8d7da';
-          input.value = account.maxDevices;
-          status(error.message, true);
-          setTimeout(() => { input.style.background = ''; }, 1500);
+          // 不自动回滚!保留用户输入,显示具体错误。否则用户不知道为什么失败。
+          status(`保存失败: ${error.message} (账号 ${account.username} 的当前最大设备数仍是 ${account.maxDevices},但你的输入 ${input.value} 已保留 — 修好后请再试)`, true);
+          setTimeout(() => { input.style.background = ''; }, 3000);
         }
       }, 600);
     });
