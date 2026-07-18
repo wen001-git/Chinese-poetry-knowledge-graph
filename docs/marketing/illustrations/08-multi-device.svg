@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs><style>
+    .ink-text { font-family: 'STKaiti', 'KaiTi', serif; fill: #1c1c1e; }
+    .ink-line { stroke: #1c1c1e; fill: none; }
+    .teal { fill: #2d5a6b; }
+  </style></defs>
+  <rect width="400" height="400" fill="#f7f5f0"/>
+  <!-- 3 device outlines -->
+  <rect x="40" y="120" width="120" height="200" rx="12" fill="none" class="ink-line" stroke-width="2"/>
+  <rect x="170" y="100" width="160" height="120" rx="6" fill="none" class="ink-line" stroke-width="2"/>
+  <rect x="210" y="240" width="100" height="120" rx="6" fill="none" class="ink-line" stroke-width="2"/>
+  <!-- sync arrows -->
+  <path d="M 100 200 Q 200 100 250 160" stroke="#2d5a6b" fill="none" stroke-width="2" stroke-dasharray="4 3"/>
+  <path d="M 250 160 Q 250 240 260 270" stroke="#2d5a6b" fill="none" stroke-width="2" stroke-dasharray="4 3"/>
+  <circle cx="250" cy="160" r="5" class="teal"/>
+  <text x="200" y="60" text-anchor="middle" class="ink-text" font-size="20" font-weight="700">iPad · 手机 · 电脑</text>
+  <text x="200" y="385" text-anchor="middle" class="ink-text" font-size="13" fill="#5c5c6e">一账号 · 全设备同步</text>
+</svg>

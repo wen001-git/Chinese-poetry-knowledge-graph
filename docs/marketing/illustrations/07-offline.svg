@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs><style>
+    .ink-text { font-family: 'STKaiti', 'KaiTi', serif; fill: #1c1c1e; }
+    .teal { fill: #2d5a6b; }
+    .grey { stroke: #9a9aaa; fill: none; }
+  </style></defs>
+  <rect width="400" height="400" fill="#f7f5.../>
+  <text x="200" y="375" text-anchor="middle" class="ink-text" font-size="13" fill="#5c5c6e">地铁 / 教室 / 旅行</text>
+</svg>

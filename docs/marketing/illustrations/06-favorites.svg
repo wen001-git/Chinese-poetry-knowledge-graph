@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs><style>
+    .ink-text { font-family: 'STKaiti', 'KaiTi', serif; fill: #1c1c1e; }
+    .cinnabar { fill: #c1352b; }
+  </style></defs>
+  <rect width="400" height="400" fill="#f7f5f0"/>
+  <rect x="60" y="100" width="280" height="220" rx="12" fill="#fff" stroke="#d8d4ce" stroke-wid...="280" y="358" text-anchor="middle" class="ink-text" font-size="14" fill="#5c5c6e">自动同步 · 永不丢失</text>
+</svg>

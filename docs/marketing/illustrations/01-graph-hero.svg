@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <style>
+      .ink { stroke: #1c1c1e; fill: none; }
+      .ink-dot { fill: #1c1c1e; }
+      .ink-text { font-family: 'STKaiti', 'KaiTi', serif; fill: #1c1c1e; }
+      .teal { fill: #2d5a6b; }
+      .ochre { fill: #c9852b; }
+      .label { font-size: 12px; font-family: 'STKaiti', 'KaiTi', serif; }
+    </style>
+  </defs>
+  <rect width="400" height="400" fill="#f7f5f0"/>
+  <g transform="translate(200,200)">
+    <!-- center: 李白 -->
+    <circle cx="0" cy="0" r="36" class="teal" opacity="0.85"/>
+    <text x="0" y="6" text-anchor="middle" class="ink-text" fill="#fff" font-size="18" font-weight="700">李白</text>
+    <!-- 7 satellite poets -->
+    <g stroke="#7899a8" stroke-width="1.5" fill="none" opacity="0.7">
+      <line x1="0" y1="0" x2="0" y2="-110"/>
+      <line x1="0" y1="0" x2="95" y2="-55"/>
+      <line x1="0" y1="0" x2="95" y2="55"/>
+      <line x1="0" y1="0" x2="0" y2="110"/>
+      <line x1="0" y1="0" x2="-95" y2="55"/>
+      <line x1="0" y1="0" x2="-95" y2="-55"/>
+    </g>
+    <circle cx="0" cy="-110" r="22" class="ink-dot" opacity="0.7"/>
+    <text x="0" y="-104" text-anchor="middle" class="ink-text" font-size="13">杜甫</text>
+    <circle cx="95" cy="-55" r="22" class="ochre" opacity="0.85"/>
+    <text x="95" y="-49" text-anchor="middle" class="ink-text" font-size="13">王维</text>
+    <circle cx="95" cy="55" r="22" class="ink-dot" opacity="0.7"/>
+    <text x="95" y="61" text-anchor="middle" class="ink-text" font-size="13">孟浩然</text>
+    <circle cx="0" cy="110" r="22" class="ink-dot" opacity="0.7"/>
+    <text x="0" y="116" text-anchor="middle" class="ink-text" font-size="13">高适</text>
+    <circle cx="-95" cy="55" r="22" class="ink-dot" opacity="0.7"/>
+    <text x="-95" y="61" text-anchor="middle" class="ink-text" font-size="13">岑参</text>
+    <circle cx="-95" cy="-55" r="22" class="ink-dot" opacity="0.7"/>
+    <text x="-95" y="-49" text-anchor="middle" class="ink-text" font-size="13">贺知章</text>
+  </g>
+  <text x="200" y="370" text-anchor="middle" class="ink-text" font-size="16" font-weight="700">诗词图谱</text>
+  <text x="200" y="390" text-anchor="middle" class="ink-text" font-size="11" fill="#5c5c6e">1-9 年级 · 300+ 诗人 · 1200+ 诗</text>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs><style>
+    .ink-text { font-family: 'STKaiti', 'KaiTi', serif; fill: #1c1c1e; }
+    .ink-line { stroke: #1c1c1e; stroke-width: 1; fill: none; }
+    .teal { fill: #2d5a6b; }
+  </style></defs>
+  <rect width="400" height="400" fill="#f7f5f0"/>
+  <text x="40" y="80" class="ink-text" font-size="24" font-weight="700">静夜思</text>
+  <text x="40" y="105" class="ink-text" font-size="13" fill="#5c5c6e">李白 · 唐代</text>
+  <line x1="40" y1="120" x2="360" y2="120" class="ink-line"/>
+  <text x="40" y="170" class="ink-text" font-size="20">床前明月光，</text>
+  <text x="40" y="200" class="ink-text" font-size="20">疑是地上霜。</text>
+  <text x="40" y="240" class="ink-text" font-size="20">举头望明月，</text>
+  <text x="40" y="270" class="ink-text" font-size="20">低头思故乡。</text>
+  <!-- play button -->
+  <g transform="translate(200,330)">
+    <circle r="32" class="teal"/>
+    <polygon points="-8,-12 -8,12 14,0" fill="#fff"/>
+  </g>
+  <text x="200" y="380" text-anchor="middle" class="ink-text" font-size="13" fill="#5c5c6e">点一下，标准朗读</text>
+</svg>

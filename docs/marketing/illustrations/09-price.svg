@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs><style>
+    .ink-text { font-family: 'STKaiti', 'KaiTi', serif; fill: #1c1c1e; }
+    .cinnabar { fill: #c1352b; }
+    .gold { fill: #b88a2a; }
+  </style></defs>
+  <rect width="400" height="400" fill="#f7f5f0"/>
+  <!-- 红包背景 -->
+  <rect x="50" y="80" width="300" height="240" rx="20" fill="#c1352b"/>
+  <circle cx="200" cy="200" r="70" fill="#a52a22"/>
+  <circle cx="200" cy="200" r="55" fill="#f7f5f0"/>
+  <text x="200" y="160" text-anchor="middle" class="ink-text" font-size="14" fill="#5c5c6e">一年会员</text>
+  <text x="200" y="215" text-anchor="middle" class="cinnabar" font-size="48" font-weight="700">¥99</text>
+  <text x="200" y="245" text-anchor="middle" class="ink-text" font-size="12" fill="#5c5c6e">终身 / 教师免费</text>
+  <!-- 底部信息 -->
+  <text x="200" y="355" text-anchor="middle" class="ink-text" font-size="14" fill="#5c5c6e">比一本课外书还便宜</text>
+  <text x="200" y="380" text-anchor="middle" class="gold" font-size="13" font-weight="700">微信 / 支付宝 · 立即开通</text>
+</svg>
