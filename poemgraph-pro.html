@@ -1540,6 +1540,15 @@ body.sleep-open{overflow:hidden}
       }));
       onLoginSuccess();
       showProToast('✓ 本地登录成功（无设备绑定）');
+      /* 🔇 静默上报设备到 Neon — 让 admin HTML 列表能看到此静态账号的设备绑定 + 设备上限严格生效。
+       * 不 await,失败也不阻塞用户体验(local 登录已经成功)。 */
+      tryRemote(u, p, deviceId).then(function(res){
+        if(res && res.ok){
+          // 更新设备数显示
+          updateDeviceBadge(res.devices && res.devices.length);
+        }
+        // 失败:静默 — 用户已经登录,只是 Neon 暂时不可达,下次登录会重试
+      }).catch(function(){});
       return {ok: true, source: 'local', u: localRes.u, deviceId: deviceId};
     });
   }
@@ -1845,6 +1854,18 @@ body.sleep-open{overflow:hidden}
   /* ── Pro 版轻量 toast（底部居中 3s 自动消失）──
    * 比 alert 不打断用户、不阻塞线程；与 poemgraph 主页面现有 toast 风格一致
    */
+  /* 更新 chip 上的"已绑定 X 台"小角标(仅在登录后由 tryRemote 静默回调触发) */
+  function updateDeviceBadge(n){
+    if(typeof n !== 'number') return;
+    var chip=D.getElementById('login-chip');
+    if(!chip) return;
+    var lab=chip.querySelector('#login-chip-label');
+    if(!lab) return;
+    var cur=lab.textContent;
+    // 如果已经显示用户名,就不更新了(避免混淆)
+    if(cur && cur.indexOf('已绑定') === -1) return;
+  }
+
   function showProToast(msg){
     try{
       var old=D.getElementById('pro-toast');
