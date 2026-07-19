@@ -594,7 +594,13 @@
       status(`已下载 accounts.json (含本次新建 ${buffered.length} 个账号)。请覆盖到仓库根 accounts.json + git push`);
     }
     document.getElementById('exportJsonBtn').onclick = downloadAccountsJson;
-    document.getElementById('clearBufferBtn').onclick = () => { window.__lastCreated = []; status('已清空新建账号缓冲'); };
+    document.getElementById('clearBufferBtn').onclick = () => {
+      const n = (window.__lastCreated || []).length;
+      window.__lastCreated = [];
+      const c = document.getElementById('lastCreatedCount');
+      if(c) c.textContent = '0';
+      status(n ? '✓ 已清空 ' + n + ' 个缓冲账号(下次「📥 下载 accounts.json」不会包含它们)' : '缓冲本来就是空的');
+    };
 
     document.getElementById('createForm').addEventListener('submit',async event=>{
       event.preventDefault();
@@ -608,6 +614,8 @@
         event.target.reset();document.getElementById('newLimit').value=3;
         // 缓冲本次明文 → 供「📥 下载 accounts.json」按钮用
         (window.__lastCreated = window.__lastCreated || []).push({username:newName, password:newPass});
+        const c = document.getElementById('lastCreatedCount');
+        if(c) c.textContent = String(window.__lastCreated.length);
         await loadAccounts(newName);  // 把新账号 id 传过去,高亮 + 滚动
         status('✓ 账号「' + newName + '」已创建');
         const orig = btn.textContent;
