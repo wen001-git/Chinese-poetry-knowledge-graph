@@ -486,7 +486,7 @@
             <button class="compact" data-action="password">改密码</button>
             <button class="compact ${account.enabled?'danger':''}" data-action="toggle">${account.enabled?'停用':'启用'}</button>
             <button class="compact danger" data-action="delete" title="从 Neon 中永久删除此账号(此账号若也在 accounts.json,删除 Neon 后即变纯静态)">🗑 删除</button>
-            <button class="compact" data-action="to-static" title="下载此账号的 SHA-256 行,以便手动加到 accounts.json">↓ 转静态</button>`}</div>
+            <button class="compact" data-action="copy-line" title="复制 SHA-256 行到剪贴板,以便手动加到 accounts.json">📋 复制 JSON 行</button>`}</div>
         </div>
         ${account.source==='static' ? '' : `<div class="devices">${account.devices.length?account.devices.map(device=>`<div class="device"><span>${escapeHtml(device.deviceName||'未命名设备')}</span><span title="${escapeHtml(device.userAgent)}">${escapeHtml(device.userAgent||device.deviceId)}</span><span>${formatDate(device.lastSeenAt)}</span></div>`).join(''):'<div class="meta">暂无绑定设备</div>'}
           ${account.devices.length?'<div class="actions" style="margin-top:10px"><button class="compact danger" data-action="clear">清空全部设备</button></div>':''}
@@ -679,23 +679,16 @@
         }catch(error){status(error.message,true)}
         return;
       }
-      if(action==='to-static'){
-        if(account.inStatic){
-          if(!confirm('账号「'+account.username+'」已在 accounts.json 中。\n\n点击"确定"会从 Neon 中删除此账号,保留 accounts.json 那条 — 此后此账号完全走本地静态登录路径(SHA-256(salt+password) 校验)。\n\n此操作不可恢复!')) return;
-          try{ await request('/api/admin/accounts/'+id, {method:'DELETE'}); await loadAccounts(); status('✓ 已删除 Neon 账号: '+account.username+' (现仅 accounts.json)'); }
-          catch(error){ status(error.message, true); }
-          return;
-        }
+      if(action==='copy-line'){
         var salt = (document.querySelector('meta[name="x-salt"]')||{}).content || 'pg-pro-salt-v1';
         var line = JSON.stringify({u: account.username, h: account.passwordHash}, null, 0);
-        var hint = `把这一行追加到仓库根 accounts.json 的 accounts 数组:\n\n${line}\n\n${salt}  ← 当前 salt(若改了也同步)\n\n(若要彻底从 Neon 移除此账号,请先合并到 accounts.json + git push,然后点 🗑 删除按钮)\n\n需要复制吗？`;
-        if(confirm(hint)){
-          try{
-            await navigator.clipboard.writeText(line);
-            status('✓ 已复制 JSON 行: ' + account.username);
-          }catch(_){
-            prompt('复制失败,请手动 Ctrl/Cmd+C:', line);
-          }
+        var hint = '复制此账号的 (u, h) 行到剪贴板?\n\n' + line + '\n\n salt: ' + salt + '\n\n提示:粘贴到仓库根 accounts.json 后再 git push。用户从「仅 Neon」变成「Neon + 静态」(本地优先)。';
+        if(!confirm(hint)) return;
+        try{
+          await navigator.clipboard.writeText(line);
+          status('✓ 已复制 ' + account.username + ' 的 JSON 行');
+        }catch(_){
+          prompt('复制失败,请手动 Ctrl/Cmd+C:', line);
         }
         return;
       }
