@@ -870,6 +870,11 @@ body.sleep-open{overflow:hidden}
 .pro-btn:hover{opacity:.85}
 .pro-btn.ghost{background:transparent;color:var(--ink2);font-weight:normal}
 .pro-btn.ghost:hover{color:var(--ink)}
+
+  /* 推荐给朋友 modal — 桌面 2 栏,手机竖排 */
+  .share-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+  @media (max-width:560px){.share-grid{grid-template-columns:1fr}}
+  #share-ta{width:100%;min-height:160px;border:1px solid var(--border);border-radius:6px;padding:10px;font:inherit;font-size:13px;line-height:1.5;resize:vertical;background:var(--paper2);color:var(--ink)}
 .pro-err{color:var(--cinnabar);font-size:13px;min-height:18px}
 
 /* ══════════ Pro 版付费墙横幅（诗单顶部） ══════════ */
@@ -1425,26 +1430,65 @@ body.sleep-open{overflow:hidden}
   }
   attachEyeButtons();
 
-  /* 📤 「分享」按钮 — 已登录用户点一下,自动拼一段种草文案 + 微信好友信息 + 二维码链接,复制到剪贴板。 */
+  /* 📤 「分享」按钮 — 弹「推荐给朋友」modal: 左栏可编辑推荐语 + 复制/系统分享,右栏作者微信 + 二维码 */
   function sharePoemgraph(){
     var wx = (typeof _readWx === 'function' ? _readWx() : 'leewen2017');
     var price = (document.querySelector('meta[name="x-price"]')||{}).content || '19.9';
     var url = location.origin + '/poemgraph-pro.html';
-    var qrUrl = location.origin + '/docs/marketing/qrcode-wechat.jpg';
-    var L = '【小学语文·诗词图谱 PoemGraph Pro】\n';
-    L += '给小学生看古诗的「网状图」工具：300+ 诗人 / 1200+ 诗 / 1-9 年级跟课本同步 / 朗读音频。\n';
+    var qrUrl = './docs/marketing/qrcode-wechat.jpg';
+    var L = '【中小学语文·诗词图谱 PoemGraph Pro】\n';
+    L += '给中小学生看古诗的「网状图」工具:300+ 诗人 / 1200+ 诗 / 1-9 年级跟课本同步 / 朗读音频。\n';
     L += '会员年费 ¥' + price + '，老师免费。\n';
     L += '打开：' + url + '\n';
     L += '作者微信：' + wx + '\n';
-    L += '扫一扫加我（备注「诗词图谱」）：' + qrUrl;
+    L += '扫一扫加我（备注「诗词图谱」）';
     var text = L;
-    var done = function(){ showProToast('已复制到剪贴板 · 粘给朋友吧'); };
-    var fail = function(){ prompt('复制失败,请手动 Ctrl/Cmd+C:', text); };
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(done).catch(fail);
-    } else {
-      fail();
-    }
+    /* 弹 modal: 左栏推荐语 textarea, 右栏作者微信 + QR */
+    var box = showModal({
+      html:
+        '<div class="pro-msg">📤 推荐给朋友</div>'+
+        '<div class="share-grid" style="margin-top:14px">'+
+          '<div>'+
+            '<div class="hint" style="margin-bottom:6px;font-size:12px">推荐语(可编辑):</div>'+
+            '<textarea id="share-ta" style="width:100%;min-height:160px;border:1px solid var(--border);border-radius:6px;padding:10px;font:inherit;font-size:13px;line-height:1.5;resize:vertical">'+text.replace(/</g,'&lt;')+'</textarea>'+
+            '<div style="display:flex;gap:8px;margin-top:10px">'+
+              '<button class="pro-btn" id="share-copy-btn">📋 复制推荐语</button>'+
+              '<button class="pro-btn ghost" id="share-native-btn" style="display:none">📱 系统分享</button>'+
+            '</div>'+
+          '</div>'+
+          '<div style="text-align:center;padding:10px;background:var(--paper2);border-radius:8px">'+
+            '<div style="font-size:12px;color:var(--ink2);margin-bottom:6px">作者微信</div>'+
+            '<div style="font-size:18px;font-weight:700;color:var(--ink);font-family:var(--serif);margin-bottom:8px">'+wx+'</div>'+
+            '<img src="'+qrUrl+'" alt="作者微信二维码" style="max-width:160px;width:100%;border:1px solid var(--border);border-radius:6px;padding:4px;background:#fff">'+
+            '<div style="font-size:11px;color:var(--ink3);margin-top:6px">扫码加我,备注「诗词图谱」</div>'+
+          '</div>'+
+        '</div>',
+      onMount: function(b){
+        var ta = b.querySelector('#share-ta');
+        var copyBtn = b.querySelector('#share-copy-btn');
+        var nativeBtn = b.querySelector('#share-native-btn');
+        copyBtn.onclick = function(){
+          var v = ta.value;
+          var done = function(){ showProToast('✓ 已复制推荐语 · 粘给朋友吧'); };
+          var fail = function(){ prompt('复制失败,请手动 Ctrl/Cmd+C:', v); };
+          if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(v).then(done).catch(fail);
+          } else {
+            fail();
+          }
+        };
+        if(navigator.share){
+          nativeBtn.style.display = '';
+          nativeBtn.onclick = function(){
+            navigator.share({
+              title: '中小学语文·诗词图谱',
+              text: ta.value,
+              url: url
+            }).catch(function(){});
+          };
+        }
+      }
+    });
   }
 
   // ── 加载 accounts.json（带 sessionStorage 缓存） ──
