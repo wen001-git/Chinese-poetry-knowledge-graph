@@ -137,6 +137,8 @@
     <section class="panel account-combo">
       <h2>账号管理</h2>
       <p class="hint" style="margin-top:0">在下方表单创建账号，或调整表格里已有账号的设备上限、密码、状态。</p>
+      <div style="margin-top:8px;padding:10px 12px;background:var(--paper2);border-left:3px solid var(--teal);border-radius:6px;font-size:12px;line-height:1.6">
+        <b>📌 设备规则(2026-07-18 决定):<b>"只记录,不拦截"</b> — 静态账号登录后,后台静默记录设备到 Neon(管理员列表能看到设备数),<b>但不会阻止同一账号在多台机器登录</b>。chrome+firefox 同账号都能登。设备上限(maxDevices)目前仅作<b>显示/参考</b>,实际不拦截。
 
       <form class="grid" id="createForm" style="padding-bottom:14px;border-bottom:1px dashed var(--border);margin-bottom:14px">
         <div class="field"><label for="newUsername">账号名（username，不是数量）</label><input id="newUsername" required maxlength="80" autocomplete="off"></div>

@@ -1540,14 +1540,12 @@ body.sleep-open{overflow:hidden}
       }));
       onLoginSuccess();
       showProToast('✓ 本地登录成功（无设备绑定）');
-      /* 🔇 静默上报设备到 Neon — 让 admin HTML 列表能看到此静态账号的设备绑定 + 设备上限严格生效。
-       * 不 await,失败也不阻塞用户体验(local 登录已经成功)。 */
-      tryRemote(u, p, deviceId).then(function(res){
-        if(res && res.ok){
-          // 更新设备数显示
-          updateDeviceBadge(res.devices && res.devices.length);
-        }
-        // 失败:静默 — 用户已经登录,只是 Neon 暂时不可达,下次登录会重试
+      /* 🔇 静默记录设备到 Neon — 让 admin HTML 列表能看到此静态账号的设备绑定。
+       * 只记录,**不拦截**(chrome+firefox 同一账号都能登)。仅在 fire-and-forget 路径调,失败静默。 */
+      fetch(AUTH_API + '/api/admin/record-device', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: u, deviceId: deviceId})
       }).catch(function(){});
       return {ok: true, source: 'local', u: localRes.u, deviceId: deviceId};
     });
