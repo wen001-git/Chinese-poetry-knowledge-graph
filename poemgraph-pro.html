@@ -892,12 +892,34 @@ body.sleep-open{overflow:hidden}
 .pro-banner-copy:hover{opacity:.85}
 .pro-banner-close{padding:0 6px;background:transparent;color:var(--ink3);border:none;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0}
 .pro-banner-close:hover{color:var(--ink)}
-@media(max-width:680px){
-  .pro-banner{gap:8px;padding:10px 12px;font-size:12px}
-  .pro-banner-ic{font-size:18px}
+@media(max-width:768px){
+  /* 手机:整条 banner 默认收起成 1 行(只显示「未登录限 1 年级 · ▾ 展开」) */
+  .pro-banner{gap:8px;padding:8px 12px;font-size:12px;flex-wrap:nowrap}
+  .pro-banner-ic{font-size:16px}
   .pro-banner-title{font-size:13px}
   .pro-banner-sub{font-size:11px}
+  /* 让 expand-btn 在所有屏幕可见 */
+  .pro-banner-expand{display:inline-flex}
+  /* 折叠时:把完整内容(描述 + 微信 + 复制 + QR-panel)全部隐藏,只留一行摘要 */
+  .pro-banner.collapsed .pro-banner-sub,
+  .pro-banner.collapsed .pro-banner-wx,
+  .pro-banner.collapsed .pro-banner-copy,
+  .pro-banner.collapsed #pro-banner-qr-panel{display:none !important}
+  /* 摘要:只显示在 collapsed 状态 */
+  #pro-banner-summary{display:none}
+  .pro-banner.collapsed #pro-banner-summary{display:inline;color:var(--ink2);font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 展开按钮:在所有屏幕都可见,但内容里默认只在手机可点;桌面无视 */
+  .pro-banner-expand{padding:5px 10px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
+  .pro-banner.collapsed{gap:6px}
+  .pro-banner.collapsed .pro-banner-title::after{content:"  · 点此查看付费详情 ▾"}
+  .pro-banner:not(.collapsed) .pro-banner-title::after{content:""}
 }
+@media(max-width:680px){
+  .pro-banner{gap:8px;padding:8px 10px;font-size:12px}
+}
+.pro-banner-expand{display:none;padding:4px 10px;background:var(--cinnabar);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
+.pro-banner-expand:hover{opacity:.85}
+.pro-banner.collapsed #pro-banner-summary{display:inline}
 
 /* 密码可见性切换 👁 按钮 */
 .eye-wrap{position:relative;display:block;width:100%}
@@ -1017,6 +1039,8 @@ body.sleep-open{overflow:hidden}
         <span class="pro-banner-sub">添加作者微信购买 ¥XX 元（解锁全部内容·教师免费）</span>
       </span>
       <span class="pro-banner-wx">微信号：<b id="pro-banner-wx">leewen2017</b></span>
+      <span id="pro-banner-summary">未登录限 1 年级 · 点击展开详情</span>
+      <button class="pro-banner-expand" id="pro-banner-expand" type="button" aria-label="展开付费墙详情">▾ 展开</button>
       <button class="pro-banner-copy" id="pro-banner-copy">📋 复制</button>
       <button class="pro-banner-qr" id="pro-banner-qr" type="button">📱 加我微信</button>
       <button class="pro-banner-close" id="pro-banner-close" aria-label="关闭横幅">✕</button>
@@ -1940,6 +1964,8 @@ body.sleep-open{overflow:hidden}
     /* 显示/隐藏 */
     var closed=sessionStorage.getItem('pg_banner_closed')==='1';
     b.style.display = (PRO.logged || closed) ? 'none' : 'flex';
+    /* 📱 手机端默认收起 */
+    if(typeof applyMobileCollapse === 'function') applyMobileCollapse();
   }
 
   function bindBannerEvents(){
@@ -1983,7 +2009,36 @@ body.sleep-open{overflow:hidden}
   W.PRO_MODE = PRO;
   W.PAY_COPY = PAY_COPY;
   W.showPaywall = showPaywall;
+  /* 📱 手机端默认把 banner 收成 1 行(只显示摘要 + ▾ 展开按钮) */
+  function applyMobileCollapse(){
+    var b = D.getElementById('pro-banner'); if(!b) return;
+    var expBtn = D.getElementById('pro-banner-expand');
+    var summary = D.getElementById('pro-banner-summary');
+    var isMobile = window.innerWidth < 768;
+    if(isMobile){
+      b.classList.add('collapsed');
+      if(expBtn) expBtn.textContent = '▾ 展开';
+    } else {
+      b.classList.remove('collapsed');
+      if(expBtn) expBtn.textContent = '▴ 收起';
+    }
+    if(summary) summary.style.display = '';
+  }
+  /* 展开/收起 banner */
+  D.addEventListener('click', function(e){
+    if(!e.target.closest || !e.target.closest('#pro-banner-expand')) return;
+    var b = D.getElementById('pro-banner'); if(!b) return;
+    var expBtn = D.getElementById('pro-banner-expand');
+    var collapsed = b.classList.toggle('collapsed');
+    if(expBtn) expBtn.textContent = collapsed ? '▾ 展开' : '▴ 收起';
+  });
+  /* 视口尺寸变化时也重算 — 横竖屏切换、桌面窗口调整生效 */
+  window.addEventListener('resize', applyMobileCollapse);
+
   W.applyProVisibility = applyProVisibility;
+  W.applyMobileCollapse = applyMobileCollapse;
+  W.bindBannerEvents = bindBannerEvents;  // 已有的,确保 boot 调用后会运行
+  /* 在 boot 里调用 applyMobileCollapse —— 修改 boot */
   if(D.readyState==='loading') D.addEventListener('DOMContentLoaded',function(){ setTimeout(boot,0); });
   else setTimeout(boot,0);
 })();
