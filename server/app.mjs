@@ -230,6 +230,23 @@ export function createApp(options) {
           const result = await store.importFromJsonAccounts(blob, maxDevices);
           return sendJson(res, 200, { ok: true, ...result });
         }
+
+        // Silent device recording (used by static-only accounts after local login)
+        // 不重新校验密码 — 仅当账号存在时记录 deviceId。仅在 fire-and-forget 路径调用。
+        if (req.method === 'POST' && url.pathname === '/api/admin/record-device') {
+          const body = await readJson(req);
+          const username = String(body.username || '').toLowerCase().trim();
+          const deviceId = String(body.deviceId || '').trim();
+          if (!username || !deviceId) {
+            return sendJson(res, 400, { ok: false, code: 'BAD_REQUEST', message: 'username + deviceId required' });
+          }
+          const account = await store.getAccountByUsername(username);
+          if (!account) {
+            return sendJson(res, 404, { ok: false, code: 'NOT_FOUND', message: '账号在 Neon 中不存在' });
+          }
+          await store.recordDevice(account.id, deviceId, 'silent-local');
+          return sendJson(res, 200, { ok: true, accountId: account.id });
+        }
       }
 
       return sendJson(res, 404, { ok: false, code: 'NOT_FOUND', requestId: randomUUID() });
