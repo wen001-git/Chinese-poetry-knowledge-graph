@@ -2588,6 +2588,15 @@ function showView(v){
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
   const tb=document.getElementById('t-'+v); if(tb)tb.classList.add('on');
   stopGraph(); tlPause(); if(v!=='detail'){reciteStop(); const f=document.getElementById('d-recite-float'); if(f)f.classList.remove('show'); panelClose();}
+  /* 📜 自动滚动到 view 顶部(避免 nav (111px) 把列表推到屏外) */
+  if(vt){
+    setTimeout(function(){
+      var rect = vt.getBoundingClientRect();
+      if(rect.y < 0 || rect.y > window.innerHeight * 0.7){
+        window.scrollTo({top: rect.y + window.scrollY - 80, behavior: 'smooth'});
+      }
+    }, 50);
+  }
   if(v==='grade')renderGradeList();
   else if(v==='cards')renderCards();
   else if(v==='graph')renderGraph();
