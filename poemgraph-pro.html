@@ -389,6 +389,11 @@ select.chip#grade-chip option[data-locked="1"]{color:var(--ink3);background:var(
 /* ══════════ 详情页 ══════════ */
 #v-detail{max-width:860px;margin:0 auto}
 .d-back{color:var(--ink2);font-size:14px;margin-bottom:16px;display:inline-flex;gap:6px;align-items:center}
+.detail-float-back{display:none;position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:120;width:46px;height:46px;
+  align-items:center;justify-content:center;border-radius:50%;border:1px solid var(--border2);background:rgba(247,245,240,.94);color:var(--ink2);
+  box-shadow:0 4px 16px rgba(28,28,30,.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:background .16s,color .16s,transform .16s}
+.detail-float-back svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.detail-float-back:active{transform:translateY(1px);background:var(--paper2);color:var(--cinnabar)}
 .d-nav{display:flex;justify-content:space-between;margin-bottom:8px}
 .d-nav .d-back{margin-bottom:0}
 .d-back:hover{color:var(--teal)}
@@ -640,6 +645,7 @@ body.theme-zhumo .d-recite-float.on{background:var(--qing)}
   .d-hero{padding:24px 18px}
 }
 @media(max-width:680px){
+  #v-detail.on .detail-float-back{display:inline-flex}
   .vtabs .vtab, .vtabs .vtab-login{padding:5px 9px;font-size:13px}
 }
 @media(min-width:821px) and (max-width:1024px){
@@ -1142,6 +1148,7 @@ body.sleep-open{overflow:hidden}
 
   <!-- 详情页 -->
   <section class="view" id="v-detail">
+    <button class="detail-float-back no-print" type="button" onclick="backFromDetail()" aria-label="返回上一页" title="返回上一页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
     <button class="d-back" onclick="backFromDetail()">← 返回</button>
     <div class="d-hero">
       <div class="d-seal">詩</div>
