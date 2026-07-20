@@ -81,6 +81,14 @@ body[data-guide="1"] #nav{display:none}
 .brand{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:.12em;cursor:pointer;white-space:nowrap}
 .brand .dot{color:var(--ochre)}
 .vtabs{display:flex;gap:4px;flex-wrap:wrap}
+.grade-nav-wrap{position:relative;display:inline-flex}
+.grade-nav-menu{display:none;position:absolute;top:calc(100% + 7px);left:0;z-index:130;width:228px;padding:10px;
+  grid-template-columns:repeat(3,1fr);gap:7px;background:rgba(247,245,240,.98);border:1px solid var(--border);
+  border-radius:14px;box-shadow:var(--shadow2);backdrop-filter:blur(10px)}
+.grade-nav-menu.open{display:grid}
+.grade-nav-menu button{min-height:42px;padding:7px 4px;border-radius:10px;border:1px solid transparent;
+  background:var(--paper2);color:var(--ink2);font-size:13px;white-space:nowrap}
+.grade-nav-menu button:hover,.grade-nav-menu button.on{border-color:var(--teal);color:var(--teal);background:var(--teal-l)}
 .vtab{padding:7px 14px;border-radius:20px;font-size:15px;color:var(--ink2);transition:.18s;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;box-sizing:border-box}
 .vtab:hover{background:var(--paper2)}
 .vtab.on{background:var(--teal);color:#fff}
@@ -885,7 +893,14 @@ body.sleep-open{overflow:hidden}
 <nav id="nav">
   <div class="brand" onclick="showView('grade')">诗词图谱<span class="dot">·</span></div>
   <div class="vtabs">
-    <button class="vtab" id="t-grade" onclick="showView('grade')">📖 年级</button>
+    <div class="grade-nav-wrap">
+      <button class="vtab" id="t-grade" onclick="toggleNavGradeMenu(event)" aria-haspopup="menu" aria-expanded="false">📖 年级</button>
+      <div class="grade-nav-menu" id="grade-nav-menu" role="menu" aria-label="选择年级">
+        <button role="menuitem" data-grade="1" onclick="selectNavGrade(1)">1年级</button><button role="menuitem" data-grade="2" onclick="selectNavGrade(2)">2年级</button><button role="menuitem" data-grade="3" onclick="selectNavGrade(3)">3年级</button>
+        <button role="menuitem" data-grade="4" onclick="selectNavGrade(4)">4年级</button><button role="menuitem" data-grade="5" onclick="selectNavGrade(5)">5年级</button><button role="menuitem" data-grade="6" onclick="selectNavGrade(6)">6年级</button>
+        <button role="menuitem" data-grade="7" onclick="selectNavGrade(7)">7年级</button><button role="menuitem" data-grade="8" onclick="selectNavGrade(8)">8年级</button><button role="menuitem" data-grade="9" onclick="selectNavGrade(9)">9年级</button>
+      </div>
+    </div>
     <button class="vtab" id="t-cards" onclick="showView('cards')">🀄 卡片墙</button>
     <button class="vtab" id="t-graph" onclick="showView('graph')">🕸 知识图谱</button>
     <button class="vtab" id="t-map" onclick="showView('map')">🗺 诗词地图</button>
@@ -2585,6 +2600,22 @@ function pickGrade(g){ runChoice(function(){
   applyRole();updateChips();setMode(ST.mode,true);showView('grade');
 });}
 function openGradePick(){document.body.dataset.guide='1';gradeOv.style.display='flex';}
+function closeNavGradeMenu(){
+  var menu=document.getElementById('grade-nav-menu'),btn=document.getElementById('t-grade');
+  if(menu)menu.classList.remove('open'); if(btn)btn.setAttribute('aria-expanded','false');
+}
+function toggleNavGradeMenu(e){
+  if(!window.matchMedia('(max-width: 820px)').matches){showView('grade');return;}
+  if(e){e.preventDefault();e.stopPropagation();}
+  var menu=document.getElementById('grade-nav-menu'),btn=document.getElementById('t-grade'); if(!menu)return;
+  var opening=!menu.classList.contains('open'); closeNavGradeMenu();
+  if(opening){menu.classList.add('open');if(btn)btn.setAttribute('aria-expanded','true');}
+}
+function selectNavGrade(g){
+  quickPickGrade(g);closeNavGradeMenu();showView('grade');
+}
+document.addEventListener('click',function(e){if(!e.target.closest('.grade-nav-wrap'))closeNavGradeMenu();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNavGradeMenu();});
 /* 顶栏年级下拉：原地切换年级，停留在当前视图（闯关/图谱/地图等），不像 pickGrade 那样跳走 */
 function quickPickGrade(g){ST.grade=+g;lsSave();updateChips();showView(ST.view);}
 function updateChips(){
@@ -2592,6 +2623,7 @@ function updateChips(){
   const rc=document.getElementById('role-chip');
   rc.innerHTML='<span class="ic">'+ri.ic+'</span><span>'+ri.nm+'</span>';
   document.getElementById('grade-chip').value=ST.grade||1;
+  document.querySelectorAll('#grade-nav-menu [data-grade]').forEach(function(b){b.classList.toggle('on',+b.dataset.grade===(ST.grade||1));});
 }
 /* ── 模式 ── */
 function setMode(m,silent){
