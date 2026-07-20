@@ -3647,18 +3647,6 @@ function openDetail(id){
   document.getElementById('d-title').textContent=p.title;
   renderDetailNav(p, fromPath);
   document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'" onclick="recitePickLine(event,'+i+')">'+rubyLine(l,p.anno)+lineScene(l.t)+'</span>').join('');
-  // 2026-07-20 把长诗朗读按钮的内嵌实验回退了 — 现在 d-recite-float 始终是 fixed 浮动按钮
-  bindAnnoPop();
-  updateReciteFloatShow();
-  reciteStop();panelClose();
-        verse.appendChild(btn);
-      } else {
-        btn.classList.remove('near');
-        // 短诗:按钮放回原位 body 末尾
-        document.body.appendChild(btn);
-      }
-    }
-  }, 50);
   bindAnnoPop();
   updateReciteFloatShow();
   reciteStop();panelClose();
@@ -3875,8 +3863,6 @@ function fillDetail(p){
     });
   });
   buildQuiz(p);
-  /* 兜底 TTS 不可用提示 */
-  if(!('speechSynthesis' in window))panelTtsUnsupported();
 }
 /* 相关 tab 推荐语动态合成(零数据改动)
    优先级:同一作者 > 同朝代 > 共享意象 > 题材相近 */
@@ -3974,7 +3960,6 @@ function buildQuiz(p){
     };
     quizPanel.insertBefore(btn, quizPanel.firstChild);
   }
-  if(!('speechSynthesis' in window)){var b2=quizPanel&&quizPanel.querySelector('.sec-read-btn');if(b2)b2.disabled=true;}
 }
 function pickChoice(qi,oi){
   ST.qa[qi]=oi;
@@ -6305,7 +6290,6 @@ function panelAttachHeaderBtn(h3, tabKey){
     panelNarrate(tabKey, sects.filter(function(s){return s&&s.txt;}).map(function(s){return s.txt;}), 0);
   };
   h3.appendChild(btn);
-  if(!('speechSynthesis' in window))btn.disabled=true;
 }
 /* 朗读：系统 TTS 优先(逐句高亮);若设备无可用语音/不发声→自动回退「内嵌音频」(RECITE_AUDIO，覆盖国产安卓如小米 Chrome 无 TTS 引擎的情况) */
 var recAudioEl=null, recWatchdog=null, recStarted=false, recMode=null, recHiIdx=-99, recPaused=false, recStartIdx=0, recAudioMeta=null, recRunId=0;
