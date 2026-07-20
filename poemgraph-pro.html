@@ -908,6 +908,8 @@ body.sleep-open{overflow:hidden}
   /* 摘要:只显示在 collapsed 状态 */
   #pro-banner-summary{display:none}
   .pro-banner.collapsed #pro-banner-summary{display:inline;color:var(--ink2);font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 桌面端 (≥769px) 始终隐藏 summary 文字 — banner 已全展开,文案重复了 */
+  @media (min-width:769px){#pro-banner-summary{display:none !important}}
   /* 展开按钮:在所有屏幕都可见,但内容里默认只在手机可点;桌面无视 */
   .pro-banner-expand{padding:5px 10px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
   .pro-banner.collapsed{gap:6px}
@@ -1377,7 +1379,7 @@ body.sleep-open{overflow:hidden}
       copiedHint:    '✓ 已复制，请打开微信搜索',                          // 复制后短暂提示
       closeBtn:      '知道了',                                        // 关闭按钮
       bannerTitle:   '未登录用户只能使用 1 年级诗词',                    // 诗单横幅标题
-      bannerSubtitle:'创作不易，添加作者微信购买 '+price+' 元（解锁全部内容·教师免费）', // 诗单横幅副标题（banner 标题未含「创作不易」，所以这里需要）
+      bannerSubtitle:'充值 ¥'+price+' 解锁全部 · 教师免费', // 诗单横幅副标题(2026-07-19 简化,腾出空间给展开按钮)
     };
   }
   var PAY_COPY = buildPayCopy(PRICE, WECHAT_ID);
