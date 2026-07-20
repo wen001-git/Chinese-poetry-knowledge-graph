@@ -2022,31 +2022,20 @@ body.sleep-open{overflow:hidden}
   W.PRO_MODE = PRO;
   W.PAY_COPY = PAY_COPY;
   W.showPaywall = showPaywall;
-  /* 📱 手机端默认把 banner 收成 1 行(只显示摘要 + ▾ 展开按钮) */
+  /* 📱 微信内置浏览器(X5 / QQ) 也按手机端处理 — banner 默认折叠 */
   function applyMobileCollapse(){
-    var b = D.getElementById('pro-banner'); if(!b) return;
+    var b = D.getElementById('pro-banner'); if(!b)return;
     var expBtn = D.getElementById('pro-banner-expand');
     var summary = D.getElementById('pro-banner-summary');
-    var isMobile = window.innerWidth < 768;
-    if(isMobile){
+    var useCollapse = (window.innerWidth < 768) || isWeChat();
+    if(useCollapse && b.style.display !== 'none'){
       b.classList.add('collapsed');
       if(expBtn) expBtn.textContent = '▾ 展开';
     } else {
       b.classList.remove('collapsed');
       if(expBtn) expBtn.textContent = '▴ 收起';
     }
-    if(summary) summary.style.display = '';
   }
-  /* 展开/收起 banner */
-  D.addEventListener('click', function(e){
-    if(!e.target.closest || !e.target.closest('#pro-banner-expand')) return;
-    var b = D.getElementById('pro-banner'); if(!b) return;
-    var expBtn = D.getElementById('pro-banner-expand');
-    var collapsed = b.classList.toggle('collapsed');
-    if(expBtn) expBtn.textContent = collapsed ? '▾ 展开' : '▴ 收起';
-  });
-  /* 视口尺寸变化时也重算 — 横竖屏切换、桌面窗口调整生效 */
-  window.addEventListener('resize', applyMobileCollapse);
 
   W.applyProVisibility = applyProVisibility;
   W.applyMobileCollapse = applyMobileCollapse;
