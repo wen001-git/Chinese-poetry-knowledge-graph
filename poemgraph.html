@@ -5237,6 +5237,11 @@ function panelClose(){
 }
 /* ▶ / ⏹ 按钮切换 */
 function panelBarToggle(){
+  // 手机端:用户主动点播放 → 如果 TTS 不支持,显示「不支持」提示
+  if(!('speechSynthesis' in window)){
+    var u=document.getElementById('pb-unsup'); if(u)u.style.display='inline';
+    return;
+  }
   if(panelSpeaking){panelStop();return;}
   var tk=currentTabKey();
   var sects=tk && window['_panelSections_'+tk];
@@ -5310,7 +5315,13 @@ function panelBarShow(){
   bar.classList.add('show');
   var ttsAvail=('speechSynthesis' in window);
   ['pb-play','pb-prev','pb-next'].forEach(function(id){var x=document.getElementById(id);if(x)x.disabled=!ttsAvail;});
-  document.getElementById('pb-unsup').style.display=ttsAvail?'none':'inline';
+  // 2026-07-19 改动:桌面端主动告知「不支持朗读」;手机端保持隐藏,只有用户主动点播放时才弹
+  var isMobile = window.innerWidth < 768;
+  if(ttsAvail || isMobile){
+    document.getElementById('pb-unsup').style.display='none';
+  } else {
+    document.getElementById('pb-unsup').style.display='inline';
+  }
 }
 function setPanelBarBtn(on){
   var b=document.getElementById('pb-play'); if(!b)return;
