@@ -1183,7 +1183,7 @@ body.sleep-open{overflow:hidden}
 
   <!-- 非原文 panel 朗读条 v2：与 d-recite-float 并存不冲突;▶/⏹ + ⏮⏭ + 调速 + 关闭 -->
   <div class="panel-bar" id="panel-bar" role="region" aria-label="面板朗读">
-    <button class="pb-btn" id="pb-play" onclick="panelBarToggle()" disabled>▶ 朗读</button>
+    <button class="pb-btn" id="pb-play" onclick="panelBarToggle()">▶ 朗读</button>
     <button class="pb-ico" id="pb-prev" onclick="panelGotoRel(-1)" aria-label="上一段" title="上一段">⏮</button>
     <button class="pb-ico" id="pb-next" onclick="panelGotoRel(1)" aria-label="下一段" title="下一段">⏭</button>
     <span class="pb-progress" id="pb-dots"></span>
@@ -1297,6 +1297,17 @@ body.sleep-open{overflow:hidden}
  */
 (function(){
   var W=window, D=document;
+
+  /* 🔍 检测微信内置 X5 / QQ 浏览器内核(产品分发现场主要在这里) */
+  function isWeChat(){
+    var ua = navigator.userAgent || '';
+    return /MicroMessenger|X5\b|MQQBrowser|QQBrowser/i.test(ua);
+  }
+  /* 🎤 综合决策:微信或不支持语音的浏览器,默认都隐藏「不支持朗读」提示 */
+  function shouldShowTtsUnsupported(){
+    return !('speechSynthesis' in window) && !isWeChat();
+  }
+
   var META=D.querySelector('meta[name="x-pro-mode"]');
   var ACCOUNT_URL=(D.querySelector('meta[name="x-account-url"]')||{}).content;
 
@@ -1379,7 +1390,7 @@ body.sleep-open{overflow:hidden}
       copiedHint:    '✓ 已复制，请打开微信搜索',                          // 复制后短暂提示
       closeBtn:      '知道了',                                        // 关闭按钮
       bannerTitle:   '未登录用户只能使用 1 年级诗词',                    // 诗单横幅标题
-      bannerSubtitle:'充值 ¥'+price+' 解锁全部 · 教师免费', // 诗单横幅副标题(2026-07-19 简化,腾出空间给展开按钮)
+      bannerSubtitle:'解锁 ¥'+price+' 全部内容 · 教师免费', // 诗单横幅副标题(2026-07-19 用「解锁」)
     };
   }
   var PAY_COPY = buildPayCopy(PRICE, WECHAT_ID);
@@ -6229,9 +6240,8 @@ function panelRenderDots(){
 function panelBarShow(){
   var bar=document.getElementById('panel-bar'); if(!bar)return;
   bar.classList.add('show');
-  var ttsAvail=('speechSynthesis' in window);
-  ['pb-play','pb-prev','pb-next'].forEach(function(id){var x=document.getElementById(id);if(x)x.disabled=!ttsAvail;});
-  document.getElementById('pb-unsup').style.display=ttsAvail?'none':'inline';
+  // 微信或不支持 TTS 时,默认不显示「不支持」横幅 — 让用户主动点 ▶ 才会看到
+  document.getElementById('pb-unsup').style.display=shouldShowTtsUnsupported()?'inline':'none';
 }
 function setPanelBarBtn(on){
   var b=document.getElementById('pb-play'); if(!b)return;
