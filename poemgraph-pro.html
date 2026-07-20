@@ -909,12 +909,9 @@ body.sleep-open{overflow:hidden}
   .pro-banner.collapsed .pro-banner-wx,
   .pro-banner.collapsed .pro-banner-copy,
   .pro-banner.collapsed #pro-banner-qr-panel{display:none !important}
-  /* 摘要:只显示在 collapsed 状态 */
+  /* 摘要:PC 端完全不显示,仅 mobile collapsed 时显示一行简短文本 */
   #pro-banner-summary{display:none}
   .pro-banner.collapsed #pro-banner-summary{display:inline;color:var(--ink2);font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  /* 桌面端 (≥769px) 始终隐藏 summary 文字 — banner 已全展开,文案重复了 */
-  @media (min-width:769px){#pro-banner-summary{display:none !important}}
-  /* 2026-07-20 用户要求删 PC summary — 已统一在 #pro-banner-summary 的默认 display:none 中处理 */
   /* 展开按钮:在所有屏幕都可见,但内容里默认只在手机可点;桌面无视 */
   .pro-banner-expand{padding:5px 10px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
   .pro-banner.collapsed{gap:6px}
@@ -6269,8 +6266,12 @@ function panelRenderDots(){
 function panelBarShow(){
   var bar=document.getElementById('panel-bar'); if(!bar)return;
   bar.classList.add('show');
-  // 微信或不支持 TTS 时,默认不显示「不支持」横幅 — 让用户主动点 ▶ 才会看到
-  document.getElementById('pb-unsup').style.display=shouldShowTtsUnsupported()?'inline':'none';
+  var ttsAvail=('speechSynthesis' in window);
+  ['pb-play','pb-prev','pb-next'].forEach(function(id){var x=document.getElementById(id);if(x)x.disabled=!ttsAvail;});
+  // 桌面端主动告知「不支持朗读」；手机端保持隐藏，只有用户主动点播放时才提示
+  var isMobile=window.innerWidth<768;
+  var unsup=document.getElementById('pb-unsup');
+  if(unsup)unsup.style.display=(ttsAvail||isMobile)?'none':'inline';
 }
 function setPanelBarBtn(on){
   var b=document.getElementById('pb-play'); if(!b)return;
