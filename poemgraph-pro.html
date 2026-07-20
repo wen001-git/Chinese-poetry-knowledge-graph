@@ -423,8 +423,6 @@ select.chip#grade-chip option[data-locked="1"]{color:var(--ink3);background:var(
   display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(28,28,30,.24);transition:.16s;border:none;cursor:pointer}
 .d-recite-float.show{display:inline-flex}
 .d-recite-float:hover{filter:brightness(1.08)}
-/* 长诗:浮动按钮 position 改 relative,跟着诗词流滚动(用户始终能看到) */
-.d-recite-float.near{position:relative;right:auto;bottom:auto;display:inline-flex;margin:14px 0 4px;width:fit-content}
 /* 微信内置浏览器:诗详情页底部 panel-bar 默认不显示。用户主动点朗读入口(原文区段的 read link)后才弹。 */
 .is-wechat #panel-bar:not(.show){display:none}
 .d-recite-float.on{background:linear-gradient(135deg,var(--ochre),#854d2e)}
@@ -3649,14 +3647,10 @@ function openDetail(id){
   document.getElementById('d-title').textContent=p.title;
   renderDetailNav(p, fromPath);
   document.getElementById('d-verse').innerHTML=p.lines.map((l,i)=>'<span class="ln" data-li="'+i+'" onclick="recitePickLine(event,'+i+')">'+rubyLine(l,p.anno)+lineScene(l.t)+'</span>').join('');
-  // 长诗:把浮动朗读按钮从 fixed 移到 inline,跟诗词流一起滚,用户始终能看到
-  setTimeout(function(){
-    var verse = document.getElementById('d-verse');
-    var btn = document.getElementById('d-recite-float');
-    if(verse && btn){
-      // 行数 > 6 视为长诗,把按钮塞到诗词末尾
-      if(p.lines.length > 6){
-        btn.classList.add('near');
+  // 2026-07-20 把长诗朗读按钮的内嵌实验回退了 — 现在 d-recite-float 始终是 fixed 浮动按钮
+  bindAnnoPop();
+  updateReciteFloatShow();
+  reciteStop();panelClose();
         verse.appendChild(btn);
       } else {
         btn.classList.remove('near');
