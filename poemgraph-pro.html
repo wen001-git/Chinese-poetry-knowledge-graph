@@ -2212,15 +2212,29 @@ const RELATIONS=[
 ];
 
 const EVENTS=[
+  {id:'hanmo',year:'184',pos:0.005,t:'黄巾起义·汉末大乱',desc:'184年黄巾起义爆发，此后军阀混战不断，东汉一步步走向瓦解。曹操在乱世中崛起，220年曹丕建立魏国，中国进入三国时期。',impact:'战争塑造了“建安风骨”：曹操的诗有统一天下的雄心，也有时光易逝的感慨；曹植则把百姓流离、海边贫苦的景象写进《梁甫行》。',poems:['guancanghai','guisuishou','liangfu']},
+  {id:'beiwei',year:'439',pos:0.015,t:'北魏统一北方',desc:'439年北魏结束北方长期分裂，统一黄河流域。此后南北政权对峙、各民族交往融合，形成南北朝时代独特的文化风貌。',impact:'北方民歌在多民族生活与边塞战争中成长。《敕勒歌》写草原的辽阔，《木兰诗》借代父从军的故事，留下北朝生活与尚武精神的回声。',poems:['chilege','mulan']},
   {id:'tang',year:'618',pos:0.04,t:'唐朝建立',desc:'618年李渊建立唐朝，定都长安。此后近三百年，唐朝成为当时世界上最强盛、最开放的帝国，为诗歌的全面繁荣奠定了基础。',impact:'安定富足、兼容并包的盛世土壤，使写诗成为读书人的普遍素养，唐诗由此走向中国诗歌的高峰。',poems:['yonge']},
+  {id:'luobinwang',year:'684',pos:0.09,t:'徐敬业起兵·骆宾王作檄',desc:'684年徐敬业起兵反对武则天掌权，骆宾王参与其幕府，并写下气势凌厉的《讨武曌檄》。起兵失败后，骆宾王的下落成为历史谜团。',impact:'那个七岁写《咏鹅》的“神童”，后来成长为敢以文章参与政治风浪的初唐名家。这一事件让孩子看到，诗人的一生远不止课本中的一首童趣小诗。',poems:['yonge']},
   {id:'kaiyuan',year:'713',pos:0.16,t:'开元盛世',desc:'唐玄宗开元年间（713—741），政治清明、经济鼎盛、国力达到顶峰，史称开元盛世，也是唐诗的黄金时代。',impact:'盛唐气象孕育出李白的浪漫飘逸、王维的山水禅意、孟浩然的田园清淡。诗人们意气风发、漫游天下、登高抒怀，写下大量昂扬壮丽的诗篇。',poems:['jingye','wanglu','wangtianmen','huanglou','wangyue','chunxiao','denggue']},
+  {id:'libai_changan',year:'742',pos:0.21,t:'李白奉诏入长安',desc:'742年，唐玄宗召李白入长安，命他供奉翰林。李白以为终于能施展政治抱负，却发现自己的工作更多是陪侍写诗，约两年后离开朝廷。',impact:'“入京—受挫—离京”让李白既尝到被赏识的荣耀，也感到理想无处施展。《行路难》中的“多歧路，今安在”，正是这段仕途失意后的追问。',poems:['xinglunan']},
   {id:'anshi',year:'755',pos:0.28,t:'安史之乱',desc:'755年安禄山、史思明发动叛乱，长安、洛阳相继陷落，持续八年，盛唐由此急转直下，生灵涂炭、田园荒芜。',impact:'这场浩劫彻底改变了诗人的命运：杜甫从此颠沛流离，诗风转为沉郁顿挫、心系苍生，被誉为“诗史”；李白晚年获罪流放；王维一度被俘。家国之痛成为这一代诗人最深的烙印。',poems:['chunwang','wenguanjun','yueyeyi','maowu','jiangnanfeng','jueju']},
+  {id:'yongwang',year:'757',pos:0.30,t:'永王事件·李白获罪',desc:'安史之乱中，李白进入永王李璘幕府。永王兵败后，李白因此获罪，被判流放夜郎；759年行至白帝城附近遇到大赦，重获自由。',impact:'政治风波把李白推入人生低谷，也成为《早发白帝城》的直接背景。“轻舟已过万重山”既是船快，也是一个人终于摆脱重压后的狂喜。',poems:['baidicheng','xinglunan']},
+  {id:'yongzhen',year:'805',pos:0.35,t:'永贞革新失败',desc:'805年，王叔文等人试图整顿朝政，刘禹锡、柳宗元积极参与。改革很快失败，刘禹锡先后被贬连州、朗州，在外辗转多年。',impact:'长期贬谪没有压垮刘禹锡，反而磨出他昂扬豪健的诗风。《秋词》一反古人悲秋，写“晴空一鹤排云上”，正是逆境中不肯低头的精神。',poems:['qiuci']},
+  {id:'niuli',year:'821',pos:0.37,t:'牛李党争加剧',desc:'唐代中后期，朝廷中的牛、李两派长期争权，官员的升迁和贬谪常受派系牵连，政治环境越来越复杂。',impact:'李商隐因婚姻和师承关系被卷入党争，仕途长期受阻。他诗中曲折幽微、难以直说的感情，既有个人身世，也带着晚唐政治阴影。',poems:['wuti','yeyujibei']},
   {id:'beisong',year:'960',pos:0.50,t:'北宋建立',desc:'960年赵匡胤陈桥兵变建立北宋，结束五代十国的分裂。宋朝重文治、兴科举，士大夫文化空前繁荣。',impact:'文人地位提高，诗、词、文全面兴盛。苏轼、王安石等既是政治家又是大文豪，宋诗以理趣见长，宋词更成一代之文学。',poems:['yuanri','tixilin','dengfeilai','wanghulou']},
   {id:'bianfa',year:'1069',pos:0.60,t:'王安石变法',desc:'1069年宋神宗任用王安石推行变法（熙宁变法），力图富国强兵、除旧布新，引发激烈的新旧党争。',impact:'王安石借《元日》“总把新桃换旧符”寄寓革故鼎新的政治抱负；党争也使苏轼等人屡遭贬谪，反而成就了他们旷达的人生与不朽的诗文。',poems:['yuanri','meihua','dengfeilai']},
+  {id:'wutai',year:'1079',pos:0.61,t:'乌台诗案',desc:'1079年，苏轼因诗文被指“讥讽新法”而遭御史弹劾，被捕入狱一百多天，出狱后贬往黄州。',impact:'这次磨难改变了苏轼的人生与创作。他从锋芒毕露走向更深的旷达，后来写山水、月色和日常生活时，总能在困境中找到开阔的精神世界。',poems:['tixilin','huichong','shuidiaogetou']},
   {id:'jingkang',year:'1127',pos:0.66,t:'靖康之变·宋室南渡',desc:'1127年金兵攻陷汴京，掳走徽、钦二帝，北宋灭亡，史称靖康之变。宋室南迁临安，是为南宋。',impact:'国破家亡成为南宋文学的主旋律：李清照南渡后词风由清丽转为沉痛；陈与义抚今追昔；陆游、辛弃疾毕生念念不忘北伐收复，写下大量悲壮的爱国诗词。',poems:['xiarijueju','linjiangxian','shier','qiuyejiangxiao','poszhenzi','nanxiangzi','yujiaao']},
+  {id:'shaoxing',year:'1141',pos:0.68,t:'绍兴和议',desc:'1141年南宋与金达成绍兴和议，南宋向金称臣纳贡，宋金形成长期南北对峙；和议前后，主战将领岳飞也被害。',impact:'偏安与求和令许多爱国诗人难以释怀。陆游终身盼望收复中原，辛弃疾南归后也屡次献策北伐，却常被闲置；“家祭无忘告乃翁”因此格外沉重。',poems:['shier','qiuyejiangxiao','poszhenzi','nanxiangzi']},
+  {id:'yashan',year:'1279',pos:0.76,t:'崖山海战·南宋灭亡',desc:'1279年崖山海战结束，南宋最后的抵抗失败。被俘的文天祥途经零丁洋，拒绝元军劝降，写下《过零丁洋》表明心志。',impact:'王朝覆亡与个人生死在这首诗里重合。“人生自古谁无死，留取丹心照汗青”不是空泛口号，而是文天祥面对真实选择时的回答。',poems:['guolingding']},
   {id:'ming',year:'1368',pos:0.82,t:'明朝建立',desc:'1368年朱元璋推翻元朝、建立明朝，恢复汉族王朝统治，社会经济逐步恢复，江南文化繁盛。',impact:'于谦以《石灰吟》“要留清白在人间”明志报国；江南才子辈出，唐寅等以诗书画寄寓性情。',poems:['shihuiyin','huaji']},
+  {id:'tumu',year:'1449',pos:0.85,t:'土木堡之变·北京保卫战',desc:'1449年明英宗在土木堡兵败被俘，瓦剌大军逼近北京。于谦反对南迁，组织军民守城，最终击退敌军。',impact:'于谦把少年时《石灰吟》中的“粉骨碎身浑不怕”活成了真实选择：国家危急时挺身而出，后来又因政治风波蒙冤遇害。',poems:['shihuiyin']},
   {id:'qing',year:'1644',pos:0.92,t:'清朝入主中原',desc:'1644年清军入关，明朝灭亡，清朝建立。改朝换代之际，抗争与坚守交织。',impact:'夏完淳少年抗清、慷慨就义；纳兰性德以清丽哀婉之词写尽人生况味；郑燮（板桥）借竹石题画言志、坚守气节。',poems:['bieyunjian','changxiangsi','zhushi']},
+  {id:'humen',year:'1839',pos:0.98,t:'虎门销烟·经世思潮',desc:'1839年林则徐在虎门销毁鸦片，清朝内外危机同时加深。同年龚自珍辞官南归，沿途写下三百多首《己亥杂诗》。',impact:'龚自珍看见旧制度的积弊，也相信社会仍需要新的力量。“我劝天公重抖擞，不拘一格降人才”，是危机来临前对改革与人才的急切呼唤。',poems:['jihai']},
   {id:'yapian',year:'1840',pos:0.985,t:'鸦片战争',desc:'1840年中英鸦片战争爆发，中国被迫打开国门，开始了近代的屈辱与觉醒。',impact:'有识之士痛感积弊：龚自珍大声疾呼“不拘一格降人才”，呼唤变革；其后秋瑾投身革命，以血荐轩辕。诗词成为唤醒民族的号角。',poems:['jihai','manjianghong']},
+  {id:'qiujin_japan',year:'1904',pos:0.995,t:'秋瑾东渡日本',desc:'1904年，秋瑾冲破家庭束缚，只身东渡日本求学，接触革命思想；次年加入同盟会，逐渐成为反清革命的重要女性领袖。',impact:'《满江红·小住京华》中“身不得，男儿列；心却比，男儿烈”的呐喊，不只是不满家庭生活，也预示她将走出闺阁、投身救国。',poems:['manjianghong']},
+  {id:'qiujin_martyr',year:'1907',pos:0.998,t:'皖浙起义·秋瑾就义',desc:'1907年徐锡麟在安庆起义失败，原计划共同举事的秋瑾在绍兴被捕，于7月15日从容就义。',impact:'秋瑾把诗词中的豪情化为行动。她的牺牲让“鉴湖女侠”成为近代女性追求独立、平等与救国理想的重要象征。',poems:['manjianghong']},
 ];
 
 const POEMS=[
@@ -2902,9 +2916,9 @@ const POEMS=[
    transT:'前两句用“彩云间”的明丽色彩和“千里—一日”的夸张，写顺流东下之快；后两句把不断的猿声与飞驰的轻舟交织在一起。“轻”是全诗的点睛之字：既写船行轻快，也写诗人重获自由后心情轻松，整首诗因此充满明快、奔放的生命力量。',
    emo:'喜悦',style:'抒情',imagery:['彩云','轻舟','猿声','长江','万重山'],
    place:'白帝城',placeModern:'今重庆奉节',createdYear:'759年',
-   story:'写这首诗时，李白已经接近六十岁。他因卷入政治风波，被流放夜郎。就在前往流放地的途中，他遇到朝廷大赦，终于恢复自由，于是从白帝城乘船顺江而下，赶往江陵。',
+   story:'写这首诗时，李白已经接近六十岁。他因卷入政治风波，被流放夜郎（今贵州北部、遵义附近）。就在前往流放地的途中，他遇到朝廷大赦，终于恢复自由，于是从白帝城乘船顺江而下，赶往江陵。',
    storyT:'了解这段经历，再读“千里江陵一日还”，感受到的不只是船快，更是一个经历挫折和压抑的人重新获得自由后归心似箭的喜悦。“轻舟已过万重山”中的“万重山”，既是长江两岸的高山，也像李白走过的重重困难。船为什么是“轻”的？因为诗人的心也轻了。孩子由此不只知道李白很高兴，也能理解一个人在低谷之后重新获得希望时的心情。',
-   history:[{y:'755年',t:'安史之乱爆发',hi:false},{y:'758年',t:'李白因永王事件被流放夜郎',hi:false},{y:'759年',t:'途中遇赦，从白帝城东下江陵，写《早发白帝城》',hi:true}],
+   history:[{y:'755年',t:'安史之乱爆发',hi:false},{y:'758年',t:'李白因永王事件被流放夜郎（今贵州北部、遵义附近）',hi:false},{y:'759年',t:'途中遇赦，从白帝城东下江陵，写《早发白帝城》',hi:true}],
    related:['wangtianmen','wanglu','emeishan','huanglou'],
    quiz:[
      {type:'choice',q:'李白从白帝城乘船前往哪里？',o:['江陵','长安','洛阳','扬州'],a:0,ex:'“千里江陵一日还”，诗人乘船顺江而下，赶往江陵。'},
@@ -3007,7 +3021,7 @@ const POEMS=[
   {id:'dujingmen',title:'渡荆门送别',grade:8,volume:'八年级上册',dyn:'唐',poet:'libai',
    lines:[{t:'渡远荆门外，',p:'dù yuǎn jīng mén wài'},{t:'来从楚国游。',p:'lái cóng chǔ guó yóu'},{t:'山随平野尽，',p:'shān suí píng yě jǐn'},{t:'江入大荒流。',p:'jiāng rù dà huāng liú'},{t:'月下飞天镜，',p:'yuè xià fēi tiān jìng'},{t:'云生结海楼。',p:'yún shēng jié hǎi lóu'},{t:'仍怜故乡水，',p:'réng lián gù xiāng shuǐ'},{t:'万里送行舟。',p:'wàn lǐ sòng xíng zhōu'}],
    anno:[{w:'荆门',m:'荆门山，在今湖北宜都。'},{w:'楚国',m:'指楚地，今湖北一带。'},{w:'平野',m:'平坦广阔的原野。'},{w:'大荒',m:'辽远无际的原野。'},{w:'月下飞天镜',m:'月亮映入水中，如从天上飞来的明镜。'},{w:'海楼',m:'海市蜃楼。'},{w:'仍怜',m:'还是喜爱。怜，喜爱。'},{w:'故乡水',m:'指从故乡四川流来的长江水。'}],
-   trans:'出蜀远游，"山随平野尽，江入大荒流"写开阔江景，结以故乡水万里相送之情。',emo:'思乡',style:'写景',place:'荆门',placeModern:'今湖北荆门',createdYear:'725年',
+   trans:'出蜀远游，"山随平野尽，江入大荒流"写开阔江景，结以故乡水万里相送之情。',emo:'思乡',style:'写景',place:'荆门山',placeModern:'今湖北宜都',createdYear:'725年',
    history:[{y:'725年',t:'渡荆门送别·唐代',hi:true}],related:[]},
   {id:'qiantanghu',title:'钱塘湖春行',grade:8,volume:'八年级上册',dyn:'唐',poet:'baijuyi',
    lines:[{t:'孤山寺北贾亭西，',p:'gū shān sì běi jiǎ tíng xī'},{t:'水面初平云脚低。',p:'shuǐ miàn chū píng yún jiǎo dī'},{t:'几处早莺争暖树，',p:'jǐ chù zǎo yīng zhēng nuǎn shù'},{t:'谁家新燕啄春泥。',p:'shuí jiā xīn yàn zhuó chūn ní'},{t:'乱花渐欲迷人眼，',p:'luàn huā jiàn yù mí rén yǎn'},{t:'浅草才能没马蹄。',p:'qiǎn cǎo cái néng mò mǎ tí'},{t:'最爱湖东行不足，',p:'zuì ài hú dōng xíng bù zú'},{t:'绿杨阴里白沙堤。',p:'lǜ yáng yīn lǐ bái shā dī'}],
@@ -3768,9 +3782,24 @@ function dTab(i){
     renderMiniGraph(ST.poem);
   }
 }
+/* 学生角色用“我们”一起读诗；只改面向学习者的讲述语，不误改诗中真实出现的孩子。 */
+function roleNarrative(text){
+  text=text||'';
+  if(ST.role!=='student')return text;
+  return text
+    .replace(/作为孩子的诗歌启蒙第一课/g,'常常是我们接触古诗的第一课')
+    .replace(/适合孩子诵读、想象/g,'很适合我们诵读、想象')
+    .replace(/深受孩子喜爱/g,'读起来也很有趣')
+    .replace(/孩子由此/g,'我们由此');
+}
 function fillDetail(p){
   const poet=POETS[p.poet];
   const teacher=ST.role==='teacher',parent=ST.role==='parent';
+  const transDeep=roleNarrative(p.transT||'');
+  const poemStory=roleNarrative(p.story||poet.intro||'');
+  const storyDeep=roleNarrative(p.storyT||'');
+  const poetIntro=roleNarrative(poet.intro||'');
+  const deepLabel=teacher?'教师赏析：':(ST.role==='student'?'我们一起想：':'深度赏析：');
   // 常驻操作栏的打印按钮:按角色显示标签(学生=自测单 / 家长·教师=学习单)
   const pb=document.getElementById('d-print');
   if(pb)pb.textContent=ST.role==='student'?'📝 打印自测单':'🖨 打印学习单';
@@ -3799,11 +3828,11 @@ function fillDetail(p){
   H+='<div class="dpanel dpanel-mean">';
   var meanSecs=[];
   H+='<div class="sec sec-read-trans"><h3><span class="bar"></span>白话译文</h3><p>'+(p.trans||'（译文待补充）')+'</p>';
-  H+='<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">展开深度赏析 ▾</button><div class="teacher-box sec-read-deeper'+(teacher?' on':'')+'"><b>教师赏析：</b>'+(p.transT||'')+'</div>';
+  H+='<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">展开深度赏析 ▾</button><div class="teacher-box sec-read-deeper'+(teacher?' on':'')+'"><b>'+deepLabel+'</b>'+transDeep+'</div>';
   if(parent)H+='<div class="parent-tip on"><span>💡</span><span>陪读建议：可以问问孩子——"诗里你最喜欢哪一句？为什么？"引导他用自己的话说说画面。</span></div>';
   H+='</div>';
   if(p.trans)meanSecs.push({txt:'白话译文：'+p.trans,fragId:'mean-trans'});
-  if(p.transT)meanSecs.push({txt:'深度赏析：'+p.transT,fragId:'mean-deeper'});
+  if(transDeep)meanSecs.push({txt:deepLabel+transDeep,fragId:'mean-deeper'});
   H+='<div class="sec sec-read-emo"><h3><span class="bar"></span>情感主题</h3><p>这首诗的情感是 <b style="color:var(--teal)">'+(p.emo||'—')+'</b>，风格为 <b style="color:var(--teal)">'+(p.style||'—')+'</b>。</p></div>';
   H+='</div>';
   if(p.emo||p.style)meanSecs.push({txt:'这首诗的情感是 '+(p.emo||'')+'，风格是 '+(p.style||'')+'。',fragId:'mean-emo'});
@@ -3813,17 +3842,17 @@ function fillDetail(p){
   var poetSecs=[];
   H+='<div class="sec sec-read-pmeta"><h3><span class="bar"></span>诗人故事 · '+poet.name+'</h3>'+
      '<p style="color:var(--ink2);font-size:14px;margin-bottom:8px">'+poet.dyn+'代 · '+poet.years+'</p>'+
-     '<p>'+(p.story||poet.intro||'')+'</p>'+
-     (p.storyT?'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">了解更多 ▾</button><div class="teacher-box sec-read-pdeep'+(teacher?' on':'')+'"><b>延伸：</b>'+p.storyT+'</div>':'')+
+     '<p>'+poemStory+'</p>'+
+     (storyDeep?'<button class="toggle-btn" onclick="this.nextElementSibling.classList.toggle(\'on\')">了解更多 ▾</button><div class="teacher-box sec-read-pdeep'+(teacher?' on':'')+'"><b>延伸：</b>'+storyDeep+'</div>':'')+
      '</div>';
   poetSecs.push({txt:poet.name+'，'+poet.dyn+'代，'+poet.years+'。',fragId:'poet-meta'});
-  if(p.story||poet.intro)poetSecs.push({txt:(p.story||poet.intro),fragId:'poet-story'});
-  if(p.storyT)poetSecs.push({txt:'延伸：'+p.storyT,fragId:'poet-pdeep'});
-  H+='<div class="sec sec-read-pintro"><h3><span class="bar"></span>诗人简介</h3><p>'+poet.intro+'</p>'+
+  if(poemStory)poetSecs.push({txt:poemStory,fragId:'poet-story'});
+  if(storyDeep)poetSecs.push({txt:'延伸：'+storyDeep,fragId:'poet-pdeep'});
+  H+='<div class="sec sec-read-pintro"><h3><span class="bar"></span>诗人简介</h3><p>'+poetIntro+'</p>'+
      (POET_STORY[p.poet]?'<button class="toggle-btn" onclick="poetSel=\''+p.poet+'\';showView(\'poets\')">📜 查看 '+poet.name+' 完整传奇人生 →</button>':'')+
      '</div>';
   H+='</div>';
-  if(poet.intro)poetSecs.push({txt:'诗人简介：'+poet.intro,fragId:'poet-pintro'});
+  if(poetIntro)poetSecs.push({txt:'诗人简介：'+poetIntro,fragId:'poet-pintro'});
   window._panelSections_poet=poetSecs;
   // 3 历史
   H+='<div class="dpanel dpanel-hist">';
@@ -4621,7 +4650,7 @@ const GEO={
  '今安徽芜湖':[118.38,31.33], '今湖南岳阳':[113.13,29.37], '今浙江衢州':[118.87,28.97],
  '今山东诸城':[119.41,35.99], '今甘肃天水':[105.72,34.58], '今陕西延安':[109.49,36.59], '今广东珠江口':[113.60,22.30], '今陕西潼关':[110.25,34.55],
  '今黄河流域':[114.00,35.50],
- '今甘肃居延一带':[100.80,41.90], '今湖北荆门':[112.20,30.92], '今湖北赤壁':[113.90,29.72],
+ '今甘肃居延一带':[100.80,41.90], '今湖北宜都':[111.45,30.38], '今湖北赤壁':[113.90,29.72],
  '今北京':[116.40,39.90], '今山东泰安':[117.13,36.19], '今河南洛阳':[112.45,34.62], '今华北一带':[114.50,38.00],
  '今河北昌黎':[119.16,39.73], '今江苏镇江':[119.45,32.19], '今北方道中':[114.0,35.5], '今四川东部':[107.5,31.2], '今湖南常德':[111.70,29.04],
  '今江苏苏州一带':[120.62,31.30],'今四川江油一带':[104.74,31.78],'今江西吉水':[115.13,27.21],
@@ -4634,6 +4663,15 @@ const ROUTE_GEO={
  dufu:[[108.95,34.27],[104.07,30.66]], wangwei:[[108.95,34.27],[109.32,34.16]]
 };
 const ROUTES={}; for(const k in ROUTE_GEO){ROUTES[k]=ROUTE_GEO[k].map(c=>proj(c[0],c[1]));}
+/* 单首诗的空间旅程：与诗人一生的紫色迁徙足迹分层呈现 */
+const POEM_JOURNEY_GEO={
+ baidicheng:{from:'白帝城',fromModern:'今重庆奉节',to:'江陵',toModern:'今湖北荆州',distance:'约一千二百里',
+  route:[[109.46,31.02],[109.88,31.07],[110.31,31.02],[110.98,30.83],[111.28,30.69],[111.75,30.53],[112.24,30.33]]}
+};
+function poemJourney(p){
+ const j=p&&POEM_JOURNEY_GEO[p.id]; if(!j)return null;
+ return Object.assign({},j,{points:j.route.map(c=>proj(c[0],c[1]))});
+}
 /* 同城在不同朝代的名称 */
 const PLACE_DYN={
  '今陕西西安':{'唐':'长安','宋':'京兆府','明':'西安','清':'西安'},
@@ -4665,7 +4703,7 @@ function miniMapSVG(p){
     '<text x="'+(x+15)+'" y="'+(y-2)+'" font-size="22" fill="#2d3a4a" font-weight="700" font-family="serif">'+anc+'</text>'+
     '<text x="'+(x+15)+'" y="'+(y+20)+'" font-size="14" fill="#7a6030">'+p.placeModern+'</text></svg>';
 }
-let mapPoet=null,mapDyn='all',mapTerrain=true,mapLabel='ancient',mapTab='all',mapFame=100,mapMoreOpen=false;
+let mapPoet=null,mapDyn='all',mapTerrain=true,mapLabel='ancient',mapTab='all',mapFame=100,mapMoreOpen=false,mapPoemFocus=null;
 function ensureHoverLabel(){let el=document.getElementById('map-hover-label');
   if(!el){el=document.createElement('div');el.id='map-hover-label';el.className='map-hover-label';document.getElementById('mapwrap').appendChild(el);}return el;}
 function updateZoomHint(){const hint=document.getElementById('map-zoom-hint');if(hint)hint.textContent='⌘/Ctrl + 滚轮缩放 · 拖动平移';}
@@ -4858,8 +4896,13 @@ function applyListYear(y){
 function locatePoem(id){
   const p=POEMS.find(x=>x.id===id); if(!p)return;
   if(poemYear(p)>tlYear){tlPause();tlSetYear(poemYear(p));}
-  const xy=GEOXY[p.placeModern];
-  if(xy){const K=2.8;mapK=K;mapTX=VW/2-xy[0]*K;mapTY=VH/2-xy[1]*K;clampZoom();applyZoom();pulseAt(xy);}
+  mapPoemFocus=id; buildMapSVG();
+  const journey=poemJourney(p),xy=GEOXY[p.placeModern];
+  if(journey){
+    const xs=journey.points.map(q=>q[0]),ys=journey.points.map(q=>q[1]);
+    const cx=(Math.min.apply(null,xs)+Math.max.apply(null,xs))/2,cy=(Math.min.apply(null,ys)+Math.max.apply(null,ys))/2;
+    const K=5.4;mapK=K;mapTX=VW/2-cx*K;mapTY=VH/2-cy*K;clampZoom();applyZoom();pulseAt(journey.points[0]);
+  }else if(xy){const K=2.8;mapK=K;mapTX=VW/2-xy[0]*K;mapTY=VH/2-xy[1]*K;clampZoom();applyZoom();pulseAt(xy);}
   document.querySelectorAll('#ml-body .ml-item').forEach(el=>el.classList.toggle('on',el.dataset.id===id));
 }
 function pulseAt(xy){
@@ -4901,6 +4944,7 @@ function buildMapSVG(){
   ps.forEach(p=>{const k=p.placeModern; if(!places[k])places[k]={modern:p.placeModern,ancient:p.place.split('（')[0],xy:GEOXY[k],poems:[]}; places[k].poems.push(p);});
   const arr=Object.values(places).filter(pl=>pl.xy);
   arr.forEach(pl=>{pl.year=Math.min.apply(null,pl.poems.map(poemYear));});
+  const focusPoem=mapPoemFocus&&ps.find(p=>p.id===mapPoemFocus),journey=poemJourney(focusPoem);
   function nb(pl){return arr.filter(o=>o!==pl && Math.hypot(o.xy[0]-pl.xy[0],o.xy[1]-pl.xy[1])<78).length;}
   let dots='',labels='';
   arr.forEach(pl=>{const x=pl.xy[0],y=pl.xy[1];const yr=pl.year;
@@ -4923,6 +4967,8 @@ function buildMapSVG(){
     let toLabel = mapPoet ? arr.slice()
       : arr.filter(pl=>pl.poems.length>=2||Math.max.apply(null,pl.poems.map(poemFame))>=98)
            .sort((a,b)=>b.imp-a.imp).slice(0,15);
+    // 聚焦单首诗的空间旅程时，只保留路线自己的起终点标签，避免其他诗作地名干扰阅读。
+    if(journey&&focusPoem)toLabel=[];
     const placed=[];
     toLabel.sort((a,b)=>a.xy[1]-b.xy[1]).forEach(pl=>{
       const right=pl.xy[0]<VW-150; let lx=pl.xy[0]+(right?11:-11),ly=pl.xy[1]-1,tries=0;
@@ -4941,6 +4987,18 @@ function buildMapSVG(){
     r.forEach(function(p,i){var x=p[0].toFixed(1),y=p[1].toFixed(1);var first=(i===0),last=(i===r.length-1);
       route+='<circle class="zm" data-br="'+(first?9.5:8.5)+'" cx="'+x+'" cy="'+y+'" r="'+(first?9.5:8.5)+'" fill="'+(first?'#3f7a52':last?'#a0603a':'#5a4a8a')+'" stroke="#f7f5f0" stroke-width="1.4" vector-effect="non-scaling-stroke"/>'+
              '<text class="zt" data-bfs="11" x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#f7f5f0" style="pointer-events:none">'+(i+1)+'</text>';});
+  }
+  let poemRoute='';
+  if(journey){
+    const jp=journey.points,start=jp[0],end=jp[jp.length-1],mid=jp[Math.floor(jp.length/2)];
+    const d='M'+jp.map(q=>q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' L');
+    poemRoute='<path d="'+d+'" fill="none" stroke="#f7f5f0" stroke-width="7" opacity=".82" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'+
+      '<path d="'+d+'" fill="none" stroke="#c1352b" stroke-width="3.6" stroke-dasharray="2,7" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'+
+      '<circle class="zm" data-br="10" cx="'+start[0].toFixed(1)+'" cy="'+start[1].toFixed(1)+'" r="10" fill="#c1352b" stroke="#f7f5f0" stroke-width="1.5" vector-effect="non-scaling-stroke"/>'+
+      '<circle class="zm" data-br="10" cx="'+end[0].toFixed(1)+'" cy="'+end[1].toFixed(1)+'" r="10" fill="#2d5a6b" stroke="#f7f5f0" stroke-width="1.5" vector-effect="non-scaling-stroke"/>'+
+      '<text class="zt" data-bfs="13" x="'+(start[0]-3).toFixed(1)+'" y="'+(start[1]+6).toFixed(1)+'" text-anchor="end" font-size="13" font-weight="700" fill="#8f2b24" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3">① '+journey.from+'<tspan x="'+(start[0]-3).toFixed(1)+'" dy="1.12em" font-size=".72em" font-weight="400">'+journey.fromModern+'</tspan></text>'+
+      '<text class="zt" data-bfs="13" x="'+(end[0]+3).toFixed(1)+'" y="'+(end[1]+8).toFixed(1)+'" font-size="13" font-weight="700" fill="#214b59" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3">② '+journey.to+'<tspan x="'+(end[0]+3).toFixed(1)+'" dy="1.12em" font-size=".72em" font-weight="400">'+journey.toModern+'</tspan></text>'+
+      '<text class="zt" data-bfs="11.5" x="'+mid[0].toFixed(1)+'" y="'+(mid[1]-14).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#8f2b24" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3">沿长江顺流而下 · '+journey.distance+' · “一日还”</text>';
   }
   let regions=''; REGIONS.forEach(function(rg){const xy=proj(rg[1],rg[2]); regions+='<text class="zt" data-bfs="17" x="'+xy[0].toFixed(1)+'" y="'+xy[1].toFixed(1)+'" text-anchor="middle" font-size="17" fill="#9a8050" opacity=".45" font-style="italic" font-family="serif" style="pointer-events:none">'+rg[0]+'</text>';});
   const rl1=proj(112.5,33.5), rl2=proj(118.5,32.6);
@@ -4961,7 +5019,7 @@ function buildMapSVG(){
     '<g id="mapZoomG">'+
     terrainLayer+
     ridgesSVG()+
-    riversSVG(2.0,1.6,.55)+regions+rangeL+rlabels+landmarksSVG()+dots+route+labels+
+    riversSVG(2.0,1.6,.55)+regions+rangeL+rlabels+landmarksSVG()+dots+route+labels+poemRoute+
     '</g>'+
     '<rect x="4" y="4" width="'+(VW-8)+'" height="'+(VH-8)+'" fill="none" stroke="#c8b870" stroke-width="5" opacity=".3" pointer-events="none"/>'+
     '<text x="'+(VW-30)+'" y="56" text-anchor="end" font-size="30" fill="#5a4030" opacity=".7" font-weight="800" font-family="serif" pointer-events="none">詩詞輿圖</text>'+
@@ -5310,7 +5368,7 @@ const POET_STORY={
    {h:'第一章 · 仗剑去国，辞亲远游', body:'二十五岁，他告别故乡，仗剑出蜀，开始游历四方。散尽千金只为求仙问道、结交豪侠，潇洒得不像凡人。', quote:'峨眉山月半轮秋，影入平羌江水流。', from:'峨眉山月歌'},
    {h:'第二章 · 蹉跎岁月，白发三千丈', body:'满腹才华，却求官无门。他表面狂放不羁，内心却极度渴望被重用。一声大笑里，藏着多少不甘。', quote:'仰天大笑出门去，我辈岂是蓬蒿人。', from:'南陵别儿童入京'},
    {h:'第三章 · 翰林待诏，力士脱靴', body:'四十二岁奉诏入京，供奉翰林。贺知章惊呼他是天上贬下来的「谪仙人」。他让高力士脱靴、传贵妃研墨，狂傲一时——可这份荣宠，注定长不了。', quote:'云想衣裳花想容，春风拂槛露华浓。', from:'清平调'},
-   {h:'第四章 · 安史乱起，误入永王', body:'安史之乱中他站错了队，入永王李璘幕府，兵败获罪，被长流夜郎（今贵州一带），跌入人生至暗。多年前他曾把这句安慰送给被贬的好友王昌龄，没想到命运也把自己推向了同一个方向。', quote:'我寄愁心与明月，随君直到夜郎西。', from:'闻王昌龄左迁龙标遥有此寄'},
+   {h:'第四章 · 安史乱起，误入永王', body:'安史之乱中他站错了队，入永王李璘幕府，兵败获罪，被长流夜郎（今贵州北部、遵义附近），跌入人生至暗。多年前他曾把这句安慰送给被贬的好友王昌龄，没想到命运也把自己推向了同一个方向。', quote:'我寄愁心与明月，随君直到夜郎西。', from:'闻王昌龄左迁龙标遥有此寄'},
    {h:'第五章 · 轻舟已过万重山', body:'流放途中行至白帝城（今重庆奉节），忽闻天下大赦！他狂喜放舟，一日千里顺江东下。这一刻，正是他一生的缩影——永远在绝境里，看见希望。', quote:'两岸猿声啼不住，轻舟已过万重山。', from:'早发白帝城'},
    {h:'尾声 · 水中捉月，归于沧海', body:'晚年漂泊，病逝当涂（今安徽当涂）。民间却宁愿相信那个浪漫的传说：他在采石江上醉酒，俯身去捞水中的月亮，便随明月一同去了。'}
   ],
@@ -5897,7 +5955,7 @@ window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(
    作用：手机上一次加载后把整份 HTML(含内嵌音频)持久缓存到本地，离线可用；
    普通在线访问优先校验服务器新版，避免用户长期卡在旧页面。 */
 function showUpdateToast(){var t=document.getElementById('pg-update-toast');if(t)t.classList.add('on');}
-var PG_APP_VERSION='2026-07-20-baidicheng';
+var PG_APP_VERSION='2026-07-20-baidicheng-map-fix';
 function pgStripAutoVersion(){
   if(location.search.indexOf('pgv=')<0||!history.replaceState)return;
   try{history.replaceState(null,'',location.pathname+location.hash);}catch(e){}
