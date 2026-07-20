@@ -895,33 +895,33 @@ body.sleep-open{overflow:hidden}
 .pro-banner-close{padding:0 6px;background:transparent;color:var(--ink3);border:none;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0}
 .pro-banner-close:hover{color:var(--ink)}
 @media(max-width:768px){
-  /* 手机:整条 banner 默认收起成 1 行(只显示「未登录限 1 年级 · ▾ 展开」) */
+  /* 手机:整条 banner 收起成「提示语 + 解锁」一行 */
   .pro-banner{gap:8px;padding:8px 12px;font-size:12px;flex-wrap:nowrap}
   .pro-banner-ic{font-size:16px}
   .pro-banner-title{font-size:13px}
   .pro-banner-sub{font-size:11px}
   /* 让 expand-btn 在所有屏幕可见 */
   .pro-banner-expand{display:inline-flex}
-  /* 折叠时:把完整内容(描述 + 微信 + 复制 + QR-panel)全部隐藏,只留一行摘要 */
+  /* 折叠时:隐藏桌面端购买详情，只留手机简短提示和解锁按钮 */
+  .pro-banner.collapsed .pro-banner-txt,
   .pro-banner.collapsed .pro-banner-sub,
   .pro-banner.collapsed .pro-banner-wx,
   .pro-banner.collapsed .pro-banner-copy,
+  .pro-banner.collapsed .pro-banner-qr,
+  .pro-banner.collapsed .pro-banner-close,
   .pro-banner.collapsed #pro-banner-qr-panel{display:none !important}
-  /* 摘要:PC 端完全不显示,仅 mobile collapsed 时显示一行简短文本 */
-  #pro-banner-summary{display:none}
-  .pro-banner.collapsed #pro-banner-summary{display:inline;color:var(--ink2);font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  /* 展开按钮:在所有屏幕都可见,但内容里默认只在手机可点;桌面无视 */
+  .pro-banner-mobile-title{display:none}
+  .pro-banner.collapsed .pro-banner-mobile-title{display:inline;color:var(--ink2);font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pro-banner.collapsed .pro-banner-expand{display:inline-flex}
   .pro-banner-expand{padding:5px 10px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
   .pro-banner.collapsed{gap:6px}
-  .pro-banner.collapsed .pro-banner-title::after{content:"  · 点此查看付费详情 ▾"}
-  .pro-banner:not(.collapsed) .pro-banner-title::after{content:""}
 }
 @media(max-width:680px){
   .pro-banner{gap:8px;padding:8px 10px;font-size:12px}
 }
 .pro-banner-expand{display:none;padding:4px 10px;background:var(--cinnabar);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
 .pro-banner-expand:hover{opacity:.85}
-.pro-banner.collapsed #pro-banner-summary{display:inline}
+.pro-banner-mobile-title{display:none}
 
 /* 密码可见性切换 👁 按钮 */
 .eye-wrap{position:relative;display:block;width:100%}
@@ -1041,8 +1041,8 @@ body.sleep-open{overflow:hidden}
         <span class="pro-banner-sub">添加作者微信购买 ¥XX 元（解锁全部内容·教师免费）</span>
       </span>
       <span class="pro-banner-wx">微信号：<b id="pro-banner-wx">leewen2017</b></span>
-      <span id="pro-banner-summary">未登录限 1 年级 · 点击展开详情</span>
-      <button class="pro-banner-expand" id="pro-banner-expand" type="button" aria-label="展开付费墙详情">▾ 展开</button>
+      <span class="pro-banner-mobile-title">未登录用户只能朗读 1 年级诗词</span>
+      <button class="pro-banner-expand" id="pro-banner-expand" type="button" aria-label="解锁全部诗词">解锁</button>
       <button class="pro-banner-copy" id="pro-banner-copy">📋 复制</button>
       <button class="pro-banner-qr" id="pro-banner-qr" type="button">📱 加我微信</button>
       <button class="pro-banner-close" id="pro-banner-close" aria-label="关闭横幅">✕</button>
@@ -2028,14 +2028,17 @@ body.sleep-open{overflow:hidden}
   function applyMobileCollapse(){
     var b = D.getElementById('pro-banner'); if(!b)return;
     var expBtn = D.getElementById('pro-banner-expand');
-    var summary = D.getElementById('pro-banner-summary');
     var useCollapse = (window.innerWidth < 768) || isWeChat();
     if(useCollapse && b.style.display !== 'none'){
       b.classList.add('collapsed');
-      if(expBtn) expBtn.textContent = '▾ 展开';
+      if(expBtn){
+        expBtn.textContent = '解锁';
+        expBtn.setAttribute('aria-label','解锁全部诗词');
+        expBtn.onclick = showPaywall;
+      }
     } else {
       b.classList.remove('collapsed');
-      if(expBtn) expBtn.textContent = '▴ 收起';
+      if(expBtn) expBtn.onclick = null;
     }
   }
 
