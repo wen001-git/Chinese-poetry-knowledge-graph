@@ -423,9 +423,8 @@ select.chip#grade-chip option[data-locked="1"]{color:var(--ink3);background:var(
   display:none;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(28,28,30,.24);transition:.16s;border:none;cursor:pointer}
 .d-recite-float.show{display:inline-flex}
 .d-recite-float:hover{filter:brightness(1.08)}
-/* 微信内置浏览器:诗意朗读框默认隐藏,用户主动 tap 后才浮出 */
-.is-wechat .d-recite-float{display:none !important}
-.is-wechat .d-recite{display:none !important}
+/* 微信内置浏览器:诗详情页底部 panel-bar 默认不显示。用户主动点朗读入口(原文区段的 read link)后才弹。 */
+.is-wechat #panel-bar:not(.show){display:none}
 .d-recite-float.on{background:linear-gradient(135deg,var(--ochre),#854d2e)}
 body.theme-zhumo .d-recite-float.on{background:var(--qing)}
 /* 详情页"非原文"panel 朗读条（与原文 #d-recite-float 并存不冲突） */
