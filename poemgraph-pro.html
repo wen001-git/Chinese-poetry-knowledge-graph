@@ -4663,6 +4663,17 @@ const ROUTE_GEO={
  dufu:[[108.95,34.27],[104.07,30.66]], wangwei:[[108.95,34.27],[109.32,34.16]]
 };
 const ROUTES={}; for(const k in ROUTE_GEO){ROUTES[k]=ROUTE_GEO[k].map(c=>proj(c[0],c[1]));}
+/* 诗人足迹编号对应的古今地名；dx/dy/anchor 用于避让相邻圆点和路线。 */
+const ROUTE_STOPS={
+ libai:[
+  {ancient:'成都府',modern:'今四川成都',dx:3.5,dy:-6,anchor:'start'},
+  {ancient:'白帝城',modern:'今重庆奉节',dx:3.5,dy:-6,anchor:'start'},
+  {ancient:'庐山',modern:'今江西九江',dx:-3.5,dy:9,anchor:'end'},
+  {ancient:'泾县',modern:'今安徽宣城泾县',dx:3.5,dy:-6,anchor:'start'},
+  {ancient:'扬州',modern:'今江苏扬州',dx:-3.5,dy:-6,anchor:'end'},
+  {ancient:'长安',modern:'今陕西西安',dx:-3.5,dy:9,anchor:'end'}
+ ]
+};
 /* 单首诗的空间旅程：与诗人一生的紫色迁徙足迹分层呈现 */
 const POEM_JOURNEY_GEO={
  baidicheng:{from:'白帝城',fromModern:'今重庆奉节',to:'江陵',toModern:'今湖北荆州',distance:'约一千二百里',
@@ -4986,7 +4997,18 @@ function buildMapSVG(){
             '<animate attributeName="stroke-dashoffset" from="38" to="0" dur="0.9s" repeatCount="indefinite"/></polyline>';
     r.forEach(function(p,i){var x=p[0].toFixed(1),y=p[1].toFixed(1);var first=(i===0),last=(i===r.length-1);
       route+='<circle class="zm" data-br="'+(first?9.5:8.5)+'" cx="'+x+'" cy="'+y+'" r="'+(first?9.5:8.5)+'" fill="'+(first?'#3f7a52':last?'#a0603a':'#5a4a8a')+'" stroke="#f7f5f0" stroke-width="1.4" vector-effect="non-scaling-stroke"/>'+
-             '<text class="zt" data-bfs="11" x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#f7f5f0" style="pointer-events:none">'+(i+1)+'</text>';});
+             '<text class="zt" data-bfs="11" x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#f7f5f0" style="pointer-events:none">'+(i+1)+'</text>';
+      var stop=ROUTE_STOPS[mapPoet]&&ROUTE_STOPS[mapPoet][i];
+      // 《早发白帝城》的专属起点标签已说明白帝城，隐藏同地点的足迹标签避免重复叠字。
+      if(stop&&(mapLabel==='ancient'||mapLabel==='modern')&&!(journey&&i===1)){
+        var sx=p[0]+stop.dx,sy=p[1]+stop.dy;
+        var big=mapLabel==='modern'?stop.modern.replace(/^今/,''):stop.ancient;
+        var small=mapLabel==='modern'?stop.ancient:stop.modern;
+        route+='<line x1="'+p[0].toFixed(1)+'" y1="'+p[1].toFixed(1)+'" x2="'+sx.toFixed(1)+'" y2="'+(sy+1).toFixed(1)+'" stroke="#5a4a8a" stroke-width=".7" opacity=".55" vector-effect="non-scaling-stroke"/>'+
+          '<text class="zt" data-bfs="11.5" x="'+sx.toFixed(1)+'" y="'+sy.toFixed(1)+'" text-anchor="'+stop.anchor+'" font-size="11.5" font-weight="700" fill="#493b72" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3" stroke-linejoin="round" style="pointer-events:none">'+big+
+          '<tspan x="'+sx.toFixed(1)+'" dy="1.12em" font-size=".76em" font-weight="400" fill="#6f5d3c" paint-order="stroke" stroke="#f7f5f0" stroke-width="2.4">'+small+'</tspan></text>';
+      }
+    });
   }
   let poemRoute='';
   if(journey){
@@ -4996,8 +5018,10 @@ function buildMapSVG(){
       '<path d="'+d+'" fill="none" stroke="#c1352b" stroke-width="3.6" stroke-dasharray="2,7" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'+
       '<circle class="zm" data-br="10" cx="'+start[0].toFixed(1)+'" cy="'+start[1].toFixed(1)+'" r="10" fill="#c1352b" stroke="#f7f5f0" stroke-width="1.5" vector-effect="non-scaling-stroke"/>'+
       '<circle class="zm" data-br="10" cx="'+end[0].toFixed(1)+'" cy="'+end[1].toFixed(1)+'" r="10" fill="#2d5a6b" stroke="#f7f5f0" stroke-width="1.5" vector-effect="non-scaling-stroke"/>'+
-      '<text class="zt" data-bfs="13" x="'+(start[0]-3).toFixed(1)+'" y="'+(start[1]+6).toFixed(1)+'" text-anchor="end" font-size="13" font-weight="700" fill="#8f2b24" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3">① '+journey.from+'<tspan x="'+(start[0]-3).toFixed(1)+'" dy="1.12em" font-size=".72em" font-weight="400">'+journey.fromModern+'</tspan></text>'+
-      '<text class="zt" data-bfs="13" x="'+(end[0]+3).toFixed(1)+'" y="'+(end[1]+8).toFixed(1)+'" font-size="13" font-weight="700" fill="#214b59" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3">② '+journey.to+'<tspan x="'+(end[0]+3).toFixed(1)+'" dy="1.12em" font-size=".72em" font-weight="400">'+journey.toModern+'</tspan></text>'+
+      '<line x1="'+start[0].toFixed(1)+'" y1="'+start[1].toFixed(1)+'" x2="'+(start[0]-4).toFixed(1)+'" y2="'+(start[1]-5).toFixed(1)+'" stroke="#c1352b" stroke-width=".8" opacity=".65" vector-effect="non-scaling-stroke"/>'+
+      '<line x1="'+end[0].toFixed(1)+'" y1="'+end[1].toFixed(1)+'" x2="'+(end[0]+4).toFixed(1)+'" y2="'+(end[1]-5).toFixed(1)+'" stroke="#2d5a6b" stroke-width=".8" opacity=".65" vector-effect="non-scaling-stroke"/>'+
+      '<text class="zt" data-bfs="13" x="'+(start[0]-4).toFixed(1)+'" y="'+(start[1]-6).toFixed(1)+'" text-anchor="end" font-size="13" font-weight="700" fill="#8f2b24" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3">① '+journey.from+'<tspan x="'+(start[0]-4).toFixed(1)+'" dy="1.12em" font-size=".72em" font-weight="400">'+journey.fromModern+'</tspan></text>'+
+      '<text class="zt" data-bfs="13" x="'+(end[0]+4).toFixed(1)+'" y="'+(end[1]-6).toFixed(1)+'" text-anchor="start" font-size="13" font-weight="700" fill="#214b59" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3">② '+journey.to+'<tspan x="'+(end[0]+4).toFixed(1)+'" dy="1.12em" font-size=".72em" font-weight="400">'+journey.toModern+'</tspan></text>'+
       '<text class="zt" data-bfs="11.5" x="'+mid[0].toFixed(1)+'" y="'+(mid[1]-14).toFixed(1)+'" text-anchor="middle" font-size="11.5" font-weight="700" fill="#8f2b24" font-family="serif" paint-order="stroke" stroke="#f7f5f0" stroke-width="3">沿长江顺流而下 · '+journey.distance+' · “一日还”</text>';
   }
   let regions=''; REGIONS.forEach(function(rg){const xy=proj(rg[1],rg[2]); regions+='<text class="zt" data-bfs="17" x="'+xy[0].toFixed(1)+'" y="'+xy[1].toFixed(1)+'" text-anchor="middle" font-size="17" fill="#9a8050" opacity=".45" font-style="italic" font-family="serif" style="pointer-events:none">'+rg[0]+'</text>';});
@@ -5955,7 +5979,7 @@ window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(
    作用：手机上一次加载后把整份 HTML(含内嵌音频)持久缓存到本地，离线可用；
    普通在线访问优先校验服务器新版，避免用户长期卡在旧页面。 */
 function showUpdateToast(){var t=document.getElementById('pg-update-toast');if(t)t.classList.add('on');}
-var PG_APP_VERSION='2026-07-20-baidicheng-map-fix';
+var PG_APP_VERSION='2026-07-20-map-route-labels';
 function pgStripAutoVersion(){
   if(location.search.indexOf('pgv=')<0||!history.replaceState)return;
   try{history.replaceState(null,'',location.pathname+location.hash);}catch(e){}
