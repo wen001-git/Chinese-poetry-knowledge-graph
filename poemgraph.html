@@ -2580,7 +2580,13 @@ function boot(){
   if(ST.role&&ST.grade){
     document.body.dataset.guide='';
     roleOv.style.display='none';gradeOv.style.display='none';
-    applyRole();updateChips();setMode(ST.mode,true);showView(ST.view);
+    applyRole();updateChips();setMode(ST.mode,true);
+    /* 初始 hash 还原(深链直达);无 hash 走 ST.view 默认行为 */
+    var m=(location.hash||'').match(/^#\/(grade|cards|graph|map|timeline|poets|path|detail)(?:\/([\w-]+))?$/);
+    if(m){
+      if(m[1]==='detail')openDetail(m[2]);
+      else showView(m[1]);
+    }else{showView(ST.view);}
   }else if(ST.role){
     document.body.dataset.guide='1';
     roleOv.style.display='none';gradeOv.style.display='flex';
@@ -2650,9 +2656,29 @@ function setMode(m,silent){
 /* ══════════════════════════════════════════
    视图路由
    ══════════════════════════════════════════ */
+/* ── SPA 路由：pushState 让浏览器返回按钮真能回上一视图(2026-07-21) ──
+ * 用 #/view-id[/poem-id] 形式 hash 路由，URL fragment 不会传给服务器/SW，
+ * 因此切视图不触发 SW re-fetch，也不增加 Render Static Site 路由负担。 */
+function pushViewHash(view, extra){
+  if(!history.pushState)return;
+  var hash='#/'+view+(extra?'/'+extra:'');
+  if(location.hash===hash)return;
+  try{history.pushState({pgView:view,pgExtra:extra||null},'',hash);}catch(_e){}
+}
+function goFromState(state){
+  if(!state||!state.pgView)return;
+  var v=state.pgView,x=state.pgExtra;
+  if(__pgPopping)return;   /* 防 popstate 互相递归 */
+  __pgPopping=true;
+  try{
+    if(v==='detail'&&x){openDetail(x);}
+    else if(v==='grade'||v==='cards'||v==='graph'||v==='map'||v==='timeline'||v==='poets'||v==='path'){showView(v);}
+  }finally{__pgPopping=false;}
+}
+let __pgPopping=false;
 let prevView='cards';
 function showView(v){
-  if(v!=='detail'){prevView=ST.view;ST.view=v;lsSave();}
+  if(v!=='detail'){prevView=ST.view;ST.view=v;lsSave();pushViewHash(v);}
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
   const vt=document.getElementById('v-'+v); if(vt)vt.classList.add('on');
   document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
@@ -2779,6 +2805,7 @@ function openDetail(id){
   const fromPath=(ST.view==='path');
   ST.poem=p;ST.tab=0;ST.qa={};ST.questMode=fromPath;
   showView('detail');
+  pushViewHash('detail',id);
   // hero
   document.getElementById('d-meta').innerHTML='<span class="dyn">'+p.dyn+'代</span> · '+POETS[p.poet].name+' · '+p.volume;
   document.getElementById('d-title').textContent=p.title;
@@ -3022,7 +3049,11 @@ function genReciteReason(rid, p){
   if(shared) return '共享意象「'+shared+'」';
   return '题材相近';
 }
-function backFromDetail(){showView(ST.questMode?'path':(prevView||'cards'));}
+function backFromDetail(){
+  /* 优先走浏览器历史栈,跟外层"返回"按钮行为一致;栈不足时降级到默认视图 */
+  if(history.length>1){history.back();return;}
+  showView(ST.questMode?'path':(prevView||'cards'));
+}
 
 /* ══════════════════════════════════════════
    练习（选择 / 情感 / 连线）
@@ -5046,6 +5077,8 @@ var panelLastSpeak=0;   /* panel 上一次 speak 时间戳——给 panelGotoRel
    ══════════════════════════════════════════ */
 boot();
 flushEarlyPicks();
+/* popstate：浏览器"返回/前进"按到 SPA 路由栈时切回上一视图(2026-07-21) */
+window.addEventListener('popstate',function(e){goFromState(e.state);});
 window.addEventListener('resize',()=>{if(ST.view==='graph'&&gCanvas){sizeCanvas(gCanvas);}});
 
 /* Service Worker：仅 http(s) 下注册(file:// 打开时不启用，App 仍是自包含单文件)。

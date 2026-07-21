@@ -11,7 +11,7 @@
  *       大陆访问 Render 美国节点 100-200ms 让冷启动 boot() 校验拖慢首屏；SWR 让登录态立即可用，
  *       撤销账号延迟 ≤2-3s 内下次访问即可生效；离线也用旧缓存保留登录态。
  */
-const CACHE = 'poemgraph-cache-v8';
+const CACHE = 'poemgraph-cache-v9';
 const ACC_CACHE = 'pg-acc-cache-v1';
 const CORE = './poemgraph.html';
 
